@@ -128,6 +128,15 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
         required: true
         schema:
           $ref: '#/components/schemas/LoginName'
+      requestBody:
+        description: "API Key"
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              minLength: 1
+
       responses:
         200:
           description: "The response body is the access token"
