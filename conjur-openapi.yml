@@ -35,7 +35,15 @@ components:
           type: string
         signature:
           type: string
-          
+
+    AccountName:
+      type: string
+      minLength: 1
+
+    LoginName:
+      type: string
+      minLength: 1
+
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid
@@ -43,14 +51,21 @@ components:
         WWW_Authenticate:
           schema:
             type: string
-            
+
   securitySchemes:
     basicAuth:
+      description: "Basic authentication"
       type: http
       scheme: basic
+    conjurAuth:
+      description: "Conjur access token in `Token token=<token>` format"
+      type: apiKey
+      in: header
+      name: Authorization
 
 security:
   - basicAuth: []
+  - conjurAuth: []
   
 paths:
   '/authn/{account}/login':
@@ -59,7 +74,11 @@ paths:
       - "authn"
       summary: "Gets the API key of a user given the username and password via HTTP Basic Authentication."
       description: "Passwords are stored in the Conjur database using `bcrypt` with a work factor of 12. Therefore, login is a fairly expensive operation. However, once the API key is obtained, it may be used to inexpensively obtain access tokens by calling the Authenticate method. An access token is required to use most other parts of the Conjur API.
+
+
 Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+
+
 Note that machine roles (Hosts) do not have passwords and do not need to login."
       operationId: "login"
       parameters:
@@ -68,7 +87,7 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
         description: "Organization account name"
         required: true
         schema:
-          type: "string"
+          $ref: '#/components/schemas/AccountName'
       responses:
         200:
           description: "The response body is the API key"
@@ -81,7 +100,7 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
-        
+
   '/authn/{account}/{login}/authenticate':
     post:
       tags:
@@ -89,7 +108,11 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
       summary: "Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API."
       description: "A client can obtain an access token by presenting a valid login name and API key.
 The login must be URL encoded. For example, `alice@devops` must be encoded as `alice%40devops`.
+
+
 For host authentication, the login is the host ID with the prefix `host/`. For example, the host webserver would login as `host/webserver`, and would be encoded as `host%2Fwebserver`.
+
+
 For API usage, the access token is ordinarily passed as an HTTP Authorization `Token` header."
       operationId: "authenticate"
       parameters:
@@ -98,13 +121,13 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
         description: "Organization account name"
         required: true
         schema:
-          type: "string"
+          $ref: '#/components/schemas/AccountName'
       - name: "login"
         in: "path"
         description: "Login name of the client. For users, it’s the user id. For hosts, the login name is `host/<host-id>`"
         required: true
         schema:
-          type: "string"
+          $ref: '#/components/schemas/LoginName'
       responses:
         200:
           description: "The response body is the access token"
@@ -115,7 +138,49 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
         401:
           $ref: '#/components/responses/UnauthorizedError'
       security:
-        - basicAuth: []
+        - conjurAuth: []
+
+  '/authn/{account}/password':
+    put:
+      tags:
+      - "authn"
+      summary: "Changes a user’s password."
+      description: "You must provide the login name and current password or API key of the user whose password is to be updated in an HTTP Basic Authentication header. Also replaces the user’s API key with a new securely generated random value. You can fetch the new API key by using Login.
+
+
+Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+
+
+Note that machine roles (Hosts) do not have passwords. They authenticate using their API keys, while passwords are only used by human users."
+      operationId: "setPassword"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      requestBody:
+        description: "New password"
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: password
+              minLength: 1
+
+      responses:
+        204:
+          description: "The password has been changed"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: "The user was not found"
+        422:
+          description: "A request parameter was missing or invalid"
+      security:
+        - conjurAuth: []
 
 externalDocs:
   description: "Find out more about Conjur"
