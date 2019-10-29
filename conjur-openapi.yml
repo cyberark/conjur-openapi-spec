@@ -189,7 +189,7 @@ Note that machine roles (Hosts) do not have passwords. They authenticate using t
         422:
           description: "A request parameter was missing or invalid"
       security:
-        - conjurAuth: []
+        - basicAuth: []
 
 externalDocs:
   description: "Find out more about Conjur"
