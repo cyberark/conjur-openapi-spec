@@ -1,0 +1,122 @@
+openapi: "3.0.0"
+
+info:
+  description: "This is an API definition for CyberArk DAP (part of AAM) and Conjur OSS v10+. You can find out more at [Conjur](https://www.conjur.org/) and [AAM](https://www.cyberark.com/products/privileged-account-security-solution/application-access-manager/) pages."
+  version: "0.0.1"
+  title: "Conjur"
+  contact:
+    email: "conj_maintainers@cyberark.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+- name: "authn"
+  description: "Authentication"
+- name: "secrets"
+  description: "Secrets"
+- name: "policies"
+  description: "Policies"
+- name: "roles"
+  description: "RBAC"
+- name: "hostfactory"
+  description: "Host factories"
+- name: "public_keys"
+  description: "SSH keys"
+  
+components:
+  schemas:
+    AccessToken:
+      type: object
+      properties:
+        protected:
+          type: string
+        payload:
+          type: string
+        signature:
+          type: string
+          
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      headers:
+        WWW_Authenticate:
+          schema:
+            type: string
+            
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+security:
+  - basicAuth: []
+  
+paths:
+  '/authn/{account}/login':
+    get:
+      tags:
+      - "authn"
+      summary: "Gets the API key of a user given the username and password via HTTP Basic Authentication."
+      description: "Passwords are stored in the Conjur database using `bcrypt` with a work factor of 12. Therefore, login is a fairly expensive operation. However, once the API key is obtained, it may be used to inexpensively obtain access tokens by calling the Authenticate method. An access token is required to use most other parts of the Conjur API.
+Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+Note that machine roles (Hosts) do not have passwords and do not need to login."
+      operationId: "login"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "The response body is the API key"
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+      security:
+        - basicAuth: []
+        
+  '/authn/{account}/{login}/authenticate':
+    post:
+      tags:
+      - "authn"
+      summary: "Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API."
+      description: "A client can obtain an access token by presenting a valid login name and API key.
+The login must be URL encoded. For example, `alice@devops` must be encoded as `alice%40devops`.
+For host authentication, the login is the host ID with the prefix `host/`. For example, the host webserver would login as `host/webserver`, and would be encoded as `host%2Fwebserver`.
+For API usage, the access token is ordinarily passed as an HTTP Authorization `Token` header."
+      operationId: "authenticate"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          type: "string"
+      - name: "login"
+        in: "path"
+        description: "Login name of the client. For users, it’s the user id. For hosts, the login name is `host/<host-id>`"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "The response body is the access token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+      security:
+        - basicAuth: []
+
+externalDocs:
+  description: "Find out more about Conjur"
+  url: "https://conjur.org"
