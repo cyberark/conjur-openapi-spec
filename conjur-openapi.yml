@@ -40,11 +40,38 @@ components:
       type: string
       minLength: 1
 
+    Kind:
+      type: string
+      minLength: 1
+
     LoginName:
       type: string
       minLength: 1
 
+    ResourceID:
+      type: string
+      minLength: 1
+      description: "Resource identifier. Requires to be encoded when in path.
+
+##### Examples:
+
+- `myapp-01` -> `myapp-01` (unchanged)
+
+- `alice@devops` -> `alice%40devops`
+
+- `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+
+- `research+development` -> `research%2Bdevelopment`
+
+- `sales&marketing` -> `sales%26marketing`"
+
+    ResourceVersion:
+      description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
+      type: integer
+
     Role:
+      type: string
+      minLength: 1
       description: "##### Kinds of roles:
 
 - User: one unique wonderful human
@@ -60,7 +87,7 @@ components:
 
 Any identifier included in the URL must be URL-encoded to be recognized by the Conjur API.
 
-##### Identifiers:
+##### Resource Identifiers:
 
 - `myapp-01` -> `myapp-01` (unchanged)
 
@@ -71,10 +98,33 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
 - `research+development` -> `research%2Bdevelopment`
 
 - `sales&marketing` -> `sales%26marketing`"
-      type: string
-      minLength: 1
 
   responses:
+    AccessToken:
+      description: "The response body is the access token"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessToken'
+
+    ApiKey:
+      description: "The response body is the API key"
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+    InadequatePrivileges:
+      description: The authenticated user lacks the necessary privileges
+    MissingRequestParameters:
+      description: A request parameter was missing or invalid
+    SecretValue:
+      description: "The secret value was added successfully"
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: 'supersecret'
     UnauthorizedError:
       description: Authentication information is missing or invalid
       headers:
@@ -120,12 +170,7 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
           $ref: '#/components/schemas/AccountName'
       responses:
         200:
-          description: "The response body is the API key"
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+          $ref: '#/components/responses/ApiKey'
         401:
           $ref: '#/components/responses/UnauthorizedError'
       security:
@@ -169,11 +214,7 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
 
       responses:
         200:
-          description: "The response body is the access token"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessToken'
+          $ref: '#/components/responses/AccessToken'
         401:
           $ref: '#/components/responses/UnauthorizedError'
       security:
@@ -217,7 +258,7 @@ Note that machine roles (Hosts) do not have passwords. They authenticate using t
         404:
           description: "The user was not found"
         422:
-          description: "A request parameter was missing or invalid"
+          $ref: '#/components/responses/MissingRequestParameters'
       security:
         - basicAuth: []
 
@@ -253,16 +294,106 @@ Note that the body of the request must be the empty string."
 
       responses:
         200:
-          description: "The response body is the API key"
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+          $ref: '#/components/responses/ApiKey'
         401:
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
+
+# ========== SECRETS ==========
+
+  '/api/secrets/{account}/{kind}/{identifier}':
+    post:
+      tags:
+      - "secrets"
+      summary: "Creates a secret value within the specified variable."
+      description: "Creates a secret value within the specified Variable.
+
+
+Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
+      operationId: "createVariable"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "path"
+        description: "Type of resource - in almost all cases this should be `variable`"
+        required: true
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "identifier"
+        in: "path"
+        description: "URL-encoded variable ID"
+        required: true
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+
+      responses:
+        201:
+          description: "The secret value was added successfully"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        422:
+          $ref: '#/components/responses/MissingRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+    get:
+      tags:
+      - "secrets"
+      summary: "Fetches the value of a secret from the specified Variable."
+      description: "Fetches the value of a secret from the specified Variable. The latest version will be retrieved unless the version parameter is specified. The twenty most recent secret versions are retained.
+
+
+The secret data is returned in the response body.
+
+
+Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
+      operationId: "getVariable"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "path"
+        description: "Type of resource - in almost all cases this should be `variable`"
+        required: true
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "identifier"
+        in: "path"
+        description: "URL-encoded variable ID"
+        required: true
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - name: "version"
+        in: "query"
+        description: "(**Optional**) Version you want to retrieve (Conjur keeps the last 20 versions of a secret)"
+        schema:
+          $ref: '#/components/schemas/ResourceVersion'
+
+      responses:
+        201:
+          $ref: '#/components/responses/SecretValue'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        422:
+          $ref: '#/components/responses/MissingRequestParameters'
+
+      security:
+        - conjurAuth: []
 
 externalDocs:
   description: "Find out more about Conjur"
