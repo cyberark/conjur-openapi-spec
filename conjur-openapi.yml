@@ -68,7 +68,7 @@ security:
   - conjurAuth: []
   
 paths:
-  '/authn/{account}/login':
+  '/api/authn/{account}/login':
     get:
       tags:
       - "authn"
@@ -101,7 +101,7 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
       security:
         - basicAuth: []
 
-  '/authn/{account}/{login}/authenticate':
+  '/api/authn/{account}/{login}/authenticate':
     post:
       tags:
       - "authn"
@@ -149,7 +149,7 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
       security:
         - conjurAuth: []
 
-  '/authn/{account}/password':
+  '/api/authn/{account}/password':
     put:
       tags:
       - "authn"
