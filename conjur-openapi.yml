@@ -51,6 +51,19 @@ components:
       minLength: 1
       example: "admin"
 
+    Policy:
+      type: string
+      minLength: 1
+      example: |
+        - !policy
+          id: database
+          body:
+          - !host
+            id: db-host
+          - !variable
+            id: db-password
+            owner: !host db-host
+
     ResourceID:
       type: string
       minLength: 1
@@ -140,9 +153,11 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
           schema:
             type: string
             example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+    Busy:
+      description: Similar operation already in progress, retry after a delay
     InadequatePrivileges:
       description: The authenticated user lacks the necessary privileges
-    MissingRequestParameters:
+    MissingOrBadRequestParameters:
       description: A request parameter was missing or invalid
     ResourceNotFound:
       description: The variable does not exist, or it does not have any secret values
@@ -168,7 +183,7 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
       type: http
       scheme: basic
     conjurAuth:
-      description: "Conjur access token in `Token token=<token>` format"
+      description: "Conjur access token in `Token token=<base64_encoded_token>` format"
       type: apiKey
       in: header
       name: Authorization
@@ -288,7 +303,7 @@ Note that machine roles (Hosts) do not have passwords. They authenticate using t
         404:
           description: "The user was not found"
         422:
-          $ref: '#/components/responses/MissingRequestParameters'
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
       security:
         - basicAuth: []
 
@@ -370,7 +385,7 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
         403:
           $ref: '#/components/responses/InadequatePrivileges'
         422:
-          $ref: '#/components/responses/MissingRequestParameters'
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
         - conjurAuth: []
@@ -422,7 +437,7 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
         404:
           $ref: '#/components/responses/ResourceNotFound'
         422:
-          $ref: '#/components/responses/MissingRequestParameters'
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
         - conjurAuth: []
@@ -452,7 +467,187 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
         404:
           $ref: '#/components/responses/ResourcesNotFound'
         422:
-          $ref: '#/components/responses/MissingRequestParameters'
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+# ========== POLICIES ==========
+
+  '/api/policies/{account}/policy/{identifier}':
+    put:
+      tags:
+      - "policies"
+      summary: "Loads or replaces a Conjur policy document."
+      description: "Loads or replaces a Conjur policy document.
+
+
+**Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted**."
+      operationId: "loadPolicy"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the policy to load (root if no root policy has been loaded yet)"
+        required: true
+        example: "root"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        description: "Policy"
+        required: true
+        content:
+          # TODO: Figure out what type YAML is in MIME convention
+          text/yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          application/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/Policy'
+
+      responses:
+        201:
+          description: "The policy was loaded or replaced successfully"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        409:
+          $ref: '#/components/responses/Busy'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+    post:
+      tags:
+      - "policies"
+      summary: "Adds data to the existing Conjur policy."
+      description: "Adds data to the existing Conjur policy. Deletions are not allowed. Any policy objects that exist on the server but are omitted from the policy file will not be deleted and any explicit deletions in the policy file will result in an error.
+
+##### Permissions required
+
+`create` privilege on the policy."
+      operationId: "updatePolicy"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the policy to update"
+        required: true
+        example: "root"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        description: "Policy"
+        required: true
+        content:
+          # TODO: Figure out what type YAML is in MIME convention
+          text/yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          application/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/Policy'
+
+      responses:
+        201:
+          description: "The policy was extended successfully"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        409:
+          $ref: '#/components/responses/Busy'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+    patch:
+      tags:
+      - "policies"
+      summary: "Modifies an existing Conjur policy."
+      description: "Modifies an existing Conjur policy. Data may be explicitly deleted using the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode, no data is ever implicitly deleted.
+
+
+##### Permissions required
+
+`create` privilege on the policy."
+      operationId: "modifyPolicy"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the policy to update"
+        required: true
+        example: "root"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        description: "Policy"
+        required: true
+        content:
+          # TODO: Figure out what type YAML is in MIME convention
+          text/yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          application/x-yaml:
+            schema:
+              $ref: '#/components/schemas/Policy'
+          text/plain:
+            schema:
+              $ref: '#/components/schemas/Policy'
+
+      responses:
+        201:
+          description: "The policy was updated successfully"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        409:
+          $ref: '#/components/responses/Busy'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
         - conjurAuth: []
