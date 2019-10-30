@@ -39,18 +39,22 @@ components:
     AccountName:
       type: string
       minLength: 1
+      example: "myorg"
 
     Kind:
       type: string
       minLength: 1
+      example: "variable"
 
     LoginName:
       type: string
       minLength: 1
+      example: "admin"
 
     ResourceID:
       type: string
       minLength: 1
+      example: "prod%2Faws%2Fdb-password"
       description: "Resource identifier. Requires to be encoded when in path.
 
 ##### Examples:
@@ -64,6 +68,28 @@ components:
 - `research+development` -> `research%2Bdevelopment`
 
 - `sales&marketing` -> `sales%26marketing`"
+
+    ResourceIDs:
+      type: string
+      minLength: 1
+      example: myorg:variable:secret1,myorg:variable:secret1
+      description: "Comma-delimited, URL-encoded resource identifiers.
+
+##### Resources IDs encoding:
+
+- `myapp-01` -> `myapp-01` (unchanged)
+
+- `alice@devops` -> `alice%40devops`
+
+- `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+
+- `research+development` -> `research%2Bdevelopment`
+
+- `sales&marketing` -> `sales%26marketing`
+
+##### Example
+
+`myorg:variable:secret1,myorg:variable:secret1`"
 
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
@@ -118,6 +144,10 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
       description: The authenticated user lacks the necessary privileges
     MissingRequestParameters:
       description: A request parameter was missing or invalid
+    ResourceNotFound:
+      description: The variable does not exist, or it does not have any secret values
+    ResourcesNotFound:
+      description: At least one resource was unable to be found
     SecretValue:
       description: "The secret value was added successfully"
       content:
@@ -389,6 +419,38 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
           $ref: '#/components/responses/UnauthorizedError'
         403:
           $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        422:
+          $ref: '#/components/responses/MissingRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+  '/api/secrets':
+    get:
+      tags:
+      - "secrets"
+      summary: "Fetch multiple secrets"
+      description: "Fetches multiple secret values in one invocation. It’s faster to fetch secrets in batches than to fetch them one at a time."
+      operationId: "getVariables"
+      parameters:
+      - name: "variable_ids"
+        in: "query"
+        description: "Comma-delimited, URL-encoded resource IDs of the variables."
+        required: true
+        schema:
+          $ref: '#/components/schemas/ResourceIDs'
+
+      responses:
+        201:
+          $ref: '#/components/responses/SecretValue'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourcesNotFound'
         422:
           $ref: '#/components/responses/MissingRequestParameters'
 
