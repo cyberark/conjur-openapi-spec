@@ -191,6 +191,40 @@ Note that machine roles (Hosts) do not have passwords. They authenticate using t
       security:
         - basicAuth: []
 
+  '/api/authn/{account}/api_key':
+    put:
+      tags:
+      - "authn"
+      summary: "Rotates a user’s API key."
+      description: "Any role can rotate its own API key. The name and password or current API key of the role must be provided via HTTP Basic Authorization.
+
+
+Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+
+
+Note that the body of the request must be the empty string."
+      operationId: "rotateApiKey"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+
+      responses:
+        200:
+          description: "The response body is the API key"
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+      security:
+        - basicAuth: []
+
 externalDocs:
   description: "Find out more about Conjur"
   url: "https://conjur.org"

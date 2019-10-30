@@ -8,7 +8,7 @@ from swagger_client.rest import ApiException
 ACCOUNT_NAME = "myorg"
 
 config = swagger_client.Configuration()
-config.host = "https://localhost/api"
+config.host = "https://localhost"
 
 # config.debug=True
 
@@ -27,6 +27,8 @@ except ApiException as err:
     print("Exception when logging in: ", err)
     sys.exit(1)
 
+print("API key:", api_key)
+
 authn_api = swagger_client.AuthnApi(swagger_client.ApiClient(config))
 try:
     conjur_access_token = authn_api.authenticate(api_key, account=ACCOUNT_NAME, login="admin")
@@ -40,6 +42,14 @@ try:
 except ApiException as err:
     print("Exception when setting password in: ", err)
     sys.exit(1)
+
+try:
+    api_key = login_api.rotate_api_key(account=ACCOUNT_NAME)
+except ApiException as err:
+    print("Exception when logging in: ", err)
+    sys.exit(1)
+
+print("New API key:", api_key)
 
 #encoded_token = base64.b64encode(conjur_access_token.to_str().encode()).decode('utf-8')
 #config.api_key['authorization'] = "token=\"%s\"".format(encoded_token)
