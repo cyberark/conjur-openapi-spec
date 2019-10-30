@@ -652,6 +652,119 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       security:
         - conjurAuth: []
 
+# ========== RBAC ==========
+
+  '/api/roles/{account}/{kind}/{identifier}':
+    get:
+      tags:
+      - "roles"
+      summary: "Get role information"
+      description: "Gets detailed information about a specific role, including the role members.
+
+
+        If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON.
+
+
+        ##### Listing members
+
+
+        If `members` is provided, you will get the members of a role.
+
+
+        If a `kind` query parameter is given, narrows results to only resources of that kind.
+
+
+        If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give limit a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+
+
+        If the parameter `count` is true, returns only the number of items in the list.
+
+
+        ##### Text search
+
+
+        If the search parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weights results so that those with matching id or a matching value of an annotation called name appear first, then those with another matching annotation value, and finally those with a matching kind.
+        "
+      operationId: "getRole"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "path"
+        description: "Type of resource"
+        required: true
+        example: user
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the policy to load (root if no root policy has been loaded yet)"
+        required: true
+        example: "admin"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - name: "members"
+        in: "query"
+        description: "Comma-delimited, URL-encoded resource IDs of the variables."
+        schema:
+          type: boolean
+          example: false
+      - name: "offset"
+        in: "query"
+        description: "When listing members, start at this item number."
+        schema:
+          type: integer
+          example: 10
+      - name: "limit"
+        in: "query"
+        description: "When listing members, return up to this many results."
+        schema:
+          type: integer
+          example: 10
+      - name: "count"
+        in: "query"
+        description: "When listing members, if `true`, return only the count of members."
+        schema:
+          type: boolean
+          example: false
+
+      responses:
+        201:
+          description: "The response body contains the requested role(s)/member(s)"
+          content:
+            application/json: {}
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+      security:
+        - conjurAuth: []
+
+# TODO: == RBAC ==
+# TODO: List resources
+# TODO: Show resource
+# TODO: Show permitted roles
+# TODO: Check permission
+
+# TODO: == Host Factory ==
+# TODO: Create Token
+# TODO: Revoke Token
+# TODO: Create Host
+
+# TODO: == Public Keys ==
+# TODO: Show Public Key
+
+# TODO: == Misc ==
+# TODO: Inject client cert
+# TODO: Seed Service
+
 externalDocs:
   description: "Find out more about Conjur"
   url: "https://conjur.org"
