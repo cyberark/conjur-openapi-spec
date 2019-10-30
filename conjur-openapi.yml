@@ -44,6 +44,36 @@ components:
       type: string
       minLength: 1
 
+    Role:
+      description: "##### Kinds of roles:
+
+- User: one unique wonderful human
+
+- Host: a single logical machine (in the broad sense, not just physical)
+
+- Layer: a collection of hosts that have the same privileges
+
+- Group: a collection of users and groups that have the same privileges
+ 
+- Policy: a role which owns of a set of related object
+
+
+Any identifier included in the URL must be URL-encoded to be recognized by the Conjur API.
+
+##### Identifiers:
+
+- `myapp-01` -> `myapp-01` (unchanged)
+
+- `alice@devops` -> `alice%40devops`
+
+- `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+
+- `research+development` -> `research%2Bdevelopment`
+
+- `sales&marketing` -> `sales%26marketing`"
+      type: string
+      minLength: 1
+
   responses:
     UnauthorizedError:
       description: Authentication information is missing or invalid
@@ -211,6 +241,15 @@ Note that the body of the request must be the empty string."
         required: true
         schema:
           $ref: '#/components/schemas/AccountName'
+      - name: "role"
+        in: "query"
+        description: "(**Optional**) role specifier in `{kind}:{identifier}` format
+
+##### Permissions required
+
+`update` privilege on the role whose API key is being rotated."
+        schema:
+          $ref: '#/components/schemas/Role'
 
       responses:
         200:
