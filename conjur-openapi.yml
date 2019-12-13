@@ -41,15 +41,39 @@ components:
       minLength: 1
       example: "myorg"
 
+    CheckPrivilege:
+      type: boolean
+      example: "true"
+      description: "Checks whether a role has a privilege on a resource."
+
+    Count:
+      description: "Return only the count of results"
+      type: boolean
+      example: true
+
     Kind:
       type: string
       minLength: 1
       example: "variable"
 
+    Limit:
+      description: "Return no more than this number of results"
+      type: integer
+      example: 10
+
     LoginName:
       type: string
       minLength: 1
       example: "admin"
+
+    Offset:
+      description: "Skips this many items before returning the rest"
+      type: integer
+      example: 20
+
+    PermittedRoles:
+      type: boolean
+      example: "true"
 
     Policy:
       type: string
@@ -63,6 +87,12 @@ components:
           - !variable
             id: db-password
             owner: !host db-host
+
+    PrivilegeLevel:
+      type: string
+      minLength: 1
+      example: "execute"
+      description: "Denotes a type of permission allowed on a resource"
 
     ResourceID:
       type: string
@@ -138,6 +168,11 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
 
 - `sales&marketing` -> `sales%26marketing`"
 
+    SearchFilter:
+      type: string
+      minLength: 1
+      description: "Only returns results that contain this string value"
+
   responses:
     AccessToken:
       description: "The response body is the access token"
@@ -154,15 +189,17 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
             type: string
             example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
     Busy:
-      description: Similar operation already in progress, retry after a delay
+      description: "Similar operation already in progress, retry after a delay"
     InadequatePrivileges:
-      description: The authenticated user lacks the necessary privileges
+      description: "The authenticated user lacks the necessary privileges"
     MissingOrBadRequestParameters:
-      description: A request parameter was missing or invalid
+      description: "A request parameter was missing or invalid"
+    PermissionCheckSuccess:
+      description: "Permissions check was successful"
     ResourceNotFound:
-      description: The variable does not exist, or it does not have any secret values
+      description: "The variable does not exist, or it does not have any secret values"
     ResourcesNotFound:
-      description: At least one resource was unable to be found
+      description: "At least one resource was unable to be found"
     SecretValue:
       description: "The secret value was added successfully"
       content:
@@ -171,7 +208,7 @@ Any identifier included in the URL must be URL-encoded to be recognized by the C
             type: string
             example: 'supersecret'
     UnauthorizedError:
-      description: Authentication information is missing or invalid
+      description: "Authentication information is missing or invalid"
       headers:
         WWW_Authenticate:
           schema:
@@ -652,7 +689,7 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       security:
         - conjurAuth: []
 
-# ========== RBAC ==========
+# ========== Roles ==========
 
   '/api/roles/{account}/{kind}/{identifier}':
     get:
@@ -702,7 +739,7 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
           $ref: '#/components/schemas/Kind'
       - name: "identifier"
         in: "path"
-        description: "ID of the policy to load (root if no root policy has been loaded yet)"
+        description: "ID of the role for which to get the information about"
         required: true
         example: "admin"
         schema:
@@ -717,20 +754,17 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
         in: "query"
         description: "When listing members, start at this item number."
         schema:
-          type: integer
-          example: 10
+          $ref: '#/components/schemas/Offset'
       - name: "limit"
         in: "query"
         description: "When listing members, return up to this many results."
         schema:
-          type: integer
-          example: 10
+          $ref: '#/components/schemas/Limit'
       - name: "count"
         in: "query"
         description: "When listing members, if `true`, return only the count of members."
         schema:
-          type: boolean
-          example: false
+          $ref: '#/components/schemas/Count'
 
       responses:
         201:
@@ -747,11 +781,147 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       security:
         - conjurAuth: []
 
-# TODO: == RBAC ==
-# TODO: List resources
-# TODO: Show resource
-# TODO: Show permitted roles
-# TODO: Check permission
+# ========== Resources ==========
+
+  '/api/resources/{account}':
+    get:
+      tags:
+      - "resources"
+      summary: "Lists resources within an organization account."
+      description: "Lists resources within an organization account.
+
+
+      If a `kind` query parameter is given, narrows results to only resources of that kind.
+
+
+      If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+
+
+      If the parameter `count` is `true`, returns only the number of items in the list.
+
+
+      ##### Text search
+
+
+      If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
+      operationId: "getResources"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "query"
+        description: "Type of resource"
+        example: user
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "search"
+        in: "query"
+        description: "Filter resources based on this value by name"
+        example: "db"
+        schema:
+          $ref: '#/components/schemas/SearchFilter'
+      - name: "offset"
+        in: "query"
+        description: "When listing resources, start at this item number."
+        schema:
+          $ref: '#/components/schemas/Offset'
+      - name: "limit"
+        in: "query"
+        description: "When listing resources, return up to this many results."
+        schema:
+          $ref: '#/components/schemas/Limit'
+      - name: "count"
+        in: "query"
+        description: "When listing resources, if `true`, return only the count of the results."
+        schema:
+          $ref: '#/components/schemas/Count'
+
+      responses:
+        200:
+          description: "The response body contains the list of matching resources"
+          content:
+            application/json: {}
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
+      security:
+        - conjurAuth: []
+
+  '/api/resources/{account}/{kind}/{identifier}':
+    get:
+      tags:
+      - "resources"
+      summary: "Shows a description of a single resource."
+      description: "Details about a single resource.
+
+      ##### Permissions Required
+
+      `read` privilege on the resource."
+      operationId: "getResource"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "path"
+        description: "Type of resource"
+        required: true
+        example: user
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the resource for which to get the information about"
+        required: true
+        example: "conjur/authn-iam/test"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+      - name: "permitted_roles"
+        in: "query"
+        description: "Lists the roles which have the named privilege on a resource."
+        schema:
+          $ref: '#/components/schemas/PermittedRoles'
+      - name: "privilege"
+        in: "query"
+        description: "Level of privilege to filter on. Can only be used in combination with `permitted_roles` or `check` parameter."
+        schema:
+          $ref: '#/components/schemas/PrivilegeLevel'
+      - name: "check"
+        in: "query"
+        description: "Check whether a role has a privilege on a resource."
+        schema:
+          $ref: '#/components/schemas/CheckPrivilege'
+      - name: "role"
+        in: "query"
+        example: myorg:host:host1
+        description: "Role to check privilege on. Can only be used in combination with `check` parameter."
+        schema:
+          $ref: '#/components/schemas/Role'
+
+      responses:
+        200:
+          description: "The response body contains the list of role memberships or permitted roles"
+          content:
+            application/json: {}
+        204:
+          $ref: '#/components/responses/PermissionCheckSuccess'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+      security:
+        - conjurAuth: []
 
 # TODO: == Host Factory ==
 # TODO: Create Token
