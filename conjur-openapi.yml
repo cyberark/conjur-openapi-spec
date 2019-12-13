@@ -100,17 +100,17 @@ components:
       example: "prod%2Faws%2Fdb-password"
       description: "Resource identifier. Requires to be encoded when in path.
 
-##### Examples:
+        ##### Examples:
 
-- `myapp-01` -> `myapp-01` (unchanged)
+        - `myapp-01` -> `myapp-01` (unchanged)
 
-- `alice@devops` -> `alice%40devops`
+        - `alice@devops` -> `alice%40devops`
 
-- `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+        - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
 
-- `research+development` -> `research%2Bdevelopment`
+        - `research+development` -> `research%2Bdevelopment`
 
-- `sales&marketing` -> `sales%26marketing`"
+        - `sales&marketing` -> `sales%26marketing`"
 
     ResourceIDs:
       type: string
@@ -118,21 +118,21 @@ components:
       example: myorg:variable:secret1,myorg:variable:secret1
       description: "Comma-delimited, URL-encoded resource identifiers.
 
-##### Resources IDs encoding:
+        ##### Resources IDs encoding:
 
-- `myapp-01` -> `myapp-01` (unchanged)
+        - `myapp-01` -> `myapp-01` (unchanged)
 
-- `alice@devops` -> `alice%40devops`
+        - `alice@devops` -> `alice%40devops`
 
-- `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+        - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
 
-- `research+development` -> `research%2Bdevelopment`
+        - `research+development` -> `research%2Bdevelopment`
 
-- `sales&marketing` -> `sales%26marketing`
+        - `sales&marketing` -> `sales%26marketing`
 
-##### Example
+        ##### Example
 
-`myorg:variable:secret1,myorg:variable:secret1`"
+        `myorg:variable:secret1,myorg:variable:secret1`"
 
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
@@ -238,10 +238,10 @@ paths:
       description: "Passwords are stored in the Conjur database using `bcrypt` with a work factor of 12. Therefore, login is a fairly expensive operation. However, once the API key is obtained, it may be used to inexpensively obtain access tokens by calling the Authenticate method. An access token is required to use most other parts of the Conjur API.
 
 
-Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+        Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
 
 
-Note that machine roles (Hosts) do not have passwords and do not need to login."
+        Note that machine roles (Hosts) do not have passwords and do not need to login."
       operationId: "login"
       parameters:
       - name: "account"
@@ -264,13 +264,14 @@ Note that machine roles (Hosts) do not have passwords and do not need to login."
       - "authn"
       summary: "Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API."
       description: "A client can obtain an access token by presenting a valid login name and API key.
-The login must be URL encoded. For example, `alice@devops` must be encoded as `alice%40devops`.
+
+        The login must be URL encoded. For example, `alice@devops` must be encoded as `alice%40devops`.
 
 
-For host authentication, the login is the host ID with the prefix `host/`. For example, the host webserver would login as `host/webserver`, and would be encoded as `host%2Fwebserver`.
+        For host authentication, the login is the host ID with the prefix `host/`. For example, the host webserver would login as `host/webserver`, and would be encoded as `host%2Fwebserver`.
 
 
-For API usage, the access token is ordinarily passed as an HTTP Authorization `Token` header."
+        For API usage, the access token is ordinarily passed as an HTTP Authorization `Token` header."
       operationId: "authenticate"
       parameters:
       - name: "account"
@@ -310,10 +311,10 @@ For API usage, the access token is ordinarily passed as an HTTP Authorization `T
       description: "You must provide the login name and current password or API key of the user whose password is to be updated in an HTTP Basic Authentication header. Also replaces the user’s API key with a new securely generated random value. You can fetch the new API key by using Login.
 
 
-Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+        Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
 
 
-Note that machine roles (Hosts) do not have passwords. They authenticate using their API keys, while passwords are only used by human users."
+        Note that machine roles (Hosts) do not have passwords. They authenticate using their API keys, while passwords are only used by human users."
       operationId: "setPassword"
       parameters:
       - name: "account"
@@ -352,10 +353,10 @@ Note that machine roles (Hosts) do not have passwords. They authenticate using t
       description: "Any role can rotate its own API key. The name and password or current API key of the role must be provided via HTTP Basic Authorization.
 
 
-Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
+        Your HTTP/REST client probably provides HTTP basic authentication support. For example, curl and all of the Conjur client libraries provide this.
 
 
-Note that the body of the request must be the empty string."
+        Note that the body of the request must be the empty string."
       operationId: "rotateApiKey"
       parameters:
       - name: "account"
@@ -368,9 +369,9 @@ Note that the body of the request must be the empty string."
         in: "query"
         description: "(**Optional**) role specifier in `{kind}:{identifier}` format
 
-##### Permissions required
+          ##### Permissions required
 
-`update` privilege on the role whose API key is being rotated."
+          `update` privilege on the role whose API key is being rotated."
         schema:
           $ref: '#/components/schemas/Role'
 
@@ -392,7 +393,7 @@ Note that the body of the request must be the empty string."
       description: "Creates a secret value within the specified Variable.
 
 
-Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
+        Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
       operationId: "createVariable"
       parameters:
       - name: "account"
@@ -434,10 +435,10 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       description: "Fetches the value of a secret from the specified Variable. The latest version will be retrieved unless the version parameter is specified. The twenty most recent secret versions are retained.
 
 
-The secret data is returned in the response body.
+        The secret data is returned in the response body.
 
 
-Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
+        Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
       operationId: "getVariable"
       parameters:
       - name: "account"
@@ -519,7 +520,7 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       description: "Loads or replaces a Conjur policy document.
 
 
-**Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted**."
+        **Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted!**."
       operationId: "loadPolicy"
       parameters:
       - name: "account"
@@ -576,9 +577,9 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       summary: "Adds data to the existing Conjur policy."
       description: "Adds data to the existing Conjur policy. Deletions are not allowed. Any policy objects that exist on the server but are omitted from the policy file will not be deleted and any explicit deletions in the policy file will result in an error.
 
-##### Permissions required
+        ##### Permissions required
 
-`create` privilege on the policy."
+        `create` privilege on the policy."
       operationId: "updatePolicy"
       parameters:
       - name: "account"
@@ -636,9 +637,9 @@ Note: Conjur will allow you to add a secret to any resource, but the best practi
       description: "Modifies an existing Conjur policy. Data may be explicitly deleted using the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode, no data is ever implicitly deleted.
 
 
-##### Permissions required
+        ##### Permissions required
 
-`create` privilege on the policy."
+        `create` privilege on the policy."
       operationId: "modifyPolicy"
       parameters:
       - name: "account"
