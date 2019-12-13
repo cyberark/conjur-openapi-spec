@@ -1,6 +1,6 @@
-# draft-conjur-openapi-spec
+# Conjur/DAP OpenAPI Spec
 
-This project contains the OpenAPI v3 spec for [Conjur OSS](https://www.conjur.org/) and DAP.
+This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/) and DAP v10+.
 
 ---
 
