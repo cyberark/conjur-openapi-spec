@@ -93,7 +93,8 @@ components:
           # TODO: Find out if we accept string or an array
           description: "Number of host tokens to create"
           type: array
-          items: string
+          items:
+            type: string
           example: "127.0.0.1/32"
 
       required:
@@ -244,6 +245,12 @@ components:
       description: "A request parameter was missing or invalid"
     PermissionCheckSuccess:
       description: "Permissions check was successful"
+    PublicKeys:
+      description: "Public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format. Empty string if the resource does not exist"
+      content:
+        text/plain:
+          schema:
+            type: string
     ResourceNotFound:
       description: "The requested resource does not exist, or it does not have a value"
     ResourcesNotFound:
@@ -1076,10 +1083,44 @@ paths:
       security:
         - conjurAuth: []
 
-# TODO: == Public Keys ==
-# TODO: Show Public Key
+# ========== Public keys ==========
 
-# TODO: == Misc ==
+  '/public_keys/{account}/{kind}/{identifier}':
+    get:
+      tags:
+      - "public keys"
+      summary: "Shows all public keys for a resource."
+      description: "Shows all public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format.
+
+
+        Returns an empty string if the resource does not exist, to prevent attackers from determining whether a resource exists."
+      operationId: "showPublicKeys"
+      parameters:
+      - name: "account"
+        in: "path"
+        description: "Organization account name"
+        required: true
+        schema:
+          $ref: '#/components/schemas/AccountName'
+      - name: "kind"
+        in: "path"
+        description: "Type of resource"
+        required: true
+        example: user
+        schema:
+          $ref: '#/components/schemas/Kind'
+      - name: "identifier"
+        in: "path"
+        description: "ID of the resource for which to get the information about"
+        required: true
+        example: "admin"
+        schema:
+          $ref: '#/components/schemas/ResourceID'
+
+      responses:
+        200:
+          $ref: '#/components/responses/PublicKeys'
+
 # TODO: Inject client cert
 # TODO: Seed Service
 
