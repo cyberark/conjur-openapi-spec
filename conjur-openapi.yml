@@ -19,9 +19,9 @@ tags:
   description: "Policies"
 - name: "roles"
   description: "RBAC"
-- name: "hostfactory"
+- name: "host factory"
   description: "Host factories"
-- name: "public_keys"
+- name: "public keys"
   description: "SSH keys"
   
 components:
@@ -46,10 +46,59 @@ components:
       example: "true"
       description: "Checks whether a role has a privilege on a resource."
 
+    CreateHostRequest:
+      type: object
+      properties:
+        id:
+          description: "Identifier of the host to be created. It will be created within the account of the host factory."
+          type: string
+          example: "my-new-host"
+
+        annotations:
+          description: "Annotations to apply to the new host"
+          type: object
+          example: '{"puppet": "true", "description": "new db host"}'
+
+      required:
+        - id
+
     Count:
       description: "Return only the count of results"
       type: boolean
       example: true
+
+    HostFactoryToken:
+      type: string
+      minLength: 1
+
+    HostFactoryTokenRequest:
+      type: object
+      properties:
+        expiration:
+          description: "`ISO 8601 datetime` denoting a requested expiration time."
+          type: string
+          example: "2017-08-04T22:27:20+00:00"
+
+        host_factory:
+          description: "Fully qualified host factory ID"
+          type: string
+          example: "myorg:host_factory:hf-db"
+
+        count:
+          description: "Number of host tokens to create"
+          type: integer
+          example: "2"
+
+        cidr:
+          # TODO: Find out if we accept string or an array
+          description: "Number of host tokens to create"
+          type: array
+          items: string
+          example: "127.0.0.1/32"
+
+      required:
+        - expiration
+        - host_factory
 
     Kind:
       type: string
@@ -180,7 +229,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AccessToken'
-
     ApiKey:
       description: "The response body is the API key"
       content:
@@ -197,7 +245,7 @@ components:
     PermissionCheckSuccess:
       description: "Permissions check was successful"
     ResourceNotFound:
-      description: "The variable does not exist, or it does not have any secret values"
+      description: "The requested resource does not exist, or it does not have a value"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
     SecretValue:
@@ -924,10 +972,109 @@ paths:
       security:
         - conjurAuth: []
 
-# TODO: == Host Factory ==
-# TODO: Create Token
-# TODO: Revoke Token
-# TODO: Create Host
+# ========== Host Factory ==========
+
+  '/host_factory_tokens':
+    post:
+      tags:
+      - "host factory"
+      summary: "Creates one or more host identity tokens."
+      description: "Creates one or more tokens which can be used to bootstrap host identity. Responds with a JSON document containing the tokens and their restrictions.
+
+
+        If the tokens are created with a CIDR restriction, Conjur will only accept them from the whitelisted IP ranges.
+
+
+        ##### Permissions required
+
+
+        `execute` privilege on the Host Factory."
+      operationId: "createHostToken"
+      requestBody:
+        description: "Parameters"
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HostFactoryTokenRequest'
+
+      responses:
+        200:
+          description: "Zero or more tokens were created and delivered in the response body"
+          content:
+            application/json: {}
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+
+      security:
+        - conjurAuth: []
+
+  '/host_factory_tokens/{token}':
+    delete:
+      tags:
+      - "host factory"
+      summary: "Revokes a token, immediately disabling it."
+      description: "Revokes a token, immediately disabling it.
+
+
+        ##### Permissions required
+
+
+        `update` privilege on the host factory."
+      operationId: "revokeHostToken"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "The host factory token to revoke"
+        required: true
+        schema:
+          $ref: '#/components/schemas/HostFactoryToken'
+      responses:
+        204:
+          description: "Token was successfully revoked"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+      security:
+        - conjurAuth: []
+
+  '/host_factories/hosts':
+    post:
+      tags:
+      - "host factory"
+      summary: "Creates a Host using the Host Factory."
+      description: "Creates a Host using the Host Factory and returns a JSON description of it.
+
+
+        Requires a host factory token, which can be created using the create tokens API. In practice, this token is usually provided automatically as part of Conjur integration with your host provisioning infrastructure.
+
+
+        Note: If the token was created with a CIDR restriction, you must make this API request from a whitelisted address."
+      operationId: "createHost"
+      requestBody:
+        description: "Parameters"
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateHostRequest'
+      responses:
+        201:
+          description: "The response body contains the newly-created host"
+          content:
+            application/json: {}
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        422:
+          $ref: '#/components/responses/MissingOrBadRequestParameters'
+      security:
+        - conjurAuth: []
 
 # TODO: == Public Keys ==
 # TODO: Show Public Key
