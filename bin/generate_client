@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+client_lang="python"
+if [ $# -ge 1 ]; then
+  client_lang="$1"
+fi
+
+GENERATOR_IMAGE="openapitools/openapi-generator-cli"
+
+echo "Pulling latest $GENERATOR_IMAGE..."
+docker pull "$GENERATOR_IMAGE"
+
+echo "Removing old client dir..."
+rm -rf "$(pwd)/out/$client_lang"
+
+echo "Generating $client_lang client..."
+docker run --rm -v ${PWD}:/local "$GENERATOR_IMAGE" generate \
+    -i "/local/conjur-openapi.yml" \
+    -g "$client_lang" \
+    -o "/local/out/$client_lang"
+
+echo "Done! Client is in $(pwd)/out folder!"
