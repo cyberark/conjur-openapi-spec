@@ -258,7 +258,7 @@ components:
           schema:
             type: string
     ResourceNotFound:
-      description: "The requested resource does not exist, or it does not have a value"
+      description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
     SecretValue:
@@ -541,6 +541,8 @@ paths:
           $ref: '#/components/responses/SecretValue'
         401:
           $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
         404:
           $ref: '#/components/responses/ResourceNotFound'
         422:
@@ -569,6 +571,8 @@ paths:
           $ref: '#/components/responses/SecretBatchValue'
         401:
           $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/InadequatePrivileges'
         404:
           $ref: '#/components/responses/ResourcesNotFound'
         422:
