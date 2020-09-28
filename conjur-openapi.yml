@@ -223,6 +223,12 @@ components:
       minLength: 1
       description: "Only returns results that contain this string value"
 
+    ApiKey:
+      type: string
+      minLength: 55
+      description: "Example of a Conjur API key"
+      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
+
   responses:
     AccessToken:
       description: "The response body is the access token"
@@ -252,7 +258,7 @@ components:
           schema:
             type: string
     ResourceNotFound:
-      description: "The requested resource does not exist, or it does not have a value"
+      description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
     SecretValue:
@@ -262,6 +268,18 @@ components:
           schema:
             type: string
             example: 'supersecret'
+    # There might be a better way to display the schema of SecretBatchValue however the json keys are dynamic depending on the secrets you fetched in the 'secrets_id' query param.
+    SecretBatchValue:
+      description: "The batch secret values"
+      content:
+        application/json:
+          schema:
+            type: object
+            example: |
+              {
+                 "myorg:variable:secret1": "secret1Value",
+                 "myorg:variable:secret2": "secret2Value"
+              }
     UnauthorizedError:
       description: "Authentication information is missing or invalid"
       headers:
@@ -347,9 +365,7 @@ paths:
         content:
           text/plain:
             schema:
-              type: string
-              minLength: 1
-
+              $ref: '#/components/schemas/ApiKey'
       responses:
         200:
           $ref: '#/components/responses/AccessToken'
@@ -521,7 +537,7 @@ paths:
           $ref: '#/components/schemas/ResourceVersion'
 
       responses:
-        201:
+        200:
           $ref: '#/components/responses/SecretValue'
         401:
           $ref: '#/components/responses/UnauthorizedError'
@@ -551,8 +567,8 @@ paths:
           $ref: '#/components/schemas/ResourceIDs'
 
       responses:
-        201:
-          $ref: '#/components/responses/SecretValue'
+        200:
+          $ref: '#/components/responses/SecretBatchValue'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
