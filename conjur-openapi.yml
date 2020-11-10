@@ -297,7 +297,6 @@ components:
       type: apiKey
       in: header
       name: Authorization
-
 security:
   - basicAuth: []
   - conjurAuth: []
@@ -485,6 +484,14 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        description: "Secret data"
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: binary
 
       responses:
         201:
