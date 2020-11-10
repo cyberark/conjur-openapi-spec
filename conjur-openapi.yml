@@ -303,7 +303,7 @@ security:
   - conjurAuth: []
   
 paths:
-  '/api/authn/{account}/login':
+  '/authn/{account}/login':
     get:
       tags:
       - "authn"
@@ -331,7 +331,7 @@ paths:
       security:
         - basicAuth: []
 
-  '/api/authn/{account}/{login}/authenticate':
+  '/authn/{account}/{login}/authenticate':
     post:
       tags:
       - "authn"
@@ -374,7 +374,7 @@ paths:
       security:
         - conjurAuth: []
 
-  '/api/authn/{account}/password':
+  '/authn/{account}/password':
     put:
       tags:
       - "authn"
@@ -416,7 +416,7 @@ paths:
       security:
         - basicAuth: []
 
-  '/api/authn/{account}/api_key':
+  '/authn/{account}/api_key':
     put:
       tags:
       - "authn"
@@ -456,7 +456,7 @@ paths:
 
 # ========== SECRETS ==========
 
-  '/api/secrets/{account}/{kind}/{identifier}':
+  '/secrets/{account}/{kind}/{identifier}':
     post:
       tags:
       - "secrets"
@@ -551,7 +551,7 @@ paths:
       security:
         - conjurAuth: []
 
-  '/api/secrets':
+  '/secrets':
     get:
       tags:
       - "secrets"
@@ -583,7 +583,7 @@ paths:
 
 # ========== POLICIES ==========
 
-  '/api/policies/{account}/policy/{identifier}':
+  '/policies/{account}/policy/{identifier}':
     put:
       tags:
       - "policies"
@@ -763,7 +763,7 @@ paths:
 
 # ========== Roles ==========
 
-  '/api/roles/{account}/{kind}/{identifier}':
+  '/roles/{account}/{kind}/{identifier}':
     get:
       tags:
       - "roles"
@@ -855,7 +855,7 @@ paths:
 
 # ========== Resources ==========
 
-  '/api/resources/{account}':
+  '/resources/{account}':
     get:
       tags:
       - "resources"
@@ -923,7 +923,7 @@ paths:
       security:
         - conjurAuth: []
 
-  '/api/resources/{account}/{kind}/{identifier}':
+  '/resources/{account}/{kind}/{identifier}':
     get:
       tags:
       - "resources"
