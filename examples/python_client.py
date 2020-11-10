@@ -65,12 +65,31 @@ api_client.configuration.api_key_prefix = {'conjurAuth': 'Token'}
 
 # restore debug flag? stops printing request logs
 api_client.configuration.debug=True
+
+# load a policy using api client
+policy_api = openapi_client.PoliciesApi(api_client)
+policy="""- !variable
+  id: sampleSecret
+
+- !permit
+  role: !user admin
+  privilege: [ execute ]
+  resource: !variable sampleSecret
+"""
+try:
+    policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
+    print("Policy loaded.")
+except ApiException as err:
+    print("Exception when loading policy: ", err)
+    sys.exit(1)
+
 # store a secret
 secrets_api = openapi_client.SecretsApi(api_client)
 secret = "supersecretstuff"
 secret_id = "sampleSecret"
 try:
     secrets_api.create_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id, body=secret)
+    print("Stored secret: ", secret)
 except ApiException as err:
     print("Exception when creating secret: ", err)
     sys.exit(1)
@@ -80,6 +99,7 @@ print("Secret stored.")
 retrieved = None
 try:
     retrieved = secrets_api.get_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id)
+    print("Retrieved seceret: ", retrieved)
 except ApiException as err:
     print("Exception when retrieving secret: ", err)
     sys.exit(1)
