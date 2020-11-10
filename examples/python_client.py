@@ -6,20 +6,6 @@ import base64
 import openapi_client
 from openapi_client.rest import ApiException
 
-def format_and_encode (token):
-    reordered_token='{"protected":"'
-    reordered_token=reordered_token+token.protected
-    reordered_token=reordered_token+'","payload":"'
-    reordered_token=reordered_token+token.payload
-    reordered_token=reordered_token+'","signature":"'
-    reordered_token=reordered_token+token.signature
-    reordered_token=reordered_token+'"}'
-    
-    compressed_token = reordered_token.replace("\n","").replace("\r","").replace(" ","")
-    encoded_token = base64.b64encode(compressed_token.encode()).decode('utf-8')
-    
-    return encoded_token
-
 ACCOUNT_NAME = "cucumber"
 
 # setup API client config
@@ -49,32 +35,31 @@ except ApiException as err:
 # authenticate admin, receiving short-lived access token
 access_token = None
 try:
-    access_token = login_api.authenticate(account=ACCOUNT_NAME, login="admin", body=api_key)
+    access_token = login_api.authenticate(account=ACCOUNT_NAME, login="admin", body=api_key, accept_encoding="base64")
     print(access_token)
 except ApiException as err:
     print("Exception when authenticating in: ", err)
-encoded_token = format_and_encode(access_token)
 
 # change admin password using basicAuth
 new_password = "N3w-Passw0rd!"
 try:
     login_api.set_password(body=new_password, account=ACCOUNT_NAME)
+    print("Password change successful.")
+    api_client.configuration.password = new_password
 except ApiException as err:
     print("Exception when setting password in: ", err)
     sys.exit(1)
-print("Password change successful.")
-api_client.configuration.password = new_password
 
 # rotate admin API key
 try:
     api_key = login_api.rotate_api_key(account=ACCOUNT_NAME)
+    print("New API key:", api_key)
 except ApiException as err:
     print("Exception when logging in: ", err)
     sys.exit(1)
-print("New API key:", api_key)
 
 # add Conjur Token header to client configuration
-token_body = 'token="{}"'.format(encoded_token)
+token_body = 'token="{}"'.format(access_token)
 api_client.configuration.api_key = {'conjurAuth': token_body}
 api_client.configuration.api_key_prefix = {'conjurAuth': 'Token'}
 

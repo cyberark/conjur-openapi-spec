@@ -27,14 +27,10 @@ tags:
 components:
   schemas:
     AccessToken:
-      type: object
-      properties:
-        protected:
-          type: string
-        payload:
-          type: string
-        signature:
-          type: string
+      type: string
+      minLength: 1
+      example: "{'protected':'abcdefg','payload','hijklmop','signature':'qrstuv'}"
+      description: "Access tokens can be received from Conjur in their raw form, or pre-encoded in base64."
 
     AccountName:
       type: string
@@ -297,6 +293,7 @@ components:
       type: apiKey
       in: header
       name: Authorization
+
 security:
   - basicAuth: []
   - conjurAuth: []
@@ -358,6 +355,11 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/LoginName'
+      - name: "Accept-Encoding"
+        in: "header"
+        description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+        schema:
+          type: "string"
       requestBody:
         description: "API Key"
         required: true
