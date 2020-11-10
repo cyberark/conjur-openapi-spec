@@ -27,14 +27,10 @@ tags:
 components:
   schemas:
     AccessToken:
-      type: object
-      properties:
-        protected:
-          type: string
-        payload:
-          type: string
-        signature:
-          type: string
+      type: string
+      minLength: 1
+      example: "{'protected':'abcdefg','payload','hijklmop','signature':'qrstuv'}"
+      description: "Access tokens can be received from Conjur in their raw form, or pre-encoded in base64."
 
     AccountName:
       type: string
@@ -247,6 +243,22 @@ components:
       description: "Similar operation already in progress, retry after a delay"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
+    LoadedPolicy:
+      description: "Decsribes new data created by a successful policy load"
+      content:
+        application/json:
+          schema:
+            type: object
+            example: |
+              {
+                "created_roles": {
+                  "myorg:host:database/db-host": {
+                    "id": "myorg:host:database/db-host",
+                    "api_key": "309yzpa1n5kp932waxw6d37x4hew2x8ve8w11m8xn92acfy672m929en"
+                  }
+                },
+                "version": 1
+              }
     MissingOrBadRequestParameters:
       description: "A request parameter was missing or invalid"
     PermissionCheckSuccess:
@@ -359,6 +371,11 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/LoginName'
+      - name: "Accept-Encoding"
+        in: "header"
+        description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+        schema:
+          type: "string"
       requestBody:
         description: "API Key"
         required: true
@@ -453,6 +470,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
+          conjurAuth: []
 
 # ========== SECRETS ==========
 
@@ -485,6 +503,14 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        description: "Secret data"
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              format: binary
 
       responses:
         201:
@@ -627,7 +653,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was loaded or replaced successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
@@ -686,7 +712,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was extended successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
@@ -746,7 +772,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was updated successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
