@@ -1,0 +1,51 @@
+#!/bin/bash -e
+
+cleanup() {
+  echo "Cleaning up..."
+  docker-compose rm --stop --force -v
+}
+
+if [ "$1" == "-d" ]; then
+  DEBUG="true"
+  shift
+fi
+
+trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
+trap 'cleanup' EXIT
+cleanup
+
+echo "Generating Client"
+./bin/generate_client
+
+echo "Building API container..."
+docker-compose build
+
+echo "Starting Conjur..."
+docker-compose up -d conjur
+docker-compose exec -T conjur conjurctl wait
+
+echo "Configuring Conjur..."
+admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+export CONJUR_AUTHN_API_KEY=$admin_api_key
+
+# Docker-compose will pick this file up when starting containers
+# so we will have these variables in the container
+cat <<ENV > .env
+CONJUR_AUTHN_API_KEY=$admin_api_key
+ENV
+
+echo "Starting test env..."
+docker-compose up -d test-python
+
+rm -rf $CURRENT_DIR/output/*
+
+if [[ "$DEBUG" == "true" ]]; then
+  docker-compose exec test-python bash
+  exit
+fi
+
+docker-compose run \
+  --rm \
+  --no-deps \
+  test-python \
+  nose2 -v -s test/python/

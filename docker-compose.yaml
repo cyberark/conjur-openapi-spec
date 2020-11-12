@@ -1,0 +1,52 @@
+version: '3'
+services:
+  pg:
+    image: postgres:9.4
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  conjur:
+    image: cyberark/conjur:1.9
+    command: server -a dev -f /policy/policy.yaml
+    environment:
+      CONJUR_DATA_KEY: 'OyXV68Mip14xj33huGaQKewmmS+gKtDlp6ECZ2iATpU='
+      DATABASE_URL: postgres://postgres@pg/postgres
+      RAILS_ENV: development
+    ports:
+      - 80
+    volumes:
+      - ./test/config:/policy:ro
+    depends_on:
+      - pg
+
+  conjur-https:
+    image: nginx:alpine
+    ports:
+      - 443
+    volumes:
+      - ./test/config/https/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./test/config/https/conjur.conf:/etc/nginx/sites-enabled/conjur.conf:ro
+      - ./test/config/https/dhparams.pem:/etc/nginx/dhparams.pem:ro
+      - ./test/config/https/conjur.crt:/cert/tls.crt:ro
+      - ./test/config/https/conjur.key:/cert/tls.key:ro
+      - ./test/config/https/ca.crt:/ca/tls.crt:ro
+    depends_on:
+      - conjur
+
+  test-python:
+    build:
+      context: .
+      dockerfile: test/Dockerfile.python
+    command: ['sleep', '999d']
+    environment:
+      CONJUR_HTTP_APPLIANCE_URL: http://conjur
+      CONJUR_HTTPS_APPLIANCE_URL: https://conjur-https
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY: Null
+      CONJUR_CA_BUNDLE: /opt/conjur-openapi-spec/test/config/https/ca.crt
+    depends_on:
+      - conjur
+      - conjur-https
+    volumes:
+      - .:/opt/conjur-openapi-spec

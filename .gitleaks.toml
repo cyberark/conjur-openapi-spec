@@ -176,7 +176,7 @@ description = "Twilio API key"
 regex = '''(?i)twilio(.{0,20})?['\"][0-9a-f]{32}['\"]'''
 tags = ["key", "twilio"]
 
-[whitelist]
+[allowlist]
 files = [
   '''(.*?)(jpg|gif|doc|pdf|bin)$''',
   '''(.*?)conjur.key$''',
