@@ -10,19 +10,7 @@ if [ "$1" == "-d" ]; then
   shift
 fi
 
-trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
-trap 'cleanup' EXIT
-cleanup
-
-echo "Generating Client"
-./bin/generate_client
-
-echo "Building API container..."
-docker-compose build
-
-echo "Starting Conjur..."
-docker-compose up -d conjur
-docker-compose exec -T conjur conjurctl wait
+bin/start_conjur
 
 echo "Configuring Conjur..."
 admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')

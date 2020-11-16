@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# deconstruct docker-compose env
+echo "Stop and remove docker-compose environment"
+docker-compose down -v
+
+# stop and remove swagger container
+echo "Stop and remove Swagger container"
+docker stop swagger-editor || true
+docker rm swagger-editor || true
