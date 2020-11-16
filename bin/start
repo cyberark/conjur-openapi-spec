@@ -1,0 +1,7 @@
+#!/bin/bash -e
+
+# Start Conjur docker-compose environment
+bin/start_conjur
+
+# Start Swagger UI
+bin/start_editor

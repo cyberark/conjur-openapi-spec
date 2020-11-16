@@ -16,15 +16,31 @@ This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.
 
 This project requires Docker and access to DockerHub
 
-## Running
+## Environment Setup
+
+Setup the development environment using the `start` script. The script starts a Swagger UI 
+container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the 
+spec against.
+
+```shell
+$ ./bin/start
+```
+
+To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger UI editor with 
+the `start_editor` script.
 
 ```shell
 $ ./bin/start_editor
 ```
 
-A browser window will be opened to the container running Swagger UI.
-
+In each case, a browser window will be opened to the container running Swagger UI.
 Import the [`conjur-openapi.yml`](conjur-openapi.yml) into the UI to view/edit.
+
+The environment can be stopped and removed using the `stop` script.
+
+```shell
+$ ./bin/stop
+```
 
 ## Editing
 

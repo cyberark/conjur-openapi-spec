@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+cleanup() {
+  echo "Cleaning up..."
+  docker-compose rm --stop --force -v
+}
+
+if [ "$1" == "-d" ]; then
+  DEBUG="true"
+  shift
+fi
+
+trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
+cleanup
+
+echo "Building services..."
+docker-compose build
+
+# Start Conjur server
+echo "Starting Conjur..."
+docker-compose up -d conjur conjur-https
+docker-compose exec -T conjur conjurctl wait
