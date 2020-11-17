@@ -1,4 +1,5 @@
 # Conjur/DAP OpenAPI Spec
+[![Integration Tests](https://github.com/conjurinc/conjur-openapi-spec/workflows/Integration%20Tests/badge.svg)](https://github.com/conjurinc/conjur-openapi-spec/actions?query=workflow%3A%22Run+Integration+Tests%22)
 
 This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/) and DAP v10+.
 
