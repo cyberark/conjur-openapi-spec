@@ -10,6 +10,7 @@ if [ "$1" == "-d" ]; then
   shift
 fi
 
+bin/generate_client
 bin/start_conjur
 
 echo "Configuring Conjur..."
