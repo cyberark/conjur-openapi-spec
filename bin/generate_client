@@ -7,9 +7,10 @@ if [ $# -ge 1 ]; then
   client_lang="$1"
 fi
 
-GENERATOR_IMAGE="openapitools/openapi-generator-cli"
+generator_version="v4.3.1"
+GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
-echo "Pulling latest $GENERATOR_IMAGE..."
+echo "Pulling latest release $GENERATOR_IMAGE..."
 docker pull "$GENERATOR_IMAGE"
 
 echo "Removing old client dir..."
