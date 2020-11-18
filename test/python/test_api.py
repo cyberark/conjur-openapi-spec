@@ -12,7 +12,9 @@ CONJUR_CERT_FILE = 'conjur.crt'
 CONJUR_KEY_FILE = 'conjur.key'
 
 class ApiTest(unittest.TestCase):
+    """Unittest TestCase for the Conjur Python API client against basic API endpoints"""
     def setUp(self):
+        """Method run before the test case starts"""
         self.config = openapi_client.Configuration(
                 host="https://conjur-https",
                 api_key={'conjurAuth': os.environ['CONJUR_AUTHN_API_KEY']}
@@ -23,6 +25,7 @@ class ApiTest(unittest.TestCase):
         self.config.key_file = cert_path.joinpath(CONJUR_KEY_FILE)
 
     def test_authenticate(self):
+        """Test authentication with conjur"""
         with openapi_client.ApiClient(self.config) as api_client:
             api_instance = openapi_client.AuthnApi(api_client)
             account = os.environ['CONJUR_ACCOUNT']
@@ -32,7 +35,7 @@ class ApiTest(unittest.TestCase):
             api_response = api_instance.authenticate(account, login, body).replace("\'","\"")
             api_response_json = json.loads(api_response)
             api_response_keys = api_response_json.keys()
-            
+
             self.assertIn("protected", api_response_keys)
             self.assertIn("payload", api_response_keys)
             self.assertIn("signature", api_response_keys)
