@@ -43,41 +43,65 @@ except ApiException as err:
     sys.exit(1)
 api_client.configuration.password = new_password
 
-# Rotate admin API key, uses basicAuth
-print("\nRotating admin API key...")
-try:
-    ADMIN_API_KEY = login_api.rotate_api_key(account=ACCOUNT_NAME)
-    print("New API key:", ADMIN_API_KEY)
-except ApiException as err:
-    print("Exception when logging in: ", err)
-    sys.exit(1)
-
 # Add Conjur Token header to client configuration
 token_body = 'token="{}"'.format(access_token)
-api_client.configuration.api_key = {'conjurAuth': token_body}
-api_client.configuration.api_key_prefix = {'conjurAuth': 'Token'}
+api_client.configuration.api_key = {'Authorization': token_body}
+api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
 
 policy_api = openapi_client.PoliciesApi(api_client)
+login_api = openapi_client.AuthnApi(api_client)
+
+# Load empty policy, allows the example to be run multiple times sequentially
+# Loading a policy returns data for users CREATED when the policy is loaded. Without loading 
+# an "empty" policy, if the user alice already exists due to a prior example run, loading 
+# the full policy will not respond with alice's api key.
+print("\nLoading empty root policy...")
+empty_policy = "- !user admin"
+empty_results = None
+try:
+    empty_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=empty_policy)
+    print("Empty policy loaded.")
+except ApiException as err:
+    print("Exception when loading empty policy: ", err)
+    sys.exit(1)
 
 # Load a policy using api client
 print("\nLoading root policy...")
 policy = """---
-- !variable
-  id: sampleSecret
+- !user admin
+- !user alice
+- !variable sampleSecret
+
+- !permit
+  role: !user admin
+  privilege: [ update ]
+  resource: !user alice
 
 - !permit
   role: !user admin
   privilege: [ execute ]
   resource: !variable sampleSecret
 """
+loaded_results = None
 try:
-    policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
+    loaded_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
     print("Policy loaded.")
 except ApiException as err:
     print("Exception when loading policy: ", err)
     sys.exit(1)
+alice_api_key = loaded_results["created_roles"]["dev:user:alice"]["api_key"]
+print("Alice API key: ", alice_api_key)
 
-# Store a secret
+# Rotate Alice's API key, uses conjurAuth
+print("\nRotating alice API key...")
+try:
+    ADMIN_API_KEY = login_api.rotate_api_key(account=ACCOUNT_NAME, role="user:alice")
+    print("New API key:", ADMIN_API_KEY)
+except ApiException as err:
+    print("Exception when logging in: ", err)
+    sys.exit(1)
+
+# Store a secret, uses conjurAuth
 print("\nStoring secret...")
 secrets_api = openapi_client.SecretsApi(api_client)
 secret = "supersecretstuff"
@@ -90,7 +114,7 @@ except ApiException as err:
     print("Exception when creating secret: ", err)
     sys.exit(1)
 
-# Retrieve secrets
+# Retrieve secrets, uses conjurAuth
 print("\nRetrieving secret...")
 retrieved_secret = None
 try:
