@@ -1,0 +1,7 @@
+[MESSAGES CONTROL]
+disable=
+
+    # redundant, we generally only have one class per module for integration tests
+    missing-module-docstring
+
+max-line-length=100
