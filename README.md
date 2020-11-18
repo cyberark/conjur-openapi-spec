@@ -15,6 +15,16 @@ streamline development processes.
 
 Find [more from CyberArk](https://github.com/cyberark).
 
+* [Requirements](#requirements)
+* [Getting Started](#getting-started)
+* [Contributing](#contributing)
+* [License](#license)
+
+<!--
+Table of contents generated with markdown-toc
+http://ecotruct-canada.github.io/markdown-toc/
+-->
+
 ## Requirements
 
 This project requires Docker and access to DockerHub.

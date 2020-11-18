@@ -1,11 +1,24 @@
 # Contributing
 
-## Table of Contents
+Please see our [Community Repository](https://github.com/cyberark/community) and our [Contribution Guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md).  
+They provide information regarding the process of contributing to Conjur OSS projects,  
+including issue reporting, pull request workflow and community guidelines.
 
-- [Prerequisites](#prerequisites)
-- [Component Compatibility](#component-compatibility)
-- [Set Up a Development Environment](#set-up-a-development-environment)
-- [Pull Request Workflow](#pull-request-workflow)
+* [Prerequisites](#prerequisites)
+* [Component Compatibility](#component-compatibility)
+  + [Conjur](#conjur)
+  + [OpenAPI](#openapi)
+  + [Swagger](#swagger)
+* [Development](#development)
+  + [Environment Setup](#environment-setup)
+  + [Editing the OpenAPI Specification](#editing-the-openapi-specification)
+  + [Utility Script Reference](#utility-script-reference)
+* [Integration Tests](#integration-tests)
+
+<!--
+Table of contents generated with markdown-toc
+http://ecotruct-canada.github.io/markdown-toc/
+-->
 
 ## Prerequisites
 
@@ -35,7 +48,9 @@ Contributing to this repository requires installation of some developer tools.
 
 [Swagger Editor v3.14.6](https://github.com/swagger-api/swagger-editor/tree/v3.14.6)
 
-## Set Up a Development Environment
+## Development
+
+### Environment Setup
 
 Setup the development environment using the `start` script. The script starts a Swagger UI  
 container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the  
@@ -61,20 +76,44 @@ The environment can be stopped and removed using the `stop` script.
 $ ./bin/stop
 ```
 
-## Editing the OpenAPI Specification
+### Editing the OpenAPI Specification
 
-1. [Start Swagger Editor](#set-up-a-development-environment)
-1. Import the spec into the UI
-1. Edit the document as necessary
-1. Download the YAML from the UI
-1. Overwrite [`conjur-openapi.yml`](conjur-openapi.yml) with the downloaded yaml file
+1. [Start Swagger Editor](#environment-setup)
+2. Import the specification YAML into the editor
+    * `File` > `Import file`
+3. Edit the document as necessary
+4. Download the new specification YAML from the editor
+    * `File` > `Save as YAML`
+5. Overwrite [`conjur-openapi.yml`](conjur-openapi.yml) with the downloaded YAML file
 
-## Pull Request Workflow
+### Utility Script Reference
 
-1. Search the [open issues](../../issues) in GitHub to find out what has been planned
-1. Select an existing issue or open an issue to propose changes or fixes
-1. Add any relevant labels as you work on it
-1. Run tests as described [in the main README](https://github.com/conjurinc/conjur-api-python3#testing),
-ensuring they pass
-1. Submit a pull request, linking the issue in the description
-1. Adjust labels as-needed on the issue. Ask another contributor to review and merge your code if there are delays in merging.
+`bin/generate_client <language>`
+* Generates a client library for the desired `<language>`.  
+* Running the script with no argument will generate a Python client by default.
+
+`bin/integration_tests`
+* Used to run the suite of integration tests.  
+* Stands up a new `docker-compose` environment, and runs the integration tests in a designated container.
+
+`bin/start`
+* Used to set up a new development environment.  
+* Stands up a new instance of Conjur, and starts a Swagger Editor container.
+
+`bin/start_conjur`
+* Used to start a new local Conjur instance based on the project's `docker-compose`.
+
+`bin/start_editor`
+* Used to start a Swagger Editor container independent of a Conjur instance.  
+
+`bin/stop`
+* Used to deconstruct the development environmnet.  
+* Stops and removes the `docker-compose` environment and Swagger Editor.
+
+## Integration Tests
+
+Run the current suite of integration tests using the script:
+
+```shell
+$ ./bin/integration_tests
+```
