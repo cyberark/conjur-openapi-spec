@@ -61,10 +61,12 @@ $ ./bin/start
 $ ./bin/generate_client
 ```
 
-Install dependencies for the OpenAPI spec generated client.
+Setup a Python virtual environment and install dependencies for the OpenAPI spec generated client.
 
 ```shell
-$ cd out/python; python3 setup.py install; cd ../..
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+$ pip3 install -e out/python
 ```
 
 Store the admin's API key as an environment variable, and run the client demo.
@@ -74,8 +76,11 @@ $ export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retri
 $ ./examples/python_client.py
 ```
 
-It is important to note that after the demo is run, the environment variable containing the admin  
-API key is out-of-date. To maintain the variable, it should be retrieved again from Conjur.
+To deactivate the Python virtual environment, input `deactivate` to an environment-active shell.
+
+```shell
+(venv) $ deactivate
+```
 
 ## Contributing
 
