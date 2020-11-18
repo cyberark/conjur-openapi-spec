@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Linting Python integration tests:"
+docker run --rm \
+    -v ${PWD}/test/python:/code/test \
+    -v ${PWD}/test/config/.pylintrc:/code/.pylintrc \
+    -v ${PWD}/out/python:/code/module \
+    python:3.8 \
+    /bin/bash -c "pip install pylint -e /code/module && pylint --rcfile=/code/.pylintrc /code/test"
+
+if [ $? -ne 0 ]
+then
+    echo "Error: Your Pylint score must be 10.0 to pass Python linting test"
+    exit 1
+fi
