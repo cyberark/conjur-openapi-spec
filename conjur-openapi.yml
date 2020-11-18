@@ -243,6 +243,22 @@ components:
       description: "Similar operation already in progress, retry after a delay"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
+    LoadedPolicy:
+      description: "Decsribes new data created by a successful policy load"
+      content:
+        application/json:
+          schema:
+            type: object
+            example: |
+              {
+                "created_roles": {
+                  "myorg:host:database/db-host": {
+                    "id": "myorg:host:database/db-host",
+                    "api_key": "309yzpa1n5kp932waxw6d37x4hew2x8ve8w11m8xn92acfy672m929en"
+                  }
+                },
+                "version": 1
+              }
     MissingOrBadRequestParameters:
       description: "A request parameter was missing or invalid"
     PermissionCheckSuccess:
@@ -454,6 +470,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
+          conjurAuth: []
 
 # ========== SECRETS ==========
 
@@ -636,7 +653,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was loaded or replaced successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
@@ -695,7 +712,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was extended successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
@@ -755,7 +772,7 @@ paths:
 
       responses:
         201:
-          description: "The policy was updated successfully"
+          $ref: '#/components/responses/LoadedPolicy'
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
