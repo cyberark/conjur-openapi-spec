@@ -27,10 +27,14 @@ tags:
 components:
   schemas:
     AccessToken:
-      type: string
-      minLength: 1
-      example: "{'protected':'abcdefg','payload','hijklmop','signature':'qrstuv'}"
-      description: "Access tokens can be received from Conjur in their raw form, or pre-encoded in base64."
+      type: object
+      properties:
+        protected:
+          type: string
+        payload:
+          type: string
+        signature:
+          type: string      
 
     AccountName:
       type: string
@@ -226,12 +230,15 @@ components:
       example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
 
   responses:
-    AccessToken:
-      description: "The response body is the access token"
+    AccessTokenGeneric:
+      description: |
+        This response schema is a generic string as opposed to the AccessToken component schema.
+        This is to allow users to use the "Accept-Encoding: base64" header in order to 
+        receive a pre-encoded token instead of a JSON object.
       content:
-        application/json:
+        text/plain:
           schema:
-            $ref: '#/components/schemas/AccessToken'
+            type: string
     ApiKey:
       description: "The response body is the API key"
       content:
@@ -385,7 +392,7 @@ paths:
               $ref: '#/components/schemas/ApiKey'
       responses:
         200:
-          $ref: '#/components/responses/AccessToken'
+          $ref: '#/components/responses/AccessTokenGeneric'
         401:
           $ref: '#/components/responses/UnauthorizedError'
       security:
