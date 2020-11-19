@@ -1,6 +1,7 @@
-import unittest
-import pathlib
+import json
 import os
+import pathlib
+import unittest
 
 import openapi_client
 import openapi_client.models.access_token
@@ -28,5 +29,10 @@ class ApiTest(unittest.TestCase):
             login = os.environ['CONJUR_AUTHN_LOGIN']
             body = os.environ['CONJUR_AUTHN_API_KEY']
 
-            api_response = api_instance.authenticate(account, login, body)
-            self.assertIsInstance(api_response, openapi_client.models.access_token.AccessToken)
+            api_response = api_instance.authenticate(account, login, body).replace("\'","\"")
+            api_response_json = json.loads(api_response)
+            api_response_keys = api_response_json.keys()
+            
+            self.assertIn("protected", api_response_keys)
+            self.assertIn("payload", api_response_keys)
+            self.assertIn("signature", api_response_keys)

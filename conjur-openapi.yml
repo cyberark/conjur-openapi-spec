@@ -34,7 +34,7 @@ components:
         payload:
           type: string
         signature:
-          type: string      
+          type: string
 
     AccountName:
       type: string
