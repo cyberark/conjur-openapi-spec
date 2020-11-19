@@ -1,0 +1,37 @@
+#!/bin/bash
+
+function announce() {
+  echo "++++++++++"
+  echo "$@"
+  echo "++++++++++"
+}
+
+if [[ ! -d "./out/python" ]]; then
+  announce "Client not found. Generating..."
+  ./bin/generate_client > /dev/null
+  echo
+fi
+
+if [[ -z "$(docker-compose ps -q)" ]]; then
+  announce "Environment not found. Spinning up..."
+  ./bin/start_conjur > /dev/null
+  echo
+fi
+
+if [[ ! -d "./.venv" ]]; then
+  announce "Python virtual environment not found. Creating..."
+  python3 -m venv .venv
+  echo
+fi
+
+announce "Setting up Python virtual environment..."
+source .venv/bin/activate
+pip3 install -e out/python
+echo
+
+export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+
+announce "Running Python Example..."
+./examples/python/python_client.py
+
+deactivate

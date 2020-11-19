@@ -44,21 +44,32 @@ The script with generate a Python client in the absence of a `<language>` argume
 A full list of supported languages can be found in [OpenAPI Generator documentation](https://github.com/OpenAPITools/openapi-generator#overview).
 
 
-## Generated Client Example
+## Examples
 
-Included in the `examples` directory is a demonstration use case.  
-The demo shows how to use popular Conjur API endpoints with a spec-generated Python client:
+Included in the `examples` directory is a generated API client demonstration.  
+The demo shows how to use popular Conjur API endpoints with a spec-generated client:
 - Authenticate a user
 - Change user's own password
 - Rotate user's API key
 - Load the root policy
 - Store and retrieve a secret
 
-To run the demo, start a development environment and generate a Python client.
+### Creating and Using a Python API Client
+
+The Python client example can be run easily using the provided script:
 
 ```shell
-$ ./bin/start
+$ ./examples/python/run
+```
+
+The example workflow is described below.
+
+In order to run the demo, you must have first generated a Python client, and  
+have a live Conjur server to interface with. This can be done using the following:
+
+```shell
 $ ./bin/generate_client
+$ ./bin/start_conjur
 ```
 
 Setup a Python virtual environment and install dependencies for the OpenAPI spec generated client.
@@ -69,11 +80,11 @@ $ source .venv/bin/activate
 $ pip3 install -e out/python
 ```
 
-Store the admin's API key as an environment variable, and run the client demo.
+Store the Conjur admin's API key as an environment variable, and run the client demo.
 
 ```shell
 $ export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
-$ ./examples/python_client.py
+$ ./examples/python/python_client.py
 ```
 
 To deactivate the Python virtual environment, input `deactivate` to an environment-active shell.
