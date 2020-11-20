@@ -1,0 +1,51 @@
+#!/bin/bash -e
+source ~/.rvm/scripts/rvm
+RUBY_VERSION="2.7.2"
+
+function announce() {
+  echo "++++++++++"
+  echo "$@"
+  echo "++++++++++"
+}
+
+if ! command -v rvm > /dev/null; then
+  announce "RVM not installed!"
+  echo "The script requires RVM to manage Ruby Gemsets"
+  echo "Installation instructions can be found at https://rvm.io"
+  exit 1
+fi
+
+if [[ ! -d "./out/ruby" ]]; then
+  announce "Client not found. Generating..."
+  ./bin/generate_client ruby > /dev/null
+  echo
+fi
+
+if [[ -z "$(docker-compose ps -q)" ]]; then
+  announce "Environment not found. Spinning up..."
+  ./bin/start_conjur > /dev/null
+  echo
+fi
+
+if [[ ! -f ./out/ruby/openapi_client-1.0.0.gem ]]; then
+  announce "Building OpenAPI gem..."
+  gem build ./out/ruby/openapi_client.gemspec -C ./out/ruby/
+  echo
+fi
+
+announce "Creating new RVM Gemset and installing OpenAPI gem..."
+if [[ ! $(rvm list | grep "ruby-$RUBY_VERSION") ]]; then
+  rvm install $RUBY_VERSION
+fi
+rvm use $RUBY_VERSION
+if [[ ! $(rvm gemset list | grep "openapi") ]]; then
+  rvm gemset create openapi
+fi
+rvm use $RUBY_VERSION@openapi
+gem install ./out/ruby/openapi_client-1.0.0.gem
+echo
+
+export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+
+announce "Running Ruby example..."
+./examples/ruby/ruby_client.rb
