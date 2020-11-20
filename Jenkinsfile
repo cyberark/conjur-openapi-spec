@@ -14,6 +14,7 @@ pipeline {
                 sh './bin/integration_tests'
             }
         }
+    }
 
     post {
         always {
