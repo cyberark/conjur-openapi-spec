@@ -24,12 +24,12 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ./test/config/https/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./test/config/https/conjur.conf:/etc/nginx/sites-enabled/conjur.conf:ro
-      - ./test/config/https/dhparams.pem:/etc/nginx/dhparams.pem:ro
-      - ./test/config/https/conjur.crt:/cert/tls.crt:ro
-      - ./test/config/https/conjur.key:/cert/tls.key:ro
-      - ./test/config/https/ca.crt:/ca/tls.crt:ro
+      - ./config/https/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/https/conjur.conf:/etc/nginx/sites-enabled/conjur.conf:ro
+      - ./config/https/dhparams.pem:/etc/nginx/dhparams.pem:ro
+      - ./config/https/conjur.crt:/cert/tls.crt:ro
+      - ./config/https/conjur.key:/cert/tls.key:ro
+      - ./config/https/ca.crt:/ca/tls.crt:ro
     depends_on:
       - conjur
 
@@ -44,7 +44,7 @@ services:
       CONJUR_ACCOUNT: dev
       CONJUR_AUTHN_LOGIN: admin
       CONJUR_AUTHN_API_KEY: Null
-      CONJUR_CA_BUNDLE: /opt/conjur-openapi-spec/test/config/https/ca.crt
+      CONJUR_CA_BUNDLE: /opt/conjur-openapi-spec/config/https/ca.crt
     depends_on:
       - conjur
       - conjur-https

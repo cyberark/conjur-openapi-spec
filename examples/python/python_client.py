@@ -2,10 +2,16 @@
 
 import base64
 import os
+import pathlib
 import sys
 
 import openapi_client
 from openapi_client.rest import ApiException
+
+CERT_DIR = pathlib.Path('config/https')
+SSL_CERT_FILE = 'ca.crt'
+CONJUR_CERT_FILE = 'conjur.crt'
+CONJUR_KEY_FILE = 'conjur.key'
 
 ACCOUNT_NAME = "dev"
 LOGIN = "admin"
@@ -13,11 +19,14 @@ ADMIN_API_KEY = os.environ["CONJUR_ADMIN_API_KEY"]
 
 # Setup API client config
 config = openapi_client.Configuration()
-config.host = "http://conjur-https"
+config.host = "http://localhost"
 # config.debug = True
 config.verify_ssl = True
 config.username = LOGIN
 config.password = ADMIN_API_KEY
+config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
+config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
+config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
 
 api_client = openapi_client.ApiClient(config)
 login_api = openapi_client.AuthnApi(api_client)
