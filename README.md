@@ -100,4 +100,6 @@ get started and descriptions of our development workflows, please see our [contr
 
 ## License
 
-This project is [licensed under Apache License v2.0](LICENSE.md)
+This project is [licensed under Apache License v2.0](LICENSE).
+
+Copyright (c) 2020 CyberArk Software Ltd. All rights reservede
