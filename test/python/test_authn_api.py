@@ -2,23 +2,12 @@ from __future__ import absolute_import
 
 import os
 import unittest
-import pathlib
 import json
 
 import openapi_client
-from openapi_client.api.authn_api import AuthnApi  # noqa: E501
-from openapi_client.rest import ApiException
 
-# SSL cert constants
-CERT_DIR = pathlib.Path('config/https')
-SSL_CERT_FILE = 'ca.crt'
-CONJUR_CERT_FILE = 'conjur.crt'
-CONJUR_KEY_FILE = 'conjur.key'
-
-# Environment Constants
-CONJUR_AUTHN_API_KEY = 'CONJUR_AUTHN_API_KEY'
-CONJUR_AUTHN_LOGIN = 'CONJUR_AUTHN_LOGIN'
-CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
+from . import api_config
+from .api_config import CONJUR_AUTHN_API_KEY, CONJUR_ACCOUNT
 
 class TestAuthnApi(unittest.TestCase):
     """AuthnApi integration tests. Ensures that authentication with a Conjur server is working"""
@@ -34,18 +23,10 @@ class TestAuthnApi(unittest.TestCase):
         os.environ.update({CONJUR_AUTHN_API_KEY: cls.api_key})
 
     def setUp(self):
-        # We generate a fresh config and API instance each time to make sure
-        # test runs dont interfere with eachother
-        self.config = openapi_client.Configuration(
-                host="https://conjur-https",
-        )
-
-        self.config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
-        self.config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
-        self.config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
-        self.config.username = os.environ[CONJUR_AUTHN_LOGIN]
+        # Reset the config password for each run because we change it in some tests
+        self.config = api_config.get_api_config()
         self.config.password = self.api_key
-        
+
         self.client = openapi_client.ApiClient(self.config)
         self.api = openapi_client.api.authn_api.AuthnApi(self.client)
 
@@ -55,7 +36,8 @@ class TestAuthnApi(unittest.TestCase):
     def test_authenticate(self):
         """Test case for authenticate
 
-        Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API.
+        Gets a short-lived access token, which can be used to authenticate requests
+        to (most of) the rest of the Conjur API.
         """
         login = self.config.username
         body = self.api_key
@@ -63,7 +45,7 @@ class TestAuthnApi(unittest.TestCase):
         response = self.api.authenticate(self.account, login, body).replace("\'","\"")
         response_json = json.loads(response)
         response_keys = response_json.keys()
-        
+
         self.assertIn("protected", response_keys)
         self.assertIn("payload", response_keys)
         self.assertIn("signature", response_keys)
@@ -105,7 +87,7 @@ class TestAuthnApi(unittest.TestCase):
         # Set a new password and try to authenticate with it
         test_password = "PAssword!234"
 
-        response = self.api.set_password(self.account, body=test_password)
+        self.api.set_password(self.account, body=test_password)
         self.config.password = test_password
 
         self.api.login(self.account)
