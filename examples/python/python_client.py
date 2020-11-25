@@ -19,7 +19,7 @@ ADMIN_API_KEY = os.environ["CONJUR_ADMIN_API_KEY"]
 
 # Setup API client config
 config = openapi_client.Configuration()
-config.host = "http://localhost"
+config.host = "https://localhost"
 # config.debug = True
 config.verify_ssl = True
 config.username = LOGIN
