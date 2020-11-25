@@ -14,6 +14,11 @@ pipeline {
                 sh './bin/integration_tests'
             }
         }
+        stage('Linting') {
+            steps {
+                sh './bin/lint_tests'
+            }
+        }
     }
 
     post {
