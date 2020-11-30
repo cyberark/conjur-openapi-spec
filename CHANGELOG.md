@@ -5,4 +5,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+### Added
+- Example use case of spec-generated Ruby client. 
+[cybearl/conjur-openapi-spec#12](https://github.com/cyberark/conjur-openapi-spec/issues/12)
