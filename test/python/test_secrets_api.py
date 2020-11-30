@@ -8,7 +8,7 @@ import openapi_client
 from . import api_config
 from .api_config import CONJUR_ACCOUNT
 
-TEST_VARIABLES = ["one/password", "testvar"]
+TEST_VARIABLES = ["one/password", "testSecret"]
 
 
 class TestSecretsApi(unittest.TestCase):
