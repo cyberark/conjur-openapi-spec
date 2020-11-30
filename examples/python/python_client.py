@@ -17,6 +17,17 @@ ACCOUNT_NAME = "dev"
 LOGIN = "admin"
 ADMIN_API_KEY = os.environ["CONJUR_ADMIN_API_KEY"]
 
+# Constants
+new_password = "N3w-Passw0rd!"
+secret = "supersecretstuff"
+secret_id = "sampleSecret"
+simple_policy = None
+with open("examples/config/simple.yml", "r") as file:
+    empty_policy = file.read()
+policy = None
+with open("examples/config/policy.yml", "r") as file:
+    policy = file.read()
+
 # Setup API client config
 config = openapi_client.Configuration()
 config.host = "https://localhost"
@@ -43,7 +54,6 @@ except ApiException as err:
 
 # Change admin password, uses basicAuth
 print("\nChanging admin password...")
-new_password = "N3w-Passw0rd!"
 try:
     login_api.set_password(body=new_password, account=ACCOUNT_NAME)
     print("Password change successful.")
@@ -60,12 +70,12 @@ api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
 policy_api = openapi_client.PoliciesApi(api_client)
 login_api = openapi_client.AuthnApi(api_client)
 
-# Load empty policy, allows the example to be run multiple times sequentially
+# Load simple policy, which only defines an admin user
+# Allows the example to be run multiple times sequentially
 # Loading a policy returns data for users CREATED when the policy is loaded. Without loading 
-# an "empty" policy, if the user alice already exists due to a prior example run, loading 
+# the simple policy, if the user alice already exists due to a prior example run, loading 
 # the full policy will not respond with alice's api key.
-print("\nLoading empty root policy...")
-empty_policy = "- !user admin"
+print("\nLoading simple root policy...")
 empty_results = None
 try:
     empty_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=empty_policy)
@@ -76,21 +86,6 @@ except ApiException as err:
 
 # Load a policy using api client
 print("\nLoading root policy...")
-policy = """---
-- !user admin
-- !user alice
-- !variable sampleSecret
-
-- !permit
-  role: !user admin
-  privilege: [ update ]
-  resource: !user alice
-
-- !permit
-  role: !user admin
-  privilege: [ execute ]
-  resource: !variable sampleSecret
-"""
 loaded_results = None
 try:
     loaded_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
@@ -113,8 +108,6 @@ except ApiException as err:
 # Store a secret, uses conjurAuth
 print("\nStoring secret...")
 secrets_api = openapi_client.SecretsApi(api_client)
-secret = "supersecretstuff"
-secret_id = "sampleSecret"
 print("Secret data: ", secret)
 try:
     secrets_api.create_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id, body=secret)
