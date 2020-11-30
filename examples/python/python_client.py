@@ -44,22 +44,14 @@ login_api = openapi_client.AuthnApi(api_client)
 
 # Authenticate admin using basicAuth, receiving short-lived access token
 print("Authenticating admin...")
-access_token = None
-try:
-    access_token = login_api.authenticate(account=ACCOUNT_NAME, login=LOGIN, body=ADMIN_API_KEY, accept_encoding="base64")
-    print("Base64 encoded token:", access_token)
-except ApiException as err:
-    print("Exception when authenticating in: ", err)
-    sys.exit(1)
+access_token = login_api.authenticate(account=ACCOUNT_NAME, login=LOGIN, body=ADMIN_API_KEY, accept_encoding="base64")
+print("Base64 encoded token:", access_token)
 
 # Change admin password, uses basicAuth
 print("\nChanging admin password...")
-try:
-    login_api.set_password(body=new_password, account=ACCOUNT_NAME)
-    print("Password change successful.")
-except ApiException as err:
-    print("Exception when setting password in: ", err)
-    sys.exit(1)
+login_api.set_password(body=new_password, account=ACCOUNT_NAME)
+print("Password change successful.")
+
 api_client.configuration.password = new_password
 
 # Add Conjur Token header to client configuration
@@ -76,55 +68,33 @@ login_api = openapi_client.AuthnApi(api_client)
 # the simple policy, if the user alice already exists due to a prior example run, loading 
 # the full policy will not respond with alice's api key.
 print("\nLoading simple root policy...")
-empty_results = None
-try:
-    empty_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=empty_policy)
-    print("Empty policy loaded.")
-except ApiException as err:
-    print("Exception when loading empty policy: ", err)
-    sys.exit(1)
+policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=empty_policy)
+print("Empty policy loaded.")
 
 # Load a policy using api client
 print("\nLoading root policy...")
-loaded_results = None
-try:
-    loaded_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
-    print("Policy loaded.")
-except ApiException as err:
-    print("Exception when loading policy: ", err)
-    sys.exit(1)
+loaded_results = policy_api.load_policy(account=ACCOUNT_NAME, identifier="root", body=policy)
+print("Policy loaded.")
+
 alice_api_key = loaded_results["created_roles"]["dev:user:alice"]["api_key"]
 print("Alice API key: ", alice_api_key)
 
 # Rotate Alice's API key, uses conjurAuth
 print("\nRotating alice API key...")
-try:
-    ADMIN_API_KEY = login_api.rotate_api_key(account=ACCOUNT_NAME, role="user:alice")
-    print("New API key:", ADMIN_API_KEY)
-except ApiException as err:
-    print("Exception when logging in: ", err)
-    sys.exit(1)
+alice_api_key = login_api.rotate_api_key(account=ACCOUNT_NAME, role="user:alice")
+print("New API key:", alice_api_key)
 
 # Store a secret, uses conjurAuth
 print("\nStoring secret...")
 secrets_api = openapi_client.SecretsApi(api_client)
 print("Secret data: ", secret)
-try:
-    secrets_api.create_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id, body=secret)
-    print("Secret stored.")
-except ApiException as err:
-    print("Exception when creating secret: ", err)
-    sys.exit(1)
+secrets_api.create_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id, body=secret)
+print("Secret stored.")
 
 # Retrieve secrets, uses conjurAuth
 print("\nRetrieving secret...")
-retrieved_secret = None
-try:
-    retrieved_secret = secrets_api.get_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id)
-    print("Retrieved seceret: ", retrieved_secret)
-except ApiException as err:
-    print("Exception when retrieving secret: ", err)
-    sys.exit(1)
+retrieved_secret = secrets_api.get_variable(account=ACCOUNT_NAME, kind="variable", identifier=secret_id)
+print("Retrieved seceret: ", retrieved_secret)
 
 if retrieved_secret != secret:
     print("Secret Malformed.")
