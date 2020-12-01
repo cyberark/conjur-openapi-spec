@@ -875,7 +875,9 @@ paths:
         201:
           description: "The response body contains the requested role(s)/member(s)"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
@@ -949,7 +951,9 @@ paths:
         200:
           description: "The response body contains the list of matching resources"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
         401:
           $ref: '#/components/responses/UnauthorizedError'
 
@@ -1014,7 +1018,9 @@ paths:
         200:
           description: "The response body contains the list of role memberships or permitted roles"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
         204:
           $ref: '#/components/responses/PermissionCheckSuccess'
         401:
@@ -1058,7 +1064,9 @@ paths:
         200:
           description: "Zero or more tokens were created and delivered in the response body"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
         403:
           $ref: '#/components/responses/InadequatePrivileges'
         404:
@@ -1124,7 +1132,9 @@ paths:
         201:
           description: "The response body contains the newly-created host"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
         401:
           $ref: '#/components/responses/UnauthorizedError'
         422:
