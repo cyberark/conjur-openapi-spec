@@ -2,6 +2,8 @@
 disable=
 
     # redundant, we generally only have one class per module for integration tests
-    missing-module-docstring
+    missing-module-docstring,
+    # pylint catches auto-generated import statements as code duplication
+    R0801
 
 max-line-length=100
