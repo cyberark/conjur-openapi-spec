@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exit_code=0
+
 echo "Linting Python integration tests:"
 docker run --rm \
     -v ${PWD}/test/python:/code/test \
@@ -11,5 +13,18 @@ docker run --rm \
 if [ $? -ne 0 ]
 then
     echo "Error: Your Pylint score must be 10.0 to pass Python linting test"
-    exit 1
+    exit_code=$((exit_code | 1))
 fi
+
+docker run --rm \
+    -v ${PWD}/conjur-openapi.yml:/code/conjur-openapi.yml \
+    node:latest \
+    /bin/bash -c "npm i -g @stoplight/spectral && spectral lint /code/conjur-openapi.yml"
+
+if [ $? -ne 0 ]
+then
+    echo "Error: Your Spectral linting score must be 10.0 to pass Yaml linting test"
+    exit_code=$((exit_code | 1))
+fi
+
+exit $exit_code
