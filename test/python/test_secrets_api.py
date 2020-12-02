@@ -1,31 +1,18 @@
 from __future__ import absolute_import
 
 import unittest
-import os
 
 import openapi_client
 
 from . import api_config
-from .api_config import CONJUR_ACCOUNT
 
 TEST_VARIABLES = ["one/password", "testSecret"]
 
 
-class TestSecretsApi(unittest.TestCase):
+class TestSecretsApi(api_config.ConfiguredTest):
     """SecretsApi unit test stubs"""
-    @classmethod
-    def setUpClass(cls):
-        cls.account = os.environ[CONJUR_ACCOUNT]
-
-        cls.client = api_config.get_api_client()
-
     def setUp(self):
         self.api = openapi_client.api.secrets_api.SecretsApi(self.client)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.close()
-
     def test_create_variable(self):
         """Test case for create_variable
 

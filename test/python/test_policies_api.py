@@ -1,12 +1,10 @@
 from __future__ import absolute_import
 
 import unittest
-import os
 
 import openapi_client
 
 import api_config
-from .api_config import CONJUR_ACCOUNT
 
 NEW_VARIABLE = 'policy/test'
 
@@ -25,20 +23,10 @@ UPDATE_POLICY = f'''
 - !variable {NEW_VARIABLE}
 '''
 
-class TestPoliciesApi(unittest.TestCase):
+class TestPoliciesApi(api_config.ConfiguredTest):
     """PoliciesApi unit test stubs"""
-    @classmethod
-    def setUpClass(cls):
-        cls.account = os.environ[CONJUR_ACCOUNT]
-
-        cls.client = api_config.get_api_client()
-
     def setUp(self):
         self.api = openapi_client.api.policies_api.PoliciesApi(self.client)
-
-    @classmethod
-    def tearDown(cls):
-        cls.client.close()
 
     def test_load_policy(self):
         """Test case for load_policy

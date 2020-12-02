@@ -1,24 +1,15 @@
 from __future__ import absolute_import
 
 import unittest
-import os
 
 import openapi_client
 
 from . import api_config
-from .api_config import CONJUR_ACCOUNT
 
 RESOURCE_MEMBERS = ['created_at', 'id', 'owner']
 
-class TestResourcesApi(unittest.TestCase):
+class TestResourcesApi(api_config.ConfiguredTest):
     """ResourcesApi unit test stubs"""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.account = os.environ[CONJUR_ACCOUNT]
-
-        cls.client = api_config.get_api_client()
-
     def setUp(self):
         self.api = openapi_client.api.resources_api.ResourcesApi(self.client)
 

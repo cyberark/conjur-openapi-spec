@@ -1,6 +1,7 @@
 
 import pathlib
 import os
+import unittest
 
 import openapi_client
 
@@ -43,3 +44,16 @@ def get_api_client():
         )
     client.configuration.api_key = {'Authorization': f'Token token="{new_key}"'}
     return client
+
+class ConfiguredTest(unittest.TestCase):
+    """Meant for test classes to inherit. Sets up an authenticated api client
+    for the test to use"""
+    @classmethod
+    def setUpClass(cls):
+        cls.account = os.environ[CONJUR_ACCOUNT]
+
+        cls.client = get_api_client()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.close()
