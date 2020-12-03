@@ -4,7 +4,6 @@ import pathlib
 import unittest
 
 import openapi_client
-import openapi_client.models.access_token
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
