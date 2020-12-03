@@ -1,0 +1,7 @@
+#!/bin/bash
+
+
+docker run --rm \
+    -v ${PWD}/conjur-openapi.yml:/code/conjur-openapi.yml \
+    node:latest \
+    /bin/bash -c "npm i -g @stoplight/spectral && spectral lint -v --fail-severity=warn -s oas3-api-servers /code/conjur-openapi.yml"

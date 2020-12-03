@@ -23,19 +23,11 @@ tags:
   description: "Host factories"
 - name: "public keys"
   description: "SSH keys"
+- name: "resources"
+  description: "Resources"
   
 components:
   schemas:
-    AccessToken:
-      type: object
-      properties:
-        protected:
-          type: string
-        payload:
-          type: string
-        signature:
-          type: string
-
     AccountName:
       type: string
       minLength: 1
@@ -43,7 +35,7 @@ components:
 
     CheckPrivilege:
       type: boolean
-      example: "true"
+      example: true
       description: "Checks whether a role has a privilege on a resource."
 
     CreateHostRequest:
@@ -57,7 +49,7 @@ components:
         annotations:
           description: "Annotations to apply to the new host"
           type: object
-          example: '{"puppet": "true", "description": "new db host"}'
+          example: {"puppet": "true", "description": "new db host"}
 
       required:
         - id
@@ -87,7 +79,7 @@ components:
         count:
           description: "Number of host tokens to create"
           type: integer
-          example: "2"
+          example: 2
 
         cidr:
           # TODO: Find out if we accept string or an array
@@ -95,7 +87,7 @@ components:
           type: array
           items:
             type: string
-          example: "127.0.0.1/32"
+          example: ["127.0.0.1/32"]
 
       required:
         - expiration
@@ -123,7 +115,7 @@ components:
 
     PermittedRoles:
       type: boolean
-      example: "true"
+      example: true
 
     Policy:
       type: string
@@ -256,7 +248,7 @@ components:
         application/json:
           schema:
             type: object
-            example: |
+            example:
               {
                 "created_roles": {
                   "myorg:host:database/db-host": {
@@ -294,7 +286,7 @@ components:
         application/json:
           schema:
             type: object
-            example: |
+            example:
               {
                  "myorg:variable:secret1": "secret1Value",
                  "myorg:variable:secret2": "secret2Value"
@@ -343,9 +335,9 @@ paths:
         schema:
           $ref: '#/components/schemas/AccountName'
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/ApiKey'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
@@ -391,9 +383,9 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiKey'
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/AccessTokenGeneric'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - conjurAuth: []
@@ -429,13 +421,13 @@ paths:
               minLength: 1
 
       responses:
-        204:
+        "204":
           description: "The password has been changed"
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        404:
+        "404":
           description: "The user was not found"
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
       security:
         - basicAuth: []
@@ -471,9 +463,9 @@ paths:
           $ref: '#/components/schemas/Role'
 
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/ApiKey'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
       security:
         - basicAuth: []
@@ -520,13 +512,13 @@ paths:
               format: binary
 
       responses:
-        201:
+        "201":
           description: "The secret value was added successfully"
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -570,15 +562,15 @@ paths:
           $ref: '#/components/schemas/ResourceVersion'
 
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/SecretValue'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -600,15 +592,15 @@ paths:
           $ref: '#/components/schemas/ResourceIDs'
 
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/SecretBatchValue'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourcesNotFound'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -659,17 +651,17 @@ paths:
               $ref: '#/components/schemas/Policy'
 
       responses:
-        201:
+        "201":
           $ref: '#/components/responses/LoadedPolicy'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        409:
+        "409":
           $ref: '#/components/responses/Busy'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -718,17 +710,17 @@ paths:
               $ref: '#/components/schemas/Policy'
 
       responses:
-        201:
+        "201":
           $ref: '#/components/responses/LoadedPolicy'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        409:
+        "409":
           $ref: '#/components/responses/Busy'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -778,17 +770,17 @@ paths:
               $ref: '#/components/schemas/Policy'
 
       responses:
-        201:
+        "201":
           $ref: '#/components/responses/LoadedPolicy'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        409:
+        "409":
           $ref: '#/components/responses/Busy'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -872,17 +864,17 @@ paths:
           $ref: '#/components/schemas/Count'
 
       responses:
-        201:
+        "201":
           description: "The response body contains the requested role(s)/member(s)"
           content:
             application/json:
               schema:
                 type: object
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
 
       security:
@@ -948,13 +940,13 @@ paths:
           $ref: '#/components/schemas/Count'
 
       responses:
-        200:
+        "200":
           description: "The response body contains the list of matching resources"
           content:
             application/json:
               schema:
                 type: object
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
 
       security:
@@ -1015,21 +1007,21 @@ paths:
           $ref: '#/components/schemas/Role'
 
       responses:
-        200:
+        "200":
           description: "The response body contains the list of role memberships or permitted roles"
           content:
             application/json:
               schema:
                 type: object
-        204:
+        "204":
           $ref: '#/components/responses/PermissionCheckSuccess'
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
       security:
         - conjurAuth: []
@@ -1061,17 +1053,17 @@ paths:
               $ref: '#/components/schemas/HostFactoryTokenRequest'
 
       responses:
-        200:
+        "200":
           description: "Zero or more tokens were created and delivered in the response body"
           content:
             application/json:
               schema:
                 type: object
-        403:
+        "403":
           $ref: '#/components/responses/InadequatePrivileges'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
 
       security:
@@ -1098,11 +1090,11 @@ paths:
         schema:
           $ref: '#/components/schemas/HostFactoryToken'
       responses:
-        204:
+        "204":
           description: "Token was successfully revoked"
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        404:
+        "404":
           $ref: '#/components/responses/ResourceNotFound'
 
       security:
@@ -1129,15 +1121,15 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateHostRequest'
       responses:
-        201:
+        "201":
           description: "The response body contains the newly-created host"
           content:
             application/json:
               schema:
                 type: object
-        401:
+        "401":
           $ref: '#/components/responses/UnauthorizedError'
-        422:
+        "422":
           $ref: '#/components/responses/MissingOrBadRequestParameters'
       security:
         - conjurAuth: []
@@ -1177,7 +1169,7 @@ paths:
           $ref: '#/components/schemas/ResourceID'
 
       responses:
-        200:
+        "200":
           $ref: '#/components/responses/PublicKeys'
 
 # TODO: Inject client cert
