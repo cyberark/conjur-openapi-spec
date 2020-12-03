@@ -13,6 +13,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
     """SecretsApi unit test stubs"""
     def setUp(self):
         self.api = openapi_client.api.secrets_api.SecretsApi(self.client)
+
     def test_create_variable(self):
         """Test case for create_variable
 
