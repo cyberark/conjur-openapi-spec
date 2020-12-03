@@ -55,16 +55,19 @@ The demos show how to use popular Conjur API endpoints:
 - Load the root policy
 - Store and retrieve a secret
 
+There are currently examples in two languages, Python and Ruby.  
 The examples can be run using their respective scripts:
 
 ```shell
-$ ./examples/<language>/run
+$ ./examples/python/start
+$ ./examples/ruby/start
 ```
 
-The scripts generate the defined client and spin up the `docker-compose` environment if  
-they are not already present, set up an environment and run the example.  
-
-There are currently examples in two languages, Python and Ruby.
+Each example performs the following steps:
+- Generate an OpenAPI client with `./bin/generate_client <language>` (if not already present)
+- Spin up the a Conjur environment from `docker-compose` (if not already present)
+- Perform language-specific environment setup
+- Run the example
 
 ## Contributing
 

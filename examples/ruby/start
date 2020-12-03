@@ -1,0 +1,30 @@
+#!/bin/bash -e
+function announce() {
+  echo "++++++++++"
+  echo "$@"
+  echo "++++++++++"
+}
+
+if [[ ! -d "./out/ruby" ]]; then
+  announce "Client not found. Generating..."
+  ./bin/generate_client ruby 1> /dev/null
+  echo
+fi
+
+if [[ -z "$(docker-compose ps -q)" ]]; then
+  announce "Environment not found. Spinning up..."
+  ./bin/start_conjur 1> /dev/null
+  echo
+fi
+
+announce "Building Ruby example container image..."
+docker-compose build example-ruby
+echo
+
+export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+
+announce "Running example in container..."
+docker-compose run --no-deps \
+    -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
+    example-ruby \
+    ruby ./ruby_client.rb

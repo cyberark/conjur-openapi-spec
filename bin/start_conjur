@@ -14,7 +14,7 @@ trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; clea
 cleanup
 
 echo "Building services..."
-docker-compose build
+docker-compose build pg conjur conjur-https
 
 # Start Conjur server
 echo "Starting Conjur..."

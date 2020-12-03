@@ -4,7 +4,7 @@
 # Load the gem
 require 'openapi_client'
 
-CERT_DIR = 'config/https'
+CERT_DIR = '/config/https'
 SSL_CERT_FILE = 'ca.crt'
 CONJUR_CERT_FILE = 'conjur.crt'
 CONJUR_KEY_FILE = 'conjur.key'
@@ -23,14 +23,14 @@ end
 new_password = "N3w-Passw0rd!"
 secret = "supersecretstuff"
 secret_id = "sampleSecret"
-empty_policy = IO.read("examples/config/simple.yml")
-policy = IO.read("examples/config/policy.yml")
+empty_policy = IO.read("/config/policy/simple.yml")
+policy = IO.read("/config/policy/policy.yml")
 
 # Setup client configuration
 config = OpenapiClient.configure
 # config.debugging = true
 config.scheme = "https"
-config.host = "localhost"
+config.host = "conjur-https"
 
 config.username = LOGIN
 config.password = ADMIN_API_KEY
