@@ -17,6 +17,7 @@ pipeline {
         stage('Linting') {
             steps {
                 sh './bin/lint_tests'
+                sh './bin/lint_spec'
             }
         }
     }
