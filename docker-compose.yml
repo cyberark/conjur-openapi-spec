@@ -50,3 +50,15 @@ services:
       - conjur-https
     volumes:
       - .:/opt/conjur-openapi-spec
+  
+  example-ruby:
+    build:
+      context: .
+      dockerfile: examples/ruby/Dockerfile.ruby
+    command: ['sleep', '999d']
+    depends_on:
+      - conjur
+      - conjur-https
+    volumes:
+      - ./examples/config/:/config/policy
+      - ./config/https/:/config/https

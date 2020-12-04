@@ -1,0 +1,13 @@
+- !user admin
+- !user alice
+- !variable sampleSecret
+
+- !permit
+  role: !user admin
+  privilege: [ update ]
+  resource: !user alice
+
+- !permit
+  role: !user admin
+  privilege: [ execute ]
+  resource: !variable sampleSecret

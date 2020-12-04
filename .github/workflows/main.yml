@@ -15,24 +15,5 @@ jobs:
             - name: checkout the repo
               uses: actions/checkout@v2
 
-            - run: ./bin/generate_client
-
-            - name: setup docker environment
-              run: |
-                docker-compose build
-                docker-compose up -d conjur
-                docker-compose exec -T conjur conjurctl wait
-
-            - name: get conjur api key
-              run: |
-                api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
-                export CONJUR_AUTHN_API_KEY=$api_key
-                echo $api_key
-                cat <<ENV > .env
-                CONJUR_AUTHN_API_KEY=$api_key
-                ENV
-
-            - name: run integration tests
-              run: |
-                docker-compose up -d test-python
-                docker-compose run test-python nose2 -v -s test/python
+            - name: run integration test script
+              run: ./bin/integration_tests

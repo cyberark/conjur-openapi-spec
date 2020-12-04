@@ -23,7 +23,8 @@ cat <<ENV > .env
 CONJUR_AUTHN_API_KEY=$admin_api_key
 ENV
 
-echo "Starting test env..."
+echo "Building and starting test env..."
+docker-compose build test-python
 docker-compose up -d test-python
 
 rm -rf $CURRENT_DIR/output/*
