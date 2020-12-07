@@ -27,7 +27,7 @@ echo "Building and starting test env..."
 docker-compose build test-python
 docker-compose up -d test-python
 
-rm -rf $CURRENT_DIR/output/*
+rm -rf $CURRENT_DIR/out/*
 
 if [[ "$DEBUG" == "true" ]]; then
   docker-compose exec test-python bash
@@ -35,7 +35,6 @@ if [[ "$DEBUG" == "true" ]]; then
 fi
 
 docker-compose run \
-  --rm \
   --no-deps \
   test-python \
-  nose2 -v -s test/python/
+  nose2 --plugin nose2.plugins.junitxml -X -v -s test/python/
