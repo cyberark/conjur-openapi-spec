@@ -1,0 +1,21 @@
+name: Rebase Check
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  force_rebase:
+    runs-on: ubuntu-latest
+    name: Enforce Rebasing
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check for rebase
+        uses: telday/enforce-rebase@v2
+        with:
+          default-branch: main
