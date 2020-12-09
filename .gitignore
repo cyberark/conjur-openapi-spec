@@ -6,6 +6,9 @@ __pycache__
 
 .env
 
+.DS_Store
+
 nose2-junit.xml
 
 spec.yml
+coverage.xml
