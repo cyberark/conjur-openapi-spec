@@ -1089,6 +1089,12 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/HostFactoryToken'
+      requestBody:
+        required: false
+        content:
+          text/plain:
+            schema:
+              type: string
       responses:
         "204":
           description: "Token was successfully revoked"
