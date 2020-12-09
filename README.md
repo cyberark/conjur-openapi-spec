@@ -1,6 +1,9 @@
 # Conjur OpenAPI Specification
 [![Integration Tests](https://github.com/conjurinc/conjur-openapi-spec/workflows/Integration%20Tests/badge.svg)](https://github.com/conjurinc/conjur-openapi-spec/actions?query=workflow%3A%22Run+Integration+Tests%22)
 ![](https://img.shields.io/badge/Certification%20Level-Community-28A745?link=https://github.com/cyberark/community/blob/master/Conjur/conventions/certification-levels.md)  
+[![Maintainability](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/maintainability)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/test_coverage)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/test_coverage)
+
 This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/).  
 
 ---
