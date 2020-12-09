@@ -1,19 +1,19 @@
 name: Integration Tests
 
 on:
-    push:
-        branches: [ main ]
-    pull_request:
-        branches: [ main ]
-        types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
 
 jobs:
-    python:
-        runs-on: ubuntu-latest
-        name: Python Integration Tests
-        steps:
-            - name: checkout the repo
-              uses: actions/checkout@v2
+  python:
+    runs-on: ubuntu-latest
+    name: Python Integration Tests
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
 
-            - name: run integration test script
-              run: ./bin/integration_tests
+      - name: run integration test script
+        run: ./bin/integration_tests
