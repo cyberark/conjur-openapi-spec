@@ -50,6 +50,19 @@ services:
       - conjur-https
     volumes:
       - .:/opt/conjur-openapi-spec
+
+  test-api:
+    build:
+      context: .
+      dockerfile: test/Dockerfile.api
+    command: ['sleep', '999d']
+    environment:
+      CONJUR_CA_BUNDLE: /config/ca.crt
+    depends_on:
+      - conjur
+      - conjur-https
+    volumes:
+      - ./config/https/:/config
   
   example-ruby:
     build:

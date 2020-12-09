@@ -1,0 +1,68 @@
+#!/bin/bash
+function announce() {
+  echo "+++++++++++++++"
+  echo "$@"
+  echo "+++++++++++++++"
+}
+
+endpoint_flag=""
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      announce "API Test Script"
+      echo "Uses Schemathesis to generate test cases for"
+      echo "API endpoints, which test the conformance between"
+      echo "Conjur OSS and the OpenAPI specification."
+      echo
+      echo "Usage"
+      echo "./bin/api_test [options]"
+      echo
+      echo "-h, --help                show help"
+      echo "-e, --endpoint <path>     test endpoints starting with the given path"
+      exit 0
+      ;;
+    -e|--endpoint)
+      if [ ! -z $2 ]; then
+        endpoint_flag="-E $2 "
+      else
+        echo "No Endpoint Specified"
+        exit 1
+      fi
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ -z "$(docker-compose ps -q)" ]]; then
+  announce "Environment not found. Spinning up..."
+  ./bin/start_conjur 1> /dev/null
+  echo
+fi
+
+announce "Building API test container image..."
+docker-compose build test-api
+echo
+
+announce "Configuring Conjur Environment..."
+export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+export ENCODED_LOGIN="$(echo "admin:${CONJUR_ADMIN_API_KEY}" | base64 | tr -d '\r')"
+export CONJUR_ADMIN_TOKEN="$(curl --header "Accept-Encoding: base64" --data "${CONJUR_ADMIN_API_KEY}" http://localhost/authn/dev/admin/authenticate | tr -d '\r')"
+echo
+
+announce "Running example in container..."
+docker-compose run --rm --no-deps \
+    -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
+    test-api \
+    bash -c \
+    "schemathesis run \
+    --show-errors-tracebacks \
+    --hypothesis-deadline None \
+    --request-tls-verify /config/ca.crt \
+    -c all ${endpoint_flag}\
+    -H \"Authorization: Basic \"$ENCODED_LOGIN\"\" \
+    -H \"Authentication: Token token=\"$CONJUR_ADMIN_TOKEN\"\" \
+    --base-url https://conjur-https conjur-openapi.yml"
