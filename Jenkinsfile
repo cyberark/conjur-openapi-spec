@@ -9,14 +9,26 @@ pipeline {
     }
 
     stages {
-        stage('Integration Test') {
+        stage('Integration Tests') {
             steps {
                 sh './bin/integration_tests'
             }
+
+            post {
+                always {
+                    junit 'nose2-junit.xml'
+                }
+            }
         }
-        stage('Linting') {
+
+        stage('Lint Integration Tests') {
             steps {
                 sh './bin/lint_tests'
+            }
+        }
+
+        stage('Lint Spec File') {
+            steps {
                 sh './bin/lint_spec'
             }
         }
