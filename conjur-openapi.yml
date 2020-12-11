@@ -238,10 +238,14 @@ components:
           schema:
             type: string
             example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+    BadRequest:
+      description: "The server cannot process the request due to malformed request syntax"
     Busy:
       description: "Similar operation already in progress, retry after a delay"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
+    InternalServerError:
+      description: "Malfromed request, rejected by the server"
     LoadedPolicy:
       description: "Decsribes new data created by a successful policy load"
       content:
@@ -258,8 +262,6 @@ components:
                 },
                 "version": 1
               }
-    MissingOrBadRequestParameters:
-      description: "A request parameter was missing or invalid"
     PermissionCheckSuccess:
       description: "Permissions check was successful"
     PublicKeys:
@@ -293,10 +295,8 @@ components:
               }
     UnauthorizedError:
       description: "Authentication information is missing or invalid"
-      headers:
-        WWW_Authenticate:
-          schema:
-            type: string
+    UnprocessableEntity:
+      description: "A request parameter was either missing or invalid."
 
   securitySchemes:
     basicAuth:
@@ -334,11 +334,19 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/AccountName'
+
       responses:
         "200":
           $ref: '#/components/responses/ApiKey'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
+        "422":
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - basicAuth: []
 
@@ -382,11 +390,17 @@ paths:
           text/plain:
             schema:
               $ref: '#/components/schemas/ApiKey'
+
       responses:
         "200":
           $ref: '#/components/responses/AccessTokenGeneric'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - conjurAuth: []
 
@@ -423,12 +437,17 @@ paths:
       responses:
         "204":
           description: "The password has been changed"
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "404":
           description: "The user was not found"
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - basicAuth: []
 
@@ -465,8 +484,15 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/ApiKey'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
+        "422":
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - basicAuth: []
           conjurAuth: []
@@ -514,12 +540,16 @@ paths:
       responses:
         "201":
           description: "The secret value was added successfully"
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
           $ref: '#/components/responses/InadequatePrivileges'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -564,6 +594,8 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/SecretValue'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
@@ -571,7 +603,9 @@ paths:
         "404":
           $ref: '#/components/responses/ResourceNotFound'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -601,7 +635,9 @@ paths:
         "404":
           $ref: '#/components/responses/ResourcesNotFound'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -653,6 +689,8 @@ paths:
       responses:
         "201":
           $ref: '#/components/responses/LoadedPolicy'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
@@ -662,7 +700,9 @@ paths:
         "409":
           $ref: '#/components/responses/Busy'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -712,6 +752,8 @@ paths:
       responses:
         "201":
           $ref: '#/components/responses/LoadedPolicy'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
@@ -721,7 +763,9 @@ paths:
         "409":
           $ref: '#/components/responses/Busy'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -772,6 +816,8 @@ paths:
       responses:
         "201":
           $ref: '#/components/responses/LoadedPolicy'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
@@ -781,7 +827,9 @@ paths:
         "409":
           $ref: '#/components/responses/Busy'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -870,12 +918,16 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
           $ref: '#/components/responses/InadequatePrivileges'
         "404":
           $ref: '#/components/responses/ResourceNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -946,8 +998,12 @@ paths:
             application/json:
               schema:
                 type: object
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -1015,6 +1071,8 @@ paths:
                 type: object
         "204":
           $ref: '#/components/responses/PermissionCheckSuccess'
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "403":
@@ -1022,7 +1080,10 @@ paths:
         "404":
           $ref: '#/components/responses/ResourceNotFound'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - conjurAuth: []
 
@@ -1059,12 +1120,16 @@ paths:
             application/json:
               schema:
                 type: object
+        "401":
+          $ref: '#/components/responses/UnauthorizedError'
         "403":
           $ref: '#/components/responses/InadequatePrivileges'
         "404":
           $ref: '#/components/responses/ResourceNotFound'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -1095,13 +1160,18 @@ paths:
           text/plain:
             schema:
               type: string
+
       responses:
         "204":
           description: "Token was successfully revoked"
+        "400":
+          $ref: '#/components/responses/BadRequest'
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "404":
           $ref: '#/components/responses/ResourceNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
       security:
         - conjurAuth: []
@@ -1126,6 +1196,7 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateHostRequest'
+
       responses:
         "201":
           description: "The response body contains the newly-created host"
@@ -1136,7 +1207,10 @@ paths:
         "401":
           $ref: '#/components/responses/UnauthorizedError'
         "422":
-          $ref: '#/components/responses/MissingOrBadRequestParameters'
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+
       security:
         - conjurAuth: []
 
@@ -1177,6 +1251,14 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/PublicKeys'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/ResourceNotFound'
+        "422":
+          $ref: '#/components/responses/UnprocessableEntity'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
 
 # TODO: Inject client cert
 # TODO: Seed Service

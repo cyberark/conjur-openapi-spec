@@ -60,9 +60,12 @@ docker-compose run --rm --no-deps \
     bash -c \
     "schemathesis run \
     --show-errors-tracebacks \
-    --hypothesis-deadline None \
     --request-tls-verify /config/ca.crt \
-    -c all ${endpoint_flag}\
+    --hypothesis-deadline None ${endpoint_flag}\
+    --checks status_code_conformance \
+    --checks content_type_conformance \
+    --checks response_headers_conformance \
+    --checks response_schema_conformance \
     -H \"Authorization: Basic \"$ENCODED_LOGIN\"\" \
     -H \"Authentication: Token token=\"$CONJUR_ADMIN_TOKEN\"\" \
     --base-url https://conjur-https conjur-openapi.yml"
