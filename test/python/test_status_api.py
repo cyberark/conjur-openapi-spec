@@ -7,6 +7,12 @@ import openapi_client
 
 from . import api_config
 
+AUTHENTICATOR_FIELDS = [
+    "enabled",
+    "installed",
+    "configured",
+]
+
 WHOAMI_FIELDS = [
     "client_ip",
     "user_agent",
@@ -149,6 +155,23 @@ class TestStatusApi(api_config.ConfiguredTest):
             self.api.authenticator_status('ldap', self.account)
 
         self.assertEqual(context.exception.status, 501)
+
+    def test_authenticators_index_200(self):
+        """Test case for authenticators 200 response"""
+        authenticators, status, _ = self.api.authenticators_index_with_http_info()
+
+        self.assertEqual(status, 200)
+        self.assertIsInstance(authenticators, openapi_client.models.authenticators.Authenticators)
+
+        for i in AUTHENTICATOR_FIELDS:
+            lst  = getattr(authenticators, i)
+            self.assertIsInstance(lst, list)
+            # authn is the default authenticator so it will always be installed and enabled
+            self.assertIn('authn', lst)
+
+            for value in lst:
+                self.assertIsInstance(value, str)
+                self.assertNotEqual(value, '')
 
 if __name__ == '__main__':
     unittest.main()
