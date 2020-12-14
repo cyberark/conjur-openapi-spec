@@ -1,5 +1,28 @@
 components:
   schemas:
+    Authenticators:
+      type: object
+      properties:
+        installed:
+          description: "The authenticators installed on the Conjur server"
+          type: array
+          items:
+            type: string
+          example: [ "authn" ]
+
+        configured:
+          description: "The authenticators configured on the Conjur server"
+          type: array
+          items:
+            type: string
+          example: [ "authn" ]
+
+        enabled:
+          description: "The authenticators enabled on the Conjur server"
+          type: array
+          items:
+            type: string
+          example: [ "authn" ]
     AuthenticatorStatus:
       type: object
       properties:
@@ -186,3 +209,24 @@ components:
 
         security:
           - conjurAuth: []
+
+    AuthenticatorsIndex:
+      get:
+        tags:
+        - "status"
+        summary: "Details about which authenticators are on the Conjur Server"
+        description: |
+          "Response contains three members: installed, configured, and enabled.
+          
+          installed: The authenticator is implemented in Conjur and is available for configuration
+          configured: The authenticator has a webservice in the DB that was loaded by policy
+          enabled: The authenticator is enabled (in the DB or in the ENV) and is ready for authentication
+          "
+        operationId: "authenticatorsIndex"
+        responses:
+          "200":
+            description: "Details about authenticators for this Conjur server"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Authenticators'

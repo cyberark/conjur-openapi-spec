@@ -221,6 +221,9 @@ paths:
 
   '/authn-{authenticator}/{service_id}/{account}/status':
     $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
+  
+  '/authenticators':
+    $ref: 'status.yml#/components/paths/AuthenticatorsIndex'
 
 # ========== SECRETS ==========
 
