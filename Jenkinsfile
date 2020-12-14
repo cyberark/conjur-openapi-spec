@@ -32,6 +32,12 @@ pipeline {
                 sh './bin/lint_spec'
             }
         }
+        
+        stage('API Contract Test') {
+            steps {
+                sh './bin/api_test'
+            }
+        }
     }
 
     post {

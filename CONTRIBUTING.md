@@ -86,7 +86,13 @@ $ ./bin/stop
     * `File` > `Save as YAML`
 5. Overwrite [`conjur-openapi.yml`](conjur-openapi.yml) with the downloaded YAML file
 
+After editing the OpenAPI spec, it's important to test your changes using `bin/api_test`.
+
 ### Utility Script Reference
+
+`bin/api_test [-e <endpoint>]`
+* Runs containerized contract testing on all endpoints specified in [`conjur-openapi.yml`](conjur-openapi.yml)
+* Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
 `bin/generate_client <language>`
 * Generates a client library for the desired `<language>`.  

@@ -1,0 +1,19 @@
+name: API Contract Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  contract_test:
+    runs-on: ubuntu-latest
+    name: API Contract Test
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+
+      - name: run api contract test script
+        run: ./bin/api_test
