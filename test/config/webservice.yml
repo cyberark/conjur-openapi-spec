@@ -1,0 +1,85 @@
+- !policy
+  id: conjur/authn-oidc/okta
+  body:
+  - !webservice
+    id: status
+    annotations:
+      description: Status service to check that the authenticator is configured correctly
+
+  - !group
+    id: operators
+    annotations:
+      description: Group of users who can check the status of the authenticator
+
+  - !permit
+    role: !group operators
+    privilege: [ read ]
+    resource: !webservice status
+
+  - !webservice
+    annotations:
+      description: Authentication service for okta, based on OpenID Connect.
+
+  - !variable
+    id: provider-uri
+
+  - !variable
+    id: id-token-user-property
+
+  - !group
+    id: users
+    annotations:
+      description: Group of users who can authenticate using the authn-oidc/okta authenticator
+
+  - !permit
+    role: !group users
+    privilege: [ read, authenticate ]
+    resource: !webservice
+
+- !policy
+  id: conjur/authn-azure
+  body:
+  - !webservice
+    id: status
+    annotations:
+      description: Status service to check that the authenticator is configured correctly
+
+  - !group
+    id: operators
+    annotations:
+      description: Group of users who can check the status of the authenticator
+
+  - !permit
+    role: !group operators
+    privilege: [ read ]
+    resource: !webservice status
+
+  - !webservice
+    annotations:
+      description: Authentication service for okta, based on OpenID Connect.
+
+  - !variable
+    id: provider-uri
+
+  - !variable
+    id: id-token-user-property
+
+  - !group
+    id: users
+    annotations:
+      description: Group of users who can authenticate using the authn-oidc/okta authenticator
+
+  - !permit
+    role: !group users
+    privilege: [ read, authenticate ]
+    resource: !webservice
+
+- !grant
+  role: !group conjur/authn-oidc/okta/users
+  member: !user admin
+
+- !grant
+  role: !group conjur/authn-azure/users
+  member: !user admin
+
+- !user alice
