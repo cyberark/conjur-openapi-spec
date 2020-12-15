@@ -18,7 +18,7 @@ rm -rf "$(pwd)/out/$client_lang"
 
 echo "Generating $client_lang client..."
 docker run --rm -v ${PWD}:/local "$GENERATOR_IMAGE" generate \
-    -i "/local/conjur-openapi.yml" \
+    -i "/local/spec/openapi.yml" \
     -g "$client_lang" \
     -o "/local/out/$client_lang"
 

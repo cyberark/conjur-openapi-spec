@@ -38,60 +38,10 @@ components:
       example: true
       description: "Checks whether a role has a privilege on a resource."
 
-    CreateHostRequest:
-      type: object
-      properties:
-        id:
-          description: "Identifier of the host to be created. It will be created within the account of the host factory."
-          type: string
-          example: "my-new-host"
-
-        annotations:
-          description: "Annotations to apply to the new host"
-          type: object
-          example: {"puppet": "true", "description": "new db host"}
-
-      required:
-        - id
-
     Count:
       description: "Return only the count of results"
       type: boolean
       example: true
-
-    HostFactoryToken:
-      type: string
-      minLength: 1
-
-    HostFactoryTokenRequest:
-      type: object
-      properties:
-        expiration:
-          description: "`ISO 8601 datetime` denoting a requested expiration time."
-          type: string
-          example: "2017-08-04T22:27:20+00:00"
-
-        host_factory:
-          description: "Fully qualified host factory ID"
-          type: string
-          example: "myorg:host_factory:hf-db"
-
-        count:
-          description: "Number of host tokens to create"
-          type: integer
-          example: 2
-
-        cidr:
-          # TODO: Find out if we accept string or an array
-          description: "Number of host tokens to create"
-          type: array
-          items:
-            type: string
-          example: ["127.0.0.1/32"]
-
-      required:
-        - expiration
-        - host_factory
 
     Kind:
       type: string
@@ -154,28 +104,6 @@ components:
 
         - `sales&marketing` -> `sales%26marketing`"
 
-    ResourceIDs:
-      type: string
-      minLength: 1
-      example: myorg:variable:secret1,myorg:variable:secret1
-      description: "Comma-delimited, URL-encoded resource identifiers.
-
-        ##### Resources IDs encoding:
-
-        - `myapp-01` -> `myapp-01` (unchanged)
-
-        - `alice@devops` -> `alice%40devops`
-
-        - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
-
-        - `research+development` -> `research%2Bdevelopment`
-
-        - `sales&marketing` -> `sales%26marketing`
-
-        ##### Example
-
-        `myorg:variable:secret1,myorg:variable:secret1`"
-
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
       type: integer
@@ -209,11 +137,6 @@ components:
         - `research+development` -> `research%2Bdevelopment`
 
         - `sales&marketing` -> `sales%26marketing`"
-
-    SearchFilter:
-      type: string
-      minLength: 1
-      description: "Only returns results that contain this string value"
 
     ApiKey:
       type: string
@@ -500,147 +423,10 @@ paths:
 # ========== SECRETS ==========
 
   '/secrets/{account}/{kind}/{identifier}':
-    post:
-      tags:
-      - "secrets"
-      summary: "Creates a secret value within the specified variable."
-      description: "Creates a secret value within the specified Variable.
-
-
-        Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
-      operationId: "createVariable"
-      parameters:
-      - name: "account"
-        in: "path"
-        description: "Organization account name"
-        required: true
-        schema:
-          $ref: '#/components/schemas/AccountName'
-      - name: "kind"
-        in: "path"
-        description: "Type of resource - in almost all cases this should be `variable`"
-        required: true
-        schema:
-          $ref: '#/components/schemas/Kind'
-      - name: "identifier"
-        in: "path"
-        description: "URL-encoded variable ID"
-        required: true
-        schema:
-          $ref: '#/components/schemas/ResourceID'
-      requestBody:
-        description: "Secret data"
-        required: true
-        content:
-          text/plain:
-            schema:
-              type: string
-              format: binary
-
-      responses:
-        "201":
-          description: "The secret value was added successfully"
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/InadequatePrivileges'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
-
-    get:
-      tags:
-      - "secrets"
-      summary: "Fetches the value of a secret from the specified Variable."
-      description: "Fetches the value of a secret from the specified Variable. The latest version will be retrieved unless the version parameter is specified. The twenty most recent secret versions are retained.
-
-
-        The secret data is returned in the response body.
-
-
-        Note: Conjur will allow you to add a secret to any resource, but the best practice is to store and retrieve secret data only using Variable resources."
-      operationId: "getVariable"
-      parameters:
-      - name: "account"
-        in: "path"
-        description: "Organization account name"
-        required: true
-        schema:
-          $ref: '#/components/schemas/AccountName'
-      - name: "kind"
-        in: "path"
-        description: "Type of resource - in almost all cases this should be `variable`"
-        required: true
-        schema:
-          $ref: '#/components/schemas/Kind'
-      - name: "identifier"
-        in: "path"
-        description: "URL-encoded variable ID"
-        required: true
-        schema:
-          $ref: '#/components/schemas/ResourceID'
-      - name: "version"
-        in: "query"
-        description: "(**Optional**) Version you want to retrieve (Conjur keeps the last 20 versions of a secret)"
-        schema:
-          $ref: '#/components/schemas/ResourceVersion'
-
-      responses:
-        "200":
-          $ref: '#/components/responses/SecretValue'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/InadequatePrivileges'
-        "404":
-          $ref: '#/components/responses/ResourceNotFound'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'secrets.yml#/components/paths/SingleSecret'
 
   '/secrets':
-    get:
-      tags:
-      - "secrets"
-      summary: "Fetch multiple secrets"
-      description: "Fetches multiple secret values in one invocation. It’s faster to fetch secrets in batches than to fetch them one at a time."
-      operationId: "getVariables"
-      parameters:
-      - name: "variable_ids"
-        in: "query"
-        description: "Comma-delimited, URL-encoded resource IDs of the variables."
-        required: true
-        schema:
-          $ref: '#/components/schemas/ResourceIDs'
-
-      responses:
-        "200":
-          $ref: '#/components/responses/SecretBatchValue'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/InadequatePrivileges'
-        "404":
-          $ref: '#/components/responses/ResourcesNotFound'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'secrets.yml#/components/paths/BatchSecrets'
 
 # ========== POLICIES ==========
 
@@ -935,284 +721,21 @@ paths:
 # ========== Resources ==========
 
   '/resources/{account}':
-    get:
-      tags:
-      - "resources"
-      summary: "Lists resources within an organization account."
-      description: "Lists resources within an organization account.
-
-
-      If a `kind` query parameter is given, narrows results to only resources of that kind.
-
-
-      If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
-
-
-      If the parameter `count` is `true`, returns only the number of items in the list.
-
-
-      ##### Text search
-
-
-      If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
-      operationId: "getResources"
-      parameters:
-      - name: "account"
-        in: "path"
-        description: "Organization account name"
-        required: true
-        schema:
-          $ref: '#/components/schemas/AccountName'
-      - name: "kind"
-        in: "query"
-        description: "Type of resource"
-        example: user
-        schema:
-          $ref: '#/components/schemas/Kind'
-      - name: "search"
-        in: "query"
-        description: "Filter resources based on this value by name"
-        example: "db"
-        schema:
-          $ref: '#/components/schemas/SearchFilter'
-      - name: "offset"
-        in: "query"
-        description: "When listing resources, start at this item number."
-        schema:
-          $ref: '#/components/schemas/Offset'
-      - name: "limit"
-        in: "query"
-        description: "When listing resources, return up to this many results."
-        schema:
-          $ref: '#/components/schemas/Limit'
-      - name: "count"
-        in: "query"
-        description: "When listing resources, if `true`, return only the count of the results."
-        schema:
-          $ref: '#/components/schemas/Count'
-
-      responses:
-        "200":
-          description: "The response body contains the list of matching resources"
-          content:
-            application/json:
-              schema:
-                type: object
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'resources.yml#/components/paths/ListResources'
 
   '/resources/{account}/{kind}/{identifier}':
-    get:
-      tags:
-      - "resources"
-      summary: "Shows a description of a single resource."
-      description: "Details about a single resource.
-
-      ##### Permissions Required
-
-      `read` privilege on the resource."
-      operationId: "getResource"
-      parameters:
-      - name: "account"
-        in: "path"
-        description: "Organization account name"
-        required: true
-        schema:
-          $ref: '#/components/schemas/AccountName'
-      - name: "kind"
-        in: "path"
-        description: "Type of resource"
-        required: true
-        example: user
-        schema:
-          $ref: '#/components/schemas/Kind'
-      - name: "identifier"
-        in: "path"
-        description: "ID of the resource for which to get the information about"
-        required: true
-        example: "conjur/authn-iam/test"
-        schema:
-          $ref: '#/components/schemas/ResourceID'
-      - name: "permitted_roles"
-        in: "query"
-        description: "Lists the roles which have the named privilege on a resource."
-        schema:
-          $ref: '#/components/schemas/PermittedRoles'
-      - name: "privilege"
-        in: "query"
-        description: "Level of privilege to filter on. Can only be used in combination with `permitted_roles` or `check` parameter."
-        schema:
-          $ref: '#/components/schemas/PrivilegeLevel'
-      - name: "check"
-        in: "query"
-        description: "Check whether a role has a privilege on a resource."
-        schema:
-          $ref: '#/components/schemas/CheckPrivilege'
-      - name: "role"
-        in: "query"
-        example: myorg:host:host1
-        description: "Role to check privilege on. Can only be used in combination with `check` parameter."
-        schema:
-          $ref: '#/components/schemas/Role'
-
-      responses:
-        "200":
-          description: "The response body contains the list of role memberships or permitted roles"
-          content:
-            application/json:
-              schema:
-                type: object
-        "204":
-          $ref: '#/components/responses/PermissionCheckSuccess'
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/InadequatePrivileges'
-        "404":
-          $ref: '#/components/responses/ResourceNotFound'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'resources.yml#/components/paths/SingleResource'
 
 # ========== Host Factory ==========
 
   '/host_factory_tokens':
-    post:
-      tags:
-      - "host factory"
-      summary: "Creates one or more host identity tokens."
-      description: "Creates one or more tokens which can be used to bootstrap host identity. Responds with a JSON document containing the tokens and their restrictions.
-
-
-        If the tokens are created with a CIDR restriction, Conjur will only accept them from the whitelisted IP ranges.
-
-
-        ##### Permissions required
-
-
-        `execute` privilege on the Host Factory."
-      operationId: "createHostToken"
-      requestBody:
-        description: "Parameters"
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/HostFactoryTokenRequest'
-
-      responses:
-        "200":
-          description: "Zero or more tokens were created and delivered in the response body"
-          content:
-            application/json:
-              schema:
-                type: object
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "403":
-          $ref: '#/components/responses/InadequatePrivileges'
-        "404":
-          $ref: '#/components/responses/ResourceNotFound'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'host-factory.yml#/components/paths/CreateHostToken'
 
   '/host_factory_tokens/{token}':
-    delete:
-      tags:
-      - "host factory"
-      summary: "Revokes a token, immediately disabling it."
-      description: "Revokes a token, immediately disabling it.
-
-
-        ##### Permissions required
-
-
-        `update` privilege on the host factory."
-      operationId: "revokeHostToken"
-      parameters:
-      - name: "token"
-        in: "path"
-        description: "The host factory token to revoke"
-        required: true
-        schema:
-          $ref: '#/components/schemas/HostFactoryToken'
-      requestBody:
-        required: false
-        content:
-          text/plain:
-            schema:
-              type: string
-
-      responses:
-        "204":
-          description: "Token was successfully revoked"
-        "400":
-          $ref: '#/components/responses/BadRequest'
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "404":
-          $ref: '#/components/responses/ResourceNotFound'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'host-factory.yml#/components/paths/RevokeHostToken'
 
   '/host_factories/hosts':
-    post:
-      tags:
-      - "host factory"
-      summary: "Creates a Host using the Host Factory."
-      description: "Creates a Host using the Host Factory and returns a JSON description of it.
-
-
-        Requires a host factory token, which can be created using the create tokens API. In practice, this token is usually provided automatically as part of Conjur integration with your host provisioning infrastructure.
-
-
-        Note: If the token was created with a CIDR restriction, you must make this API request from a whitelisted address."
-      operationId: "createHost"
-      requestBody:
-        description: "Parameters"
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CreateHostRequest'
-
-      responses:
-        "201":
-          description: "The response body contains the newly-created host"
-          content:
-            application/json:
-              schema:
-                type: object
-        "401":
-          $ref: '#/components/responses/UnauthorizedError'
-        "422":
-          $ref: '#/components/responses/UnprocessableEntity'
-        "500":
-          $ref: '#/components/responses/InternalServerError'
-
-      security:
-        - conjurAuth: []
+    $ref: 'host-factory.yml#/components/paths/CreateHost'
 
 # ========== Public keys ==========
 

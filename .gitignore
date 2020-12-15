@@ -7,3 +7,5 @@ __pycache__
 .env
 
 nose2-junit.xml
+
+spec.yml

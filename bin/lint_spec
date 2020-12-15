@@ -1,7 +1,8 @@
 #!/bin/bash
 
+./bin/bundle_spec
 
 docker run --rm \
-    -v ${PWD}/conjur-openapi.yml:/code/conjur-openapi.yml \
+    -v ${PWD}/spec.yml:/code/spec.yml \
     node:latest \
-    /bin/bash -c "npm i -g @stoplight/spectral && spectral lint -v --fail-severity=warn -s oas3-api-servers /code/conjur-openapi.yml"
+    /bin/bash -c "npm i -g @stoplight/spectral && spectral lint -v --fail-severity=warn -s oas3-api-servers  -s oas3-unused-components-schema /code/spec.yml"

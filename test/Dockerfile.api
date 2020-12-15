@@ -8,6 +8,6 @@ RUN apt-get update && \
                        python3-dev \
                        python3-pip
 
-COPY ./conjur-openapi.yml .
+COPY spec.yml .
 
 RUN pip3 install schemathesis
