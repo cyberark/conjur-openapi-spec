@@ -1,0 +1,176 @@
+components:
+  schemas:
+    SearchFilter:
+      type: string
+      minLength: 1
+      description: "Only returns results that contain this string value"
+
+    PrivilegeLevel:
+      type: string
+      minLength: 1
+      example: "execute"
+      description: "Denotes a type of permission allowed on a resource"
+
+    PermittedRoles:
+      type: boolean
+      example: true
+
+    CheckPrivilege:
+      type: boolean
+      example: true
+      description: "Checks whether a role has a privilege on a resource."
+
+
+  paths:
+    ListResources:
+      get:
+        tags:
+        - "resources"
+        summary: "Lists resources within an organization account."
+        description: "Lists resources within an organization account.
+
+
+        If a `kind` query parameter is given, narrows results to only resources of that kind.
+
+
+        If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+
+
+        If the parameter `count` is `true`, returns only the number of items in the list.
+
+
+        ##### Text search
+
+
+        If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
+        operationId: "getResources"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "kind"
+          in: "query"
+          description: "Type of resource"
+          example: user
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Kind'
+        - name: "search"
+          in: "query"
+          description: "Filter resources based on this value by name"
+          example: "db"
+          schema:
+            $ref: '#/components/schemas/SearchFilter'
+        - name: "offset"
+          in: "query"
+          description: "When listing resources, start at this item number."
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Offset'
+        - name: "limit"
+          in: "query"
+          description: "When listing resources, return up to this many results."
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Limit'
+        - name: "count"
+          in: "query"
+          description: "When listing resources, if `true`, return only the count of the results."
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Count'
+
+        responses:
+          "200":
+            description: "The response body contains the list of matching resources"
+            content:
+              application/json:
+                schema:
+                  type: object
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    SingleResource:
+      get:
+        tags:
+        - "resources"
+        summary: "Shows a description of a single resource."
+        description: "Details about a single resource.
+
+        ##### Permissions Required
+
+        `read` privilege on the resource."
+        operationId: "getResource"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "kind"
+          in: "path"
+          description: "Type of resource"
+          required: true
+          example: user
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Kind'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the resource for which to get the information about"
+          required: true
+          example: "conjur/authn-iam/test"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+        - name: "permitted_roles"
+          in: "query"
+          description: "Lists the roles which have the named privilege on a resource."
+          schema:
+            $ref: '#/components/schemas/PermittedRoles'
+        - name: "privilege"
+          in: "query"
+          description: "Level of privilege to filter on. Can only be used in combination with `permitted_roles` or `check` parameter."
+          schema:
+            $ref: '#/components/schemas/PrivilegeLevel'
+        - name: "check"
+          in: "query"
+          description: "Check whether a role has a privilege on a resource."
+          schema:
+            $ref: '#/components/schemas/CheckPrivilege'
+        - name: "role"
+          in: "query"
+          example: myorg:host:host1
+          description: "Role to check privilege on. Can only be used in combination with `check` parameter."
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Role'
+
+        responses:
+          "200":
+            description: "The response body contains the list of role memberships or permitted roles"
+            content:
+              application/json:
+                schema:
+                  type: object
+          "204":
+            $ref: 'openapi.yml#/components/responses/PermissionCheckSuccess'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
