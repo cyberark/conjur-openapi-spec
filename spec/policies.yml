@@ -1,0 +1,223 @@
+components:
+  schemas:
+    Policy:
+      type: string
+      minLength: 1
+      example: |
+        - !policy
+          id: database
+          body:
+          - !host
+            id: db-host
+          - !variable
+            id: db-password
+            owner: !host db-host
+
+  responses:
+    LoadedPolicy:
+      description: "Decsribes new data created by a successful policy load"
+      content:
+        application/json:
+          schema:
+            type: object
+            example:
+              {
+                "created_roles": {
+                  "myorg:host:database/db-host": {
+                    "id": "myorg:host:database/db-host",
+                    "api_key": "309yzpa1n5kp932waxw6d37x4hew2x8ve8w11m8xn92acfy672m929en"
+                  }
+                },
+                "version": 1
+              }
+
+  paths:
+    Policies:
+      put:
+        tags:
+        - "policies"
+        summary: "Loads or replaces a Conjur policy document."
+        description: "Loads or replaces a Conjur policy document.
+
+
+          **Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted!**."
+        operationId: "loadPolicy"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the policy to load (root if no root policy has been loaded yet)"
+          required: true
+          example: "root"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+        requestBody:
+          description: "Policy"
+          required: true
+          content:
+            # TODO: Figure out what type YAML is in MIME convention
+            text/yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            application/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+        responses:
+          "201":
+            $ref: '#/components/responses/LoadedPolicy'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            $ref: 'openapi.yml#/components/responses/Busy'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      post:
+        tags:
+        - "policies"
+        summary: "Adds data to the existing Conjur policy."
+        description: "Adds data to the existing Conjur policy. Deletions are not allowed. Any policy objects that exist on the server but are omitted from the policy file will not be deleted and any explicit deletions in the policy file will result in an error.
+
+          ##### Permissions required
+
+          `create` privilege on the policy."
+        operationId: "updatePolicy"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the policy to update"
+          required: true
+          example: "root"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+        requestBody:
+          description: "Policy"
+          required: true
+          content:
+            # TODO: Figure out what type YAML is in MIME convention
+            text/yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            application/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+        responses:
+          "201":
+            $ref: '#/components/responses/LoadedPolicy'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            $ref: 'openapi.yml#/components/responses/Busy'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      patch:
+        tags:
+        - "policies"
+        summary: "Modifies an existing Conjur policy."
+        description: "Modifies an existing Conjur policy. Data may be explicitly deleted using the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode, no data is ever implicitly deleted.
+
+
+          ##### Permissions required
+
+          `create` privilege on the policy."
+        operationId: "modifyPolicy"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the policy to update"
+          required: true
+          example: "root"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+        requestBody:
+          description: "Policy"
+          required: true
+          content:
+            # TODO: Figure out what type YAML is in MIME convention
+            text/yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            application/x-yaml:
+              schema:
+                $ref: '#/components/schemas/Policy'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+        responses:
+          "201":
+            $ref: '#/components/responses/LoadedPolicy'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            $ref: 'openapi.yml#/components/responses/Busy'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
