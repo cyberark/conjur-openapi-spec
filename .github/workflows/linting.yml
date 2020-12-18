@@ -36,12 +36,5 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v1
-
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral
-
-      - name: Run Spectral Linting
-        run: spectral lint -v --fail-severity=warn -s oas3-api-servers conjur-openapi.yml
-
+      - name: Lint Spec
+        run: ./bin/lint_spec

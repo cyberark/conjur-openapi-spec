@@ -1,0 +1,177 @@
+components:
+  schemas:
+    HostFactoryToken:
+      type: string
+      minLength: 1
+
+    HostFactoryTokenRequest:
+      type: object
+      properties:
+        expiration:
+          description: "`ISO 8601 datetime` denoting a requested expiration time."
+          type: string
+          example: "2017-08-04T22:27:20+00:00"
+
+        host_factory:
+          description: "Fully qualified host factory ID"
+          type: string
+          example: "myorg:host_factory:hf-db"
+
+        count:
+          description: "Number of host tokens to create"
+          type: integer
+          example: 2
+
+        cidr:
+          # TODO: Find out if we accept string or an array
+          description: "Number of host tokens to create"
+          type: array
+          items:
+            type: string
+          example: ["127.0.0.1/32"]
+
+      required:
+        - expiration
+        - host_factory
+
+    CreateHostRequest:
+      type: object
+      properties:
+        id:
+          description: "Identifier of the host to be created. It will be created within the account of the host factory."
+          type: string
+          example: "my-new-host"
+
+        annotations:
+          description: "Annotations to apply to the new host"
+          type: object
+          example: {"puppet": "true", "description": "new db host"}
+
+      required:
+        - id
+
+  paths:
+    CreateHostToken:
+      post:
+        tags:
+        - "host factory"
+        summary: "Creates one or more host identity tokens."
+        description: "Creates one or more tokens which can be used to bootstrap host identity. Responds with a JSON document containing the tokens and their restrictions.
+
+
+          If the tokens are created with a CIDR restriction, Conjur will only accept them from the whitelisted IP ranges.
+
+
+          ##### Permissions required
+
+
+          `execute` privilege on the Host Factory."
+        operationId: "createHostToken"
+        requestBody:
+          description: "Parameters"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/HostFactoryTokenRequest'
+
+        responses:
+          "200":
+            description: "Zero or more tokens were created and delivered in the response body"
+            content:
+              application/json:
+                schema:
+                  type: object
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    RevokeHostToken:
+      delete:
+        tags:
+        - "host factory"
+        summary: "Revokes a token, immediately disabling it."
+        description: "Revokes a token, immediately disabling it.
+
+
+          ##### Permissions required
+
+
+          `update` privilege on the host factory."
+        operationId: "revokeHostToken"
+        parameters:
+        - name: "token"
+          in: "path"
+          description: "The host factory token to revoke"
+          required: true
+          schema:
+            $ref: '#/components/schemas/HostFactoryToken'
+        requestBody:
+          required: false
+          content:
+            text/plain:
+              schema:
+                type: string
+
+        responses:
+          "204":
+            description: "Token was successfully revoked"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    CreateHost:
+      post:
+        tags:
+        - "host factory"
+        summary: "Creates a Host using the Host Factory."
+        description: "Creates a Host using the Host Factory and returns a JSON description of it.
+
+
+          Requires a host factory token, which can be created using the create tokens API. In practice, this token is usually provided automatically as part of Conjur integration with your host provisioning infrastructure.
+
+
+          Note: If the token was created with a CIDR restriction, you must make this API request from a whitelisted address."
+        operationId: "createHost"
+        requestBody:
+          description: "Parameters"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/CreateHostRequest'
+
+        responses:
+          "201":
+            description: "The response body contains the newly-created host"
+            content:
+              application/json:
+                schema:
+                  type: object
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []

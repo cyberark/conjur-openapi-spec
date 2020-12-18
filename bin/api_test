@@ -43,6 +43,9 @@ if [[ -z "$(docker-compose ps -q)" ]]; then
   echo
 fi
 
+announce "Bundling spec file"
+./bin/bundle_spec
+
 announce "Building API test container image..."
 docker-compose build test-api
 echo
@@ -68,4 +71,4 @@ docker-compose run --rm --no-deps \
     --checks response_schema_conformance \
     -H \"Authorization: Basic \"$ENCODED_LOGIN\"\" \
     -H \"Authentication: Token token=\"$CONJUR_ADMIN_TOKEN\"\" \
-    --base-url https://conjur-https conjur-openapi.yml"
+    --base-url https://conjur-https spec.yml"

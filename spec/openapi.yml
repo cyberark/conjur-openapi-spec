@@ -1,0 +1,259 @@
+openapi: "3.0.0"
+
+info:
+  description: "This is an API definition for CyberArk DAP (part of AAM) and Conjur OSS v10+. You can find out more at [Conjur](https://www.conjur.org/) and [AAM](https://www.cyberark.com/products/privileged-account-security-solution/application-access-manager/) pages."
+  version: "0.0.1"
+  title: "Conjur"
+  contact:
+    email: "conj_maintainers@cyberark.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+- name: "authn"
+  description: "Authentication"
+- name: "secrets"
+  description: "Secrets"
+- name: "policies"
+  description: "Policies"
+- name: "roles"
+  description: "RBAC"
+- name: "host factory"
+  description: "Host factories"
+- name: "public keys"
+  description: "SSH keys"
+- name: "resources"
+  description: "Resources"
+  
+components:
+  schemas:
+    ApiKey:
+      type: string
+      minLength: 55
+      description: "Example of a Conjur API key"
+      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
+
+    AccountName:
+      type: string
+      minLength: 1
+      example: "myorg"
+
+    CheckPrivilege:
+      type: boolean
+      example: true
+      description: "Checks whether a role has a privilege on a resource."
+
+    Count:
+      description: "Return only the count of results"
+      type: boolean
+      example: true
+
+    Kind:
+      type: string
+      minLength: 1
+      example: "variable"
+
+    Limit:
+      description: "Return no more than this number of results"
+      type: integer
+      example: 10
+
+    Offset:
+      description: "Skips this many items before returning the rest"
+      type: integer
+      example: 20
+
+    PermittedRoles:
+      type: boolean
+      example: true
+
+    PrivilegeLevel:
+      type: string
+      minLength: 1
+      example: "execute"
+      description: "Denotes a type of permission allowed on a resource"
+
+    ResourceID:
+      type: string
+      minLength: 1
+      example: "prod%2Faws%2Fdb-password"
+      description: "Resource identifier. Requires to be encoded when in path.
+
+        ##### Examples:
+
+        - `myapp-01` -> `myapp-01` (unchanged)
+
+        - `alice@devops` -> `alice%40devops`
+
+        - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+
+        - `research+development` -> `research%2Bdevelopment`
+
+        - `sales&marketing` -> `sales%26marketing`"
+
+    ResourceVersion:
+      description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
+      type: integer
+
+    Role:
+      type: string
+      minLength: 1
+      description: "##### Kinds of roles:
+
+        - User: one unique wonderful human
+
+        - Host: a single logical machine (in the broad sense, not just physical)
+
+        - Layer: a collection of hosts that have the same privileges
+
+        - Group: a collection of users and groups that have the same privileges
+ 
+        - Policy: a role which owns of a set of related object
+
+
+        Any identifier included in the URL must be URL-encoded to be recognized by the Conjur API.
+
+        ##### Resource Identifiers:
+
+        - `myapp-01` -> `myapp-01` (unchanged)
+
+        - `alice@devops` -> `alice%40devops`
+
+        - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
+
+        - `research+development` -> `research%2Bdevelopment`
+
+        - `sales&marketing` -> `sales%26marketing`"
+
+  responses:
+    AccessTokenGeneric:
+      description: |
+        This response schema is a generic string as opposed to the AccessToken component schema.
+        This is to allow users to use the "Accept-Encoding: base64" header in order to 
+        receive a pre-encoded token instead of a JSON object.
+      content:
+        text/plain:
+          schema:
+            type: string
+    ApiKey:
+      description: "The response body is the API key"
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
+    BadRequest:
+      description: "The server cannot process the request due to malformed request syntax"
+    Busy:
+      description: "Similar operation already in progress, retry after a delay"
+    InadequatePrivileges:
+      description: "The authenticated user lacks the necessary privileges"
+    InternalServerError:
+      description: "Malfromed request, rejected by the server"
+    PermissionCheckSuccess:
+      description: "Permissions check was successful"
+    ResourceNotFound:
+      description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
+    ResourcesNotFound:
+      description: "At least one resource was unable to be found"
+    SecretValue:
+      description: "The secret value was added successfully"
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: 'supersecret'
+    # There might be a better way to display the schema of SecretBatchValue however the json keys are dynamic depending on the secrets you fetched in the 'secrets_id' query param.
+    SecretBatchValue:
+      description: "The batch secret values"
+      content:
+        application/json:
+          schema:
+            type: object
+            example:
+              {
+                 "myorg:variable:secret1": "secret1Value",
+                 "myorg:variable:secret2": "secret2Value"
+              }
+    UnauthorizedError:
+      description: "Authentication information is missing or invalid"
+    UnprocessableEntity:
+      description: "A request parameter was either missing or invalid."
+
+  securitySchemes:
+    basicAuth:
+      description: "Basic authentication"
+      type: http
+      scheme: basic
+    conjurAuth:
+      description: "Conjur access token in `Token token=<base64_encoded_token>` format"
+      type: apiKey
+      in: header
+      name: Authorization
+
+security:
+  - basicAuth: []
+  - conjurAuth: []
+  
+paths:
+  '/authn/{account}/login':
+    $ref: 'authentication.yaml#/components/paths/Login'
+
+  '/authn/{account}/{login}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/Authenticate'
+
+  '/authn/{account}/password':
+    $ref: 'authentication.yaml#/components/paths/ChangePassword'
+
+  '/authn/{account}/api_key':
+    $ref: 'authentication.yaml#/components/paths/RotateApiKey'
+
+# ========== SECRETS ==========
+
+  '/secrets/{account}/{kind}/{identifier}':
+    $ref: 'secrets.yml#/components/paths/SingleSecret'
+
+  '/secrets':
+    $ref: 'secrets.yml#/components/paths/BatchSecrets'
+
+# ========== POLICIES ==========
+
+  '/policies/{account}/policy/{identifier}':
+    $ref: 'policies.yml#/components/paths/Policies'
+
+# ========== Roles ==========
+
+  '/roles/{account}/{kind}/{identifier}':
+    $ref: 'roles.yml#/components/paths/Roles'
+
+# ========== Resources ==========
+
+  '/resources/{account}':
+    $ref: 'resources.yml#/components/paths/ListResources'
+
+  '/resources/{account}/{kind}/{identifier}':
+    $ref: 'resources.yml#/components/paths/SingleResource'
+
+# ========== Host Factory ==========
+
+  '/host_factory_tokens':
+    $ref: 'host-factory.yml#/components/paths/CreateHostToken'
+
+  '/host_factory_tokens/{token}':
+    $ref: 'host-factory.yml#/components/paths/RevokeHostToken'
+
+  '/host_factories/hosts':
+    $ref: 'host-factory.yml#/components/paths/CreateHost'
+
+# ========== Public keys ==========
+
+  '/public_keys/{account}/{kind}/{identifier}':
+    $ref: 'public-keys.yml#/components/paths/PublicKeys'
+
+# TODO: Inject client cert
+# TODO: Seed Service
+
+externalDocs:
+  description: "Find out more about Conjur"
+  url: "https://conjur.org"

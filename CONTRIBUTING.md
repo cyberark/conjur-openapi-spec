@@ -68,7 +68,7 @@ $ ./bin/start_editor
 ```
 
 In each case, a browser window will be opened to the container running Swagger UI.  
-Import the [`conjur-openapi.yml`](conjur-openapi.yml) into the UI to view/edit.
+Import the [`openapi.yml`](openapi.yml) into the UI to view/edit.
 
 The environment can be stopped and removed using the `stop` script.
 
@@ -84,14 +84,14 @@ $ ./bin/stop
 3. Edit the document as necessary
 4. Download the new specification YAML from the editor
     * `File` > `Save as YAML`
-5. Overwrite [`conjur-openapi.yml`](conjur-openapi.yml) with the downloaded YAML file
+5. Overwrite [`openapi.yml`](openapi.yml) with the downloaded YAML file
 
 After editing the OpenAPI spec, it's important to test your changes using `bin/api_test`.
 
 ### Utility Script Reference
 
 `bin/api_test [-e <endpoint>]`
-* Runs containerized contract testing on all endpoints specified in [`conjur-openapi.yml`](conjur-openapi.yml)
+* Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
 `bin/generate_client <language>`

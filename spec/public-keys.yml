@@ -1,0 +1,53 @@
+components:
+  responses:
+    PublicKeys:
+      description: "Public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format. Empty string if the resource does not exist"
+      content:
+        text/plain:
+          schema:
+            type: string
+
+  paths:
+    PublicKeys:
+      get:
+        tags:
+        - "public keys"
+        summary: "Shows all public keys for a resource."
+        description: "Shows all public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format.
+
+
+          Returns an empty string if the resource does not exist, to prevent attackers from determining whether a resource exists."
+        operationId: "showPublicKeys"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "kind"
+          in: "path"
+          description: "Type of resource"
+          required: true
+          example: user
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Kind'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the resource for which to get the information about"
+          required: true
+          example: "admin"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+
+        responses:
+          "200":
+            $ref: '#/components/responses/PublicKeys'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
