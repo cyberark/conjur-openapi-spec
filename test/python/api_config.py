@@ -15,6 +15,11 @@ CONJUR_AUTHN_API_KEY = 'CONJUR_AUTHN_API_KEY'
 CONJUR_AUTHN_LOGIN = 'CONJUR_AUTHN_LOGIN'
 CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
 
+def get_default_policy():
+    """Gets the default testing policy"""
+    with open(pathlib.Path('.').resolve() / 'test/config/policy.yaml', 'r') as default_policy:
+        return default_policy.read()
+
 def get_api_config():
     """Gets a default API config to be used with the testsing setup"""
     config = openapi_client.Configuration(
@@ -56,4 +61,9 @@ class ConfiguredTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        # reload the default policy so tests dont interfere with eachother
+        default_policy = get_default_policy()
+        policy_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
+        policy_api.load_policy(cls.account, 'root', default_policy)
+
         cls.client.close()
