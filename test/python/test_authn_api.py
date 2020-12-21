@@ -9,16 +9,18 @@ import openapi_client
 from . import api_config
 from .api_config import CONJUR_AUTHN_API_KEY, CONJUR_ACCOUNT
 
-class TestAuthnApi(unittest.TestCase):
+class TestAuthnApi(api_config.ConfiguredTest):
     """AuthnApi integration tests. Ensures that authentication with a Conjur server is working"""
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.api_key = os.environ[CONJUR_AUTHN_API_KEY]
         cls.account = os.environ[CONJUR_ACCOUNT]
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         # ensures that the proper API key is set for other test cases after the key rotation test
         os.environ.update({CONJUR_AUTHN_API_KEY: cls.api_key})
 
