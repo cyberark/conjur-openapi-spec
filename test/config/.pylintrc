@@ -4,6 +4,8 @@ disable=
     # redundant, we generally only have one class per module for integration tests
     missing-module-docstring,
     # pylint catches auto-generated import statements as code duplication
-    R0801
+    R0801,
+    # pylint sets a maximum number of public methods for each test suite (20)
+    R0904
 
 max-line-length=100
