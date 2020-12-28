@@ -37,6 +37,15 @@ Clients are generated using [OpenAPI Generator v4.3.1](https://github.com/OpenAP
 
 ## Getting Started
 
+To view the Conjur OpenAPI Specification directly, please see the [spec/](./spec/) directory.
+
+In the sections below, we review some of the ways you can leverage the spec in your own workflows.
+Need help with something that's not yet documented here? Please
+[open an issue](https://github.com/cyberark/conjur-openapi-spec/issues/new/choose) - we'd be happy
+to help you get started.
+
+### Generating client libraries
+
 To generate a client library using the OpenAPI spec, use the provided script:
 
 ```shell
@@ -48,7 +57,7 @@ A full list of supported languages can be found in
 [OpenAPI Generator documentation](https://github.com/OpenAPITools/openapi-generator#overview).
 
 
-## Examples
+#### Examples
 
 Included in the `examples` directory are demonstrations for using spec-generated API clients.  
 The demos show how to use popular Conjur API endpoints:
@@ -81,4 +90,4 @@ get started and descriptions of our development workflows, please see our [contr
 
 This project is [licensed under Apache License v2.0](LICENSE).
 
-Copyright (c) 2020 CyberArk Software Ltd. All rights reservede
+Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.
