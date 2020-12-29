@@ -216,6 +216,12 @@ paths:
   '/whoami':
     $ref: 'status.yml#/components/paths/WhoAmI'
 
+  '/authn-{authenticator}/{account}/status':
+    $ref: 'status.yml#/components/paths/AuthenticatorStatus'
+
+  '/authn-{authenticator}/{service_id}/{account}/status':
+    $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
+
 # ========== SECRETS ==========
 
   '/secrets/{account}/{kind}/{identifier}':

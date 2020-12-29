@@ -32,22 +32,38 @@ def get_api_config():
     config.username = os.environ[CONJUR_AUTHN_LOGIN]
     return config
 
-def get_api_client():
-    """Gets an authenticated ApiClient to be used with the testing setup"""
-    api_key = os.environ[CONJUR_AUTHN_API_KEY]
+def get_api_key(username):
+    """Gets the api key for a given username
+
+    In order for this to work admin MUST have permissions on the new user,
+    which wont be true if you simply add a user to the default policy file
+    loaded in at server start
+    """
+    if username == 'admin':
+        return os.environ[CONJUR_AUTHN_API_KEY]
+    auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
+    api_key = auth_api.rotate_api_key(os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
+    return api_key
+
+def get_api_client(username='admin'):
+    """
+    Gets an authenticated ApiClient with the given
+    username/password to be used with the testing setup
+    """
+    api_key = get_api_key(username)
     account = os.environ[CONJUR_ACCOUNT]
 
     config = get_api_config()
 
     client = openapi_client.ApiClient(config)
     auth = openapi_client.api.AuthnApi(client)
-    new_key = auth.authenticate(
+    api_token = auth.authenticate(
             account,
-            os.environ['CONJUR_AUTHN_LOGIN'],
+            username,
             api_key,
             accept_encoding='base64'
         )
-    client.configuration.api_key = {'Authorization': f'Token token="{new_key}"'}
+    client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
     return client
 
 class ConfiguredTest(unittest.TestCase):
