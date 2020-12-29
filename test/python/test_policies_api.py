@@ -37,7 +37,7 @@ class TestPoliciesApi(api_config.ConfiguredTest):
 
         # Sanity check, make sure the new variable is accessable
         secrets = openapi_client.api.secrets_api.SecretsApi(self.client)
-        secrets.create_variable(self.account, 'variable', NEW_VARIABLE, 'random_data')
+        secrets.create_variable(self.account, 'variable', NEW_VARIABLE, body='random_data')
 
     def test_modify_policy(self):
         """Test case for modify_policy
@@ -63,7 +63,7 @@ class TestPoliciesApi(api_config.ConfiguredTest):
         secrets = openapi_client.api.secrets_api.SecretsApi(self.client)
         secret_val = 'new secret value'
 
-        secrets.create_variable(self.account, 'variable', NEW_VARIABLE, secret_val)
+        secrets.create_variable(self.account, 'variable', NEW_VARIABLE, body=secret_val)
 
 if __name__ == '__main__':
     unittest.main()

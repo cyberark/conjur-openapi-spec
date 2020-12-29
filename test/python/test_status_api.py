@@ -40,13 +40,13 @@ class TestStatusApi(api_config.ConfiguredTest):
             cls.account,
             "variable",
             'conjur/authn-oidc/okta/provider-uri',
-            'invalid'
+            body='invalid'
         )
         secrets_api.create_variable(
             cls.account,
             "variable",
             'conjur/authn-oidc/okta/id-token-user-property',
-            'admin'
+            body='admin'
         )
 
     @classmethod

@@ -1,2 +1,4 @@
 - !variable one/password
 - !variable testSecret
+
+- !user alice
