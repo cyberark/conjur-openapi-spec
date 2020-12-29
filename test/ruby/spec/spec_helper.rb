@@ -31,7 +31,48 @@ require 'openapi_client'
 # users commonly want.
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
+
+# gets a basic OpenAPI configuration
+def get_api_config
+  config = OpenapiClient::Configuration.new
+
+  config.scheme = "http"
+  config.host = "localhost"
+  config.username = "admin"
+
+  return config
+end
+
+# gets an authenticated admin client
+def get_api_client
+  api_key = ENV['CONJUR_AUTHN_API_KEY']
+  account = ENV['CONJUR_ACCOUNT']
+
+  config = get_api_config
+
+  client = OpenapiClient::ApiClient.new(config)
+  auth = OpenapiClient::AuthnApi.new(client)
+  token = auth.authenticate(account, "admin", api_key, {accept_encoding: 'base64'})
+  formatted_token = 'Token token="%s"' % token
+  client.config.api_key['Authorization'] = formatted_token
+
+  return client
+end
+
 RSpec.configure do |config|
+
+  config.before(:all) do
+    @client = get_api_client
+    @bad_auth_client = OpenapiClient::ApiClient.new(get_api_config)
+  end
+
+  config.after(:all) do
+    # reload the default policy so tests don't interfere with eachother
+    default_policy = IO.read('/Users/jodonnell/dev/conjur-openapi-spec/test/config/policy.yaml')
+    policy_api = OpenapiClient::PoliciesApi.new(@client)
+    policy_api.load_policy("dev", "root", default_policy)
+  end
+
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
