@@ -242,8 +242,14 @@ paths:
 
 # ========== Resources ==========
 
-  '/resources/{account}':
+  '/resources':
     $ref: 'resources.yml#/components/paths/ListResources'
+
+  '/resources/{account}':
+    $ref: 'resources.yml#/components/paths/ListResourcesOnAccount'
+
+  '/resources/{account}/{kind}':
+    $ref: 'resources.yml#/components/paths/ListSimilarResourcesOnAccount'
 
   '/resources/{account}/{kind}/{identifier}':
     $ref: 'resources.yml#/components/paths/SingleResource'
