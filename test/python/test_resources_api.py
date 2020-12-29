@@ -76,7 +76,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_resources_422(self):
         """Test case for 422 status response on /resources endpoint
-        422 - an optional query parameter is malformed
+        422 - Conjur received a malformed request parameter
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_resources(account=NULL_BYTE)
@@ -99,7 +99,9 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_resources_on_account_400(self):
         """Test case for 400 status response on /resources/{account} endpoint
-        400 - a required URI parameter is malformed
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_resources_on_account(NULL_BYTE)
@@ -126,7 +128,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_resources_on_account_422(self):
         """Test case for 422 status response on /resources/{account} endpoint
-        422 - an optional query parameter is malformed
+        422 - Conjur received a malformed request parameter
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_resources_on_account(self.account, kind=NULL_BYTE)
@@ -152,7 +154,9 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_similar_resources_on_account_400(self):
         """Test case for 400 status response on /resources/{account}/{kind} endpoint
-        400 - a required URI parameter is malformed
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_similar_resources_on_account(NULL_BYTE, "variable")
@@ -183,7 +187,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_similar_resources_on_account_422(self):
         """Test case for 422 status response on /resources/{account}/{kind}
-        422 - on optional query parameter is malformed
+        422 - Conjur received a malformed request parameter
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_similar_resources_on_account(self.account, "variable", search=NULL_BYTE)
@@ -223,7 +227,9 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_resource_400(self):
         """Test case for 400 status response on /resources/{account}/{kind}/{identifier} endpoint
-        400 - a required URI parameter is malformed
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_resource(self.account, NULL_BYTE, 'testSecret')
@@ -262,7 +268,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
     def test_get_resource_422(self):
         """Test case for 422 status response on /resources/{account}/{kind}/{identifier} endpoint
-        422 - an optional query parameter is malformed
+        422 - Conjur received a malformed request parameter
         """
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.get_resource(self.account, 'variable', 'testSecret', check=NULL_BYTE)
