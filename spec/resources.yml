@@ -25,7 +25,7 @@ components:
     ListResources:
       get:
         tags:
-          - "resources"
+        - "resources"
         summary: "Lists resources within an organization account."
         description: "Lists resources within an organization account.
       
@@ -103,8 +103,6 @@ components:
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -188,8 +186,6 @@ components:
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -274,8 +270,6 @@ components:
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -351,8 +345,6 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
