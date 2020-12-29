@@ -58,6 +58,7 @@ class ConfiguredTest(unittest.TestCase):
         cls.account = os.environ[CONJUR_ACCOUNT]
 
         cls.client = get_api_client()
+        cls.bad_auth_client = openapi_client.ApiClient(get_api_config())
 
     @classmethod
     def tearDownClass(cls):

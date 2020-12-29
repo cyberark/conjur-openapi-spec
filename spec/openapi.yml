@@ -25,6 +25,8 @@ tags:
   description: "SSH keys"
 - name: "resources"
   description: "Resources"
+- name: "status"
+  description: "Server status"
   
 components:
   schemas:
@@ -208,6 +210,11 @@ paths:
 
   '/authn/{account}/api_key':
     $ref: 'authentication.yaml#/components/paths/RotateApiKey'
+
+# ========== STATUS ===========
+
+  '/whoami':
+    $ref: 'status.yml#/components/paths/WhoAmI'
 
 # ========== SECRETS ==========
 

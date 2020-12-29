@@ -1,0 +1,55 @@
+components:
+  schemas:
+    WhoAmI:
+      type: object
+      description: "Information about the client making a request"
+      properties:
+
+        client_ip:
+          description: "The request client IP address as determined by Conjur. This same IP address appears in application logs and audit logs."
+          type: string
+          example: "127.0.0.1"
+
+        user_agent:
+          description: "The incoming request HTTP user agent header."
+          type: string
+          example: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+
+        account:
+          description: "The account attribute of the client provided access token."
+          type: string
+          example: "dev"
+
+        username:
+          description: "The username attribute of the provided access token."
+          type: string
+          example: "admin"
+
+        token_issued_at:
+          description: "The issued timestamp, that is, when the provided access token was created (iat field in the JWT)"
+          type: string
+          example: "2017-08-04T22:27:20+00:00"
+
+  paths:
+    WhoAmI:
+      get:
+        tags:
+        - "status"
+        summary: "Provides information about the client making an API request."
+        description: |
+          WhoAmI provides information about the client making an API request.
+          It can be used to help troubleshoot configuration by verifying authentication
+          and the client IP address for audit and network access restrictions.
+          For more information, see Host Attributes.
+        operationId: "whoAmI"
+        responses:
+          "200":
+            description: "Details about the client making the request"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/WhoAmI'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+        security:
+          - conjurAuth: []
