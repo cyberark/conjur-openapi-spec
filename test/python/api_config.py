@@ -74,8 +74,15 @@ class ConfiguredTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         # reload the default policy so tests dont interfere with eachother
+        cls.load_default_policy()
+
+        cls.client.close()
+
+    @classmethod
+    def load_default_policy(cls):
+        """Reloads a default policy
+        Compartmentalizes test cases by replacing any loaded policy
+        """
         default_policy = get_default_policy()
         policy_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
         policy_api.load_policy(cls.account, 'root', default_policy)
-
-        cls.client.close()
