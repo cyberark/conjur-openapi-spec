@@ -16,3 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cybeark/conjur-openapi-spec#62](https://github.com/cyberark/conjur-openapi-spec/issues/62)
 - The authenticators index endpoint is now included in the spec file. Allows users to check which authenticators are installed and enabled.
   [cyberark/conjur-openapi-spec#58](https://github.com/cyberark/conjur-openapi-spec/issues/58)
+- Secrets endpoint will now except `expirations` as an extra kwarg. Allows for resetting the expiration date of a secret.
+  [cybeark/conjur-openapi-spec#64](https://github.com/cyberark/conjur-openapi-spec/issues/64)
+- Secrets endpoint integration tests are now fully enumerated
+  [cyberark/conjur-openapi-spec#102](https://github.com/cyberark/conjur-openapi-spec/issues/102)
