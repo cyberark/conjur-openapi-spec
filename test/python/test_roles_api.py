@@ -16,6 +16,20 @@ ROLES_POLICY = """
 - !user alice
 """
 
+GRANT_POLICY = """
+- !permit
+  role: !user alice
+  privileges: [ read, execute ]
+  resource: !user bob
+"""
+
+DENY_POLICY = """
+- !deny
+  resource: !user bob
+  role: !user alice
+  privilege: [ read, execute ]
+"""
+
 NULL_BYTE = '\00'
 
 class TestRolesApi(api_config.ConfiguredTest):
@@ -48,6 +62,16 @@ class TestRolesApi(api_config.ConfiguredTest):
             member=role_id
         )
         return response
+
+    def grant_deny_permissions(self):
+        """Loads two policies, one which grants permissions for alice on a
+        variable, then one that denies permissions. This needs to be done so
+        that a 403 code can be returned when alice attempts to retrieve the
+        variable in place of a 404"""
+        policy_api = openapi_client.api.PoliciesApi(self.client)
+
+        policy_api.modify_policy(self.account, 'root', GRANT_POLICY)
+        policy_api.modify_policy(self.account, 'root', DENY_POLICY)
 
     # Test cases for GET requests to /roles/{account}/{kind}/{identifier} endpoint
 
@@ -92,6 +116,9 @@ class TestRolesApi(api_config.ConfiguredTest):
         # establish a new api client as user Alice
         alice_client = api_config.get_api_client(username="alice")
         alice_roles_api = openapi_client.RolesApi(alice_client)
+
+        # permit and then deny alice privilege on user:bob
+        self.grant_deny_permissions()
 
         # attempt to show group:userGroup's role details
         with self.assertRaises(openapi_client.ApiException) as context:
