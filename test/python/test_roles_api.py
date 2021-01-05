@@ -346,5 +346,120 @@ class TestRolesApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
+    # Test cases for DELETE requests to /roles/{account}/{kind}/{identifier}?members&member="{role}"
+
+    def test_delete_member_204(self):
+        """Test case for 204 status response when deleting role member
+        204 - successful request, the specified member is no longer a member of the role
+        """
+        # add Bob as a member of userGroup and confirm
+        self.add_user_to_group('bob')
+        group_members = self.api.get_role(self.account, 'group', 'userGroup', members='')
+        self.assertEqual(len(group_members), 2)
+        self.assertEqual(group_members[1]['member'], self.BOB_ID)
+
+        # remove Bob as member of userGroup
+        _, delete_status, _ = self.api.delete_member_with_http_info(
+            self.account,
+            'group',
+            'userGroup',
+            members='',
+            member=self.BOB_ID
+        )
+        self.assertEqual(delete_status, 204)
+
+        # confirm Bob's removal as member
+        group_members = self.api.get_role(self.account, 'group', 'userGroup', members='')
+        self.assertEqual(len(group_members), 1)
+        self.assertNotEqual(group_members[0]['member'], self.BOB_ID)
+
+    def test_delete_member_400(self):
+        """Test case for 400 status response when deleting role member
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.delete_member(
+                self.account,
+                NULL_BYTE,
+                'userGroup',
+                members='',
+                member=self.BOB_ID
+            )
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_delete_member_401(self):
+        """Test case for 401 status response when deleting role member
+        401 - unauthenticated request
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.bad_auth_api.delete_member(
+                self.account,
+                'group',
+                'userGroup',
+                members='',
+                member=self.BOB_ID
+            )
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_delete_member_403(self):
+        """Test case for 403 status response when deleting role member
+        403 - the authenticated client lacks the necessary privilege
+        """
+        # add Alice as a member of userGroup and confirm
+        self.add_user_to_group('alice')
+        group_members = self.api.get_role(self.account, 'group', 'userGroup', members='')
+        self.assertEqual(len(group_members), 2)
+        self.assertEqual(group_members[1]['member'], self.ALICE_ID)
+
+        # establish a new api client as user Bob
+        bob_client = api_config.get_api_client(username='bob')
+        bob_roles_api = openapi_client.RolesApi(bob_client)
+
+        # attempt to delete Alice as member of userGroup as Bob
+        with self.assertRaises(openapi_client.ApiException) as context:
+            bob_roles_api.delete_member(
+                self.account,
+                'group',
+                'userGroup',
+                members='',
+                member=self.ALICE_ID
+            )
+
+        self.assertEqual(context.exception.status, 403)
+
+    def test_delete_member_404(self):
+        """Test case for 404 status response when deleting role member
+        404 - the queried role intended for deletion was not found
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.delete_member(
+                self.account,
+                'group',
+                'userGroup',
+                members='',
+                member=f'{self.account}:user:fakeUser'
+            )
+
+        self.assertEqual(context.exception.status, 404)
+
+    def test_delete_member_422(self):
+        """Test case for 422 status response when deleting role member
+        422 - Conjur recieved a malformed request parameter
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.delete_member(
+                self.account,
+                'group',
+                'userGroup',
+                members='',
+                member=NULL_BYTE
+            )
+
+        self.assertEqual(context.exception.status, 422)
+
 if __name__ == '__main__':
     unittest.main()
