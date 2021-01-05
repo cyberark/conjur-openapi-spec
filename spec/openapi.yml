@@ -151,6 +151,8 @@ components:
       description: "The server cannot process the request due to malformed request syntax"
     Busy:
       description: "Similar operation already in progress, retry after a delay"
+    DeleteMemberSuccess:
+      description: "Member was deleted from role successfully"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
     InternalServerError:

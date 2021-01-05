@@ -87,8 +87,6 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -154,8 +152,71 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      delete:
+        tags:
+        - "roles"
+        summary: "Deletes an existing role membership"
+        description: "Deletes an existing role membership.
+
+          If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON.
+
+          When the `members` query parameter is provided, you will get the members of a role.
+
+          When the `members` and `member` query parameters are provided, the role specfified by `member` will be removed as a member of the role specified in the endpoint URI.
+          "
+        operationId: "deleteMember"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "kind"
+          in: "path"
+          description: "Type of resource"
+          required: true
+          example: user
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Kind'
+        - name: "identifier"
+          in: "path"
+          description: "ID of the role for which to get the information about"
+          required: true
+          example: "admin"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/ResourceID'
+        - name: "members"
+          in: "query"
+          description: "Returns a list of the Role's members."
+          required: true
+          schema:
+            type: string
+        - name: "member"
+          in: "query"
+          description: "The identifier of the Role to be added as a member."
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Role'
+
+
+        responses:
+          "204":
+            $ref: 'openapi.yml#/components/responses/DeleteMemberSuccess'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
 
         security:
           - conjurAuth: []
