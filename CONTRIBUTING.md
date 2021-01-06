@@ -123,3 +123,11 @@ Run the current suite of integration tests using the script:
 ```shell
 $ ./bin/integration_tests
 ```
+
+## Manual Testing
+
+You can access a compatible version of the the Conjur command line interface by starting the `cli` docker compose container
+
+```shell
+$ ./bin/cli
+```
