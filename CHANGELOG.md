@@ -26,3 +26,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cybeark/conjur-openapi-spec#67](https://github.com/cyberark/conjur-openapi-spec/issues/67)
 - `all` query parameter supported on Roles endpoint.
   [cybeark/conjur-openapi-spec#68](https://github.com/cyberark/conjur-openapi-spec/issues/68)
+- The roles `graph` query parameter is now included in the spec file. Allows for viewing a role as a graph/tree.
+  [cyberark/conjur-openapi-spec#69](https://github.com/cyberark/conjur-openapi-spec/issues/69)
