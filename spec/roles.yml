@@ -46,6 +46,16 @@ components:
           example: "admin"
           schema:
             $ref: 'openapi.yml#/components/schemas/ResourceID'
+        - name: "all"
+          in: "query"
+          description: "Returns all role memberships, expanded recursively."
+          schema:
+            type: string
+        - name: "memberships"
+          in: "query"
+          description: "Returns all direct role memberships (members not expanded recursively)."
+          schema:
+            type: string
         - name: "members"
           in: "query"
           description: "Returns a list of the Role's members."

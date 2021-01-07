@@ -22,3 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#102](https://github.com/cyberark/conjur-openapi-spec/issues/102)
 - Adding and deleting role members now supported in Roles spec file.
   [cyberark/conjur-openapi-spec#65](https://github.com/cyberark/conjur-openapi-spec/issues/65)
+- `memberships` query parameter supported on Roles endpoint.
+  [cybeark/conjur-openapi-spec#67](https://github.com/cyberark/conjur-openapi-spec/issues/67)
+- `all` query parameter supported on Roles endpoint.
+  [cybeark/conjur-openapi-spec#68](https://github.com/cyberark/conjur-openapi-spec/issues/68)
