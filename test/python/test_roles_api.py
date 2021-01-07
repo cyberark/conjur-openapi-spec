@@ -4,11 +4,18 @@ import unittest
 
 import openapi_client
 
-from . import api_config
+import api_config
 
 ROLES_POLICY = """
+- !layer testLayer
+
 - !group
   id: userGroup
+  annotations:
+    editable: true
+
+- !group
+  id: anotherGroup
   annotations:
     editable: true
 
@@ -112,13 +119,213 @@ class TestRolesApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
-    # Test query parameters on GET requests to /roles/{account}/{kind}/{identifier} endpoint
+    # Test cases for getting all of a role's memberships, expanded recursively
 
-    def test_get_members(self):
-        """Test using members query parameter on GET requests
+    def test_get_all_memberships_200(self):
+        """Test case for 200 status response for GET requests using 'all' query parameter
+        Queries user:bob for all its memberships, expanded recursively
+        """
+        # Set bob as member of userGroup and anotherGroup
+        # Set userGroup as member of testLayer
+        self.add_user_to_group('bob')
+
+        self.api.add_member(
+            self.account,
+            'group',
+            'anotherGroup',
+            members='',
+            member=self.BOB_ID
+        )
+
+        self.api.add_member(
+            self.account,
+            'layer',
+            'testLayer',
+            members='',
+            member=self.GROUP_ID
+        )
+
+        # testLayer will be listed in all memberships of bob
+        bob_membership_data, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'bob',
+            all=''
+        )
+
+        target_membership_data = [
+            f'{self.account}:layer:testLayer',
+            f'{self.account}:group:anotherGroup',
+            f'{self.account}:group:userGroup',
+            f'{self.account}:user:bob'
+        ]
+
+        self.assertEqual(status, 200)
+        self.assertEqual(bob_membership_data, target_membership_data)
+
+    def test_get_all_memberships_400(self):
+        """Test case for 400 status response for GET requests using 'all' query parameter
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                NULL_BYTE,
+                'admin',
+                all=''
+            )
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_get_all_memberships_401(self):
+        """Test case for 401 status response for GET requests using 'all' query parameter
+        401 - unauthorized request
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.bad_auth_api.get_role(
+                self.account,
+                'user',
+                'admin',
+                all=''
+            )
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_get_all_memberships_404(self):
+        """Test case for 404 status response for GET requests using 'all' query parameter
+        404 - the queried role does not exist
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                'user',
+                'fakeUser',
+                all=''
+            )
+
+        self.assertEqual(context.exception.status, 404)
+
+    # Test cases for getting a role's direct memberships
+
+    def test_get_direct_memberships_200(self):
+        """Test case for 200 status response for GET requests using 'memberships' query parameter
+        Queries user:bob for all its memberships, expanded recursively
+        This will include memberships of bob's direct memberships
+        """
+        # Set bob as member of userGroup and anotherGroup
+        # Set userGroup as member of testLayer
+        self.add_user_to_group('bob')
+
+        self.api.add_member(
+            self.account,
+            'group',
+            'anotherGroup',
+            members='',
+            member=self.BOB_ID
+        )
+
+        self.api.add_member(
+            self.account,
+            'layer',
+            'testLayer',
+            members='',
+            member=self.GROUP_ID
+        )
+
+        # testLayer will not be listed in direct memberships of bob
+        bob_membership_data, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'bob',
+            memberships=''
+        )
+
+        target_membership_data = [
+            {
+                'admin_option': False,
+                'ownership': False,
+                'role': f'{self.account}:group:userGroup',
+                'member': f'{self.account}:user:bob'
+            },
+            {
+                'admin_option': False,
+                'ownership': False,
+                'role': f'{self.account}:group:anotherGroup',
+                'member': f'{self.account}:user:bob'
+            }
+        ]
+
+        self.assertEqual(status, 200)
+        self.assertEqual(bob_membership_data, target_membership_data)
+
+    def test_get_direct_memberships_400(self):
+        """Test case for 400 status response for GET requests using 'memberships' query parameter
+        Error originates from NGINX, occurs when making HTTPS requests to Conjur through NGINX
+        This same request made directly to Conjur with HTTP results in a 422 status response
+        400 - request rejected by NGINX proxy
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                NULL_BYTE,
+                'admin',
+                memberships=''
+            )
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_get_direct_memberships_401(self):
+        """Test case for 401 status response for GET requests using 'memberships' query parameter
+        401 - unauthorized request
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.bad_auth_api.get_role(
+                self.account,
+                'user',
+                'admin',
+                memberships=''
+            )
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_get_direct_memberships_404(self):
+        """Test case for 404 status response for GET requests using 'memberships' query parameter
+        404 - the queried role does not exist
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                'user',
+                'fakeUser',
+                memberships=''
+            )
+
+        self.assertEqual(context.exception.status, 404)
+
+    def test_get_direct_memberships_422(self):
+        """Test case for 422 status response for GET requests using 'memberships' query parameter
+        422 - Conjur recieved a malformed request parameter
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                'user',
+                'admin',
+                memberships='',
+                search=NULL_BYTE
+            )
+
+        self.assertEqual(context.exception.status, 422)
+
+    # Test cases for getting a role's members
+
+    def test_get_members_200(self):
+        """Test case for 200 status response for GET requests using 'members' query parameter
         Queries group:userGroup role for its members, which should only be dev:user:admin
         """
-        response = self.api.get_role(
+        group_member_data, status, _ = self.api.get_role_with_http_info(
             self.account,
             'group',
             'userGroup',
@@ -135,7 +342,66 @@ class TestRolesApi(api_config.ConfiguredTest):
             }
         ]
 
-        self.assertEqual(response, target_response)
+        self.assertEqual(status, 200)
+        self.assertEqual(group_member_data, target_response)
+
+    def test_get_members_400(self):
+        """Test case for 400 status response for GET requests using 'members' query parameter
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                NULL_BYTE,
+                'admin',
+                members=''
+            )
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_get_members_401(self):
+        """Test case for 401 status response for GET requests using 'members' query parameter
+        401 - unauthorized request
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.bad_auth_api.get_role(
+                self.account,
+                'user',
+                'admin',
+                members=''
+            )
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_get_members_404(self):
+        """Test case for 404 status response for GET requests using 'members' query parameter
+        404 - the queried role does not exist
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                'user',
+                'fakeUser',
+                members=''
+            )
+
+        self.assertEqual(context.exception.status, 404)
+
+    def test_get_members_422(self):
+        """Test case for 422 status response for GET requests using 'members' query parameter
+        422 - Conjur recieved a malformed request parameter
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_role(
+                self.account,
+                'user',
+                'admin',
+                members='',
+                search=NULL_BYTE
+            )
+
+        self.assertEqual(context.exception.status, 422)
+
+    # Test cases confirming count, offset, limit and search query parameters
 
     def test_get_members_count(self):
         """Test using members & count query parameters on GET
