@@ -44,7 +44,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         login = self.config.username
         body = self.api_key
 
-        response = self.api.authenticate(self.account, login, body).replace("\'","\"")
+        response = self.api.authenticate('authn', self.account, login, body).replace("\'","\"")
         response_json = json.loads(response)
         response_keys = response_json.keys()
 
@@ -58,13 +58,13 @@ class TestAuthnApi(api_config.ConfiguredTest):
         Gets the API key of a user given the username and password via HTTP Basic Authentication.
         """
         # Attempt to login
-        self.api.login(self.account)
+        self.api.login('authn', self.account)
 
         # Ensure we cannot login with a bad password
         self.config.password = "FakePassword123"
 
         with self.assertRaises(openapi_client.exceptions.ApiException):
-            self.api.login(self.account)
+            self.api.login('authn', self.account)
 
     def test_rotate_api_key(self):
         """Test case for rotate_api_key
@@ -72,11 +72,11 @@ class TestAuthnApi(api_config.ConfiguredTest):
         Rotates a user’s API key.
         """
         # Rotate the key and attempt to login with it
-        new_key = self.api.rotate_api_key(self.account)
+        new_key = self.api.rotate_api_key('authn', self.account)
 
         self.config.password = new_key
 
-        self.api.login(self.account)
+        self.api.login('authn', self.account)
 
         # We rotated the API key so we have to update the class variable
         self.__class__.api_key = new_key
@@ -92,13 +92,13 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.api.set_password(self.account, body=test_password)
         self.config.password = test_password
 
-        self.api.login(self.account)
+        self.api.login('authn', self.account)
 
         # Attempt to change password with bad auth info
         self.config.password = "BadPassword"
 
         with self.assertRaises(openapi_client.exceptions.ApiException):
-            self.api.login(self.account)
+            self.api.login('authn', self.account)
 
         self.config.password = test_password
 

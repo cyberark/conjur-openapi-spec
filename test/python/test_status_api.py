@@ -161,7 +161,7 @@ class TestStatusApi(api_config.ConfiguredTest):
         authenticators, status, _ = self.api.authenticators_index_with_http_info()
 
         self.assertEqual(status, 200)
-        self.assertIsInstance(authenticators, openapi_client.models.authenticators.Authenticators)
+        self.assertIsInstance(authenticators, openapi_client.models.authenticators_response.AuthenticatorsResponse)
 
         for i in AUTHENTICATOR_FIELDS:
             lst  = getattr(authenticators, i)

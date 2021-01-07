@@ -37,7 +37,7 @@ def get_api_key(username):
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
     auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
-    api_key = auth_api.rotate_api_key(os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
+    api_key = auth_api.rotate_api_key('authn', os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
     return api_key
 
 def get_api_client(username='admin'):
@@ -53,6 +53,7 @@ def get_api_client(username='admin'):
     client = openapi_client.ApiClient(config)
     auth = openapi_client.api.AuthnApi(client)
     api_token = auth.authenticate(
+            'authn',
             account,
             username,
             api_key,
