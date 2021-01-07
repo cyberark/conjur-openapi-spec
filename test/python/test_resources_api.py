@@ -8,39 +8,22 @@ from . import api_config
 
 RESOURCE_MEMBERS = ['created_at', 'id', 'owner']
 
-POLICY_ALICE = "- !user alice"
-
 NULL_BYTE = '\00'
+
+def authenticated_client_without_privilege():
+    """Create and authenticate Alice, a user with no resource permissions
+    Returns a Resource API client configured around Alice
+    This is used in testing 404 responses due to lack of privilege
+    """
+    alice_client = api_config.get_api_client(username='alice')
+
+    return openapi_client.ResourcesApi(alice_client)
 
 class TestResourcesApi(api_config.ConfiguredTest):
     """ResourcesApi unit test stubs"""
     def setUp(self):
         self.api = openapi_client.api.resources_api.ResourcesApi(self.client)
         self.bad_auth_api = openapi_client.api.resources_api.ResourcesApi(self.bad_auth_client)
-
-    def authenticated_client_without_privilege(self):
-        """Create and authenticate Alice, a user with no resource permissions
-        Returns a Resource API client configured around Alice
-        This is used in testing 404 responses due to lack of privilege
-        """
-        policy_api = openapi_client.PoliciesApi(self.client)
-
-        alice_info = policy_api.modify_policy(self.account, 'root', POLICY_ALICE)
-        alice_api_key = alice_info["created_roles"]["dev:user:alice"]["api_key"]
-
-        config = api_config.get_api_config()
-        config.username = "alice"
-        alice_client = openapi_client.ApiClient(config)
-        authn_api = openapi_client.AuthnApi(alice_client)
-        alice_authn_token = authn_api.authenticate(
-            self.account,
-            config.username,
-            alice_api_key,
-            accept_encoding='base64'
-        )
-        alice_client.configuration.api_key = {'Authorization': f'Token token="{alice_authn_token}"'}
-
-        return openapi_client.ResourcesApi(alice_client)
 
     # Test cases for /resources endpoint
 
@@ -259,7 +242,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         404 - the authenticated user lacks the necessary privilege
         Conjur docs say this should return 403 - Conjur api feature tests say otherwise
         """
-        alice_resource_api = self.authenticated_client_without_privilege()
+        alice_resource_api = authenticated_client_without_privilege()
 
         with self.assertRaises(openapi_client.ApiException) as context:
             alice_resource_api.get_resource_with_http_info(self.account, 'variable', 'testSecret')

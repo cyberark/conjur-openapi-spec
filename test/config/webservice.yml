@@ -81,5 +81,3 @@
 - !grant
   role: !group conjur/authn-azure/users
   member: !user admin
-
-- !user alice

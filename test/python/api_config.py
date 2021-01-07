@@ -33,12 +33,7 @@ def get_api_config():
     return config
 
 def get_api_key(username):
-    """Gets the api key for a given username
-
-    In order for this to work admin MUST have permissions on the new user,
-    which wont be true if you simply add a user to the default policy file
-    loaded in at server start
-    """
+    """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
     auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
