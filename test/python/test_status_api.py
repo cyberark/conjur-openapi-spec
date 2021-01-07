@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import unittest
-import pathlib
 
 import openapi_client
 
@@ -21,13 +20,6 @@ WHOAMI_FIELDS = [
     "token_issued_at",
 ]
 
-WEBSERVICE_POLICY = pathlib.Path('test/config/webservice.yml')
-
-def get_webservice_policy():
-    """Gets the text for the webservice testing policy"""
-    with open(WEBSERVICE_POLICY, 'r') as policy:
-        return policy.read()
-
 class TestStatusApi(api_config.ConfiguredTest):
     """StatusApi unit test stubs"""
     @classmethod
@@ -35,7 +27,7 @@ class TestStatusApi(api_config.ConfiguredTest):
         """loads the webservice policy into conjur and gets it setup"""
         policies_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
         secrets_api = openapi_client.api.secrets_api.SecretsApi(cls.client)
-        policies_api.modify_policy(cls.account, 'root', get_webservice_policy())
+        policies_api.modify_policy(cls.account, 'root', api_config.get_webservice_policy())
         secrets_api.create_variable(
             cls.account,
             "variable",
@@ -161,7 +153,10 @@ class TestStatusApi(api_config.ConfiguredTest):
         authenticators, status, _ = self.api.authenticators_index_with_http_info()
 
         self.assertEqual(status, 200)
-        self.assertIsInstance(authenticators, openapi_client.models.authenticators_response.AuthenticatorsResponse)
+        self.assertIsInstance(
+            authenticators,
+            openapi_client.models.authenticators_response.AuthenticatorsResponse
+        )
 
         for i in AUTHENTICATOR_FIELDS:
             lst  = getattr(authenticators, i)

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+export CONJUR_AUTHN_API_KEY=$admin_api_key
+
+echo "Conjur admin api key $admin_api_key"
+
+# Docker-compose will pick this file up when starting containers
+# so we will have these variables in the container
+cat <<ENV > .env
+CONJUR_AUTHN_API_KEY=$admin_api_key
+ENV
