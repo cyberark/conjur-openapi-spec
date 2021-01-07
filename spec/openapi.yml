@@ -138,6 +138,8 @@ components:
         text/plain:
           schema:
             type: string
+    AddMemberSuccess:
+      description: "Member was added to role successfully"
     ApiKey:
       description: "The response body is the API key"
       content:
@@ -149,6 +151,8 @@ components:
       description: "The server cannot process the request due to malformed request syntax"
     Busy:
       description: "Similar operation already in progress, retry after a delay"
+    DeleteMemberSuccess:
+      description: "Member was deleted from role successfully"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
     InternalServerError:
@@ -159,6 +163,18 @@ components:
       description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
+    Roles:
+      description: "The response body contains the requested role(s)/member(s)"
+      content:
+        application/json:
+          schema:
+            type: object
+            example:
+              {
+                "created_at": "2020-12-31:12:34:56.789+00:00",
+                "id": "myorg:user:admin",
+                "members": []
+              }
     SecretValue:
       description: "The secret value was added successfully"
       content:
