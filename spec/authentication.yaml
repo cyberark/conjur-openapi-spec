@@ -167,9 +167,8 @@ components:
           in: "query"
           description: "(**Optional**) role specifier in `{kind}:{identifier}` format
 
-            openapi.yml#openapi.yml#openapi.yml#openapi.yml#openapi.yml# Permissions required
-
-            `update` privilege on the role whose API key is being rotated."
+              ##### Permissions required:
+              `update` privilege on the role whose API key is being rotated."
           schema:
             $ref: 'openapi.yml#/components/schemas/Role'
 

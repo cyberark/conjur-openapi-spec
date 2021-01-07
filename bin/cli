@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker-compose up -d cli
+docker-compose exec cli bash

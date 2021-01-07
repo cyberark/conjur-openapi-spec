@@ -75,3 +75,17 @@ services:
     volumes:
       - ./examples/config/:/config/policy
       - ./config/https/:/config/https
+
+  cli:
+    image: cyberark/conjur-cli:5
+    entrypoint: sleep
+    command: infinity
+    environment:
+      CONJUR_HTTP_APPLIANCE_URL: http://conjur
+      CONJUR_HTTPS_APPLIANCE_URL: https://conjur-https
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY: Null
+      CONJUR_CA_BUNDLE: /opt/conjur-openapi-spec/config/https/ca.crt
+    volumes:
+      - ./:/src
