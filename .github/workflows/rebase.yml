@@ -16,6 +16,6 @@ jobs:
           fetch-depth: 0
 
       - name: Check for rebase
-        uses: telday/enforce-rebase@v2
+        uses: cyberark/enforce-rebase@v2
         with:
           default-branch: main
