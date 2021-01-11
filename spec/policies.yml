@@ -89,8 +89,6 @@ components:
             $ref: 'openapi.yml#/components/responses/Busy'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -152,8 +150,6 @@ components:
             $ref: 'openapi.yml#/components/responses/Busy'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -216,8 +212,6 @@ components:
             $ref: 'openapi.yml#/components/responses/Busy'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
