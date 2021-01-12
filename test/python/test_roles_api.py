@@ -71,6 +71,7 @@ class TestRolesApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 200)
         self.assertIsInstance(role_details, dict)
+
         members = ['created_at', 'id', 'members']
         for i in members:
             self.assertIn(i, role_details)
@@ -726,6 +727,42 @@ class TestRolesApi(api_config.ConfiguredTest):
             )
 
         self.assertEqual(context.exception.status, 422)
+
+    def test_get_role_graph_200(self):
+        """Test case for get_role 200 response with graph query param"""
+        details, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'admin',
+            graph=''
+        )
+
+        self.assertEqual(status, 200)
+        # root policy as parent should always be first for admin user
+        for i in details:
+            self.assertIn('parent', i)
+            self.assertIn('child', i)
+
+    def test_get_role_graph_400(self):
+        """Test case for get_role 400 response with graph query param"""
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.bad_auth_api.get_role(self.account, 'user', NULL_BYTE, graph='')
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_get_role_graph_401(self):
+        """Test case for get_role 401 response with graph query param"""
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.bad_auth_api.get_role(self.account, 'user', 'admin', graph='')
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_get_role_graph_404(self):
+        """Test case for get_role 404 response with graph query param"""
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.api.get_role(self.account, 'user', 'nonexist', graph='')
+
+        self.assertEqual(context.exception.status, 404)
 
 if __name__ == '__main__':
     unittest.main()
