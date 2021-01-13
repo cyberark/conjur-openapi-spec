@@ -27,6 +27,8 @@ tags:
   description: "Resources"
 - name: "status"
   description: "Server status"
+- name: "certificate authority"
+  description: "Certificate authority"
   
 components:
   schemas:
@@ -285,6 +287,11 @@ paths:
 
   '/public_keys/{account}/{kind}/{identifier}':
     $ref: 'public-keys.yml#/components/paths/PublicKeys'
+
+# ========== Certificate Authority ==========
+
+  '/ca/{account}/{service_id}/sign':
+    $ref: 'cert-auth.yml#/components/paths/Sign'
 
 # TODO: Inject client cert
 # TODO: Seed Service
