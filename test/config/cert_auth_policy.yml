@@ -1,0 +1,33 @@
+- !policy
+  id: conjur/signing-service/ca
+  body:
+    - !variable private-key
+    - !variable private-key-password
+    - !variable cert-chain
+
+    - !webservice
+        annotations:
+          ca/private-key: conjur/signing-service/ca/private-key
+          ca/private-key-password: conjur/signing-service/ca/private-key-password
+          ca/certificate-chain: conjur/signing-service/ca/cert-chain
+          ca/max_ttl: P1D
+
+    - !group clients
+
+    - !permit
+      role: !group clients
+      privilege: [ sign ]
+      resource: !webservice
+
+- !policy
+  id: signing-service
+  body:
+    - !host test-client
+    - !host cn-test-client
+    - !host no-sign-client
+
+- !grant
+  role: !group conjur/signing-service/ca/clients
+  members:
+    - !host signing-service/test-client
+    - !host signing-service/cn-test-client

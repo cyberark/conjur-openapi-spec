@@ -181,5 +181,7 @@ files = [
   '''(.*?)(jpg|gif|doc|pdf|bin)$''',
   '''(.*?)conjur.key$''',
   '''.gitleaks.toml''',
-  '''ldap-server.key.pem'''
+  '''ldap-server.key.pem''',
+  '''(.*?)intermediate.key''',
+  '''(.*?)intermediate_encrypted.key'''
 ]
