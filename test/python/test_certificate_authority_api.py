@@ -58,7 +58,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
 
         # assign intermediate CA private key and CA chain to Conjur variables
         ca_chain = read_file(CERT_CHAIN_PATH)
-        private_key = read_file(INTERMED_PRIVKEY_PATH)
+        private_key = read_file(UNENCRYPTED_KEY_PATH)
 
         self.secrets_api = openapi_client.SecretsApi(self.client)
         self.update_ca_chain(ca_chain)
@@ -132,6 +132,48 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 201)
         self.assertIsInstance(response, str)
+
+    def test_sign_with_encrypted_key_201(self):
+        """Test case for 201 response when requesting a signed certificate
+        Uses an encrypted intermediate key and password to sign CSR
+        """
+        key_password = read_file(KEY_PASSWORD_PATH)
+        encrypted_key = read_file(ENCRYPTED_KEY_PATH)
+
+        self.update_ca_private_key(encrypted_key)
+        self.update_ca_key_password(key_password)
+
+        response, status, _ = self.api.sign_with_http_info(
+            self.account,
+            self.CA_SERVICE_ID,
+            self.csr,
+            'P1D'
+        )
+
+        self.assertEqual(status, 201)
+        self.assertIsInstance(response, openapi_client.models.certificate_json.CertificateJson)
+
+        self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
+
+    def test_sign_with_encrypted_key_500(self):
+        """Test case for 500 response when requesting a signed certificate
+        500 status repsonses can result from a misconfigured CA service
+        In this test, the Conjur variable for the encrypted key's password is incorrect
+        """
+        encrypted_key = read_file(ENCRYPTED_KEY_PATH)
+
+        self.update_ca_private_key(encrypted_key)
+        self.update_ca_key_password('wrong_pass')
+
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.sign(
+                self.account,
+                self.CA_SERVICE_ID,
+                self.csr,
+                'P1D'
+            )
+
+        self.assertEqual(context.exception.status, 500)
 
     def test_sign_400(self):
         """Test case for 400 response when requesting a signed certificate
