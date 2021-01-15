@@ -281,6 +281,12 @@ components:
         summary: "Shows a description of a single resource."
         description: "Details about a single resource.
 
+        If `permitted_roles` and `privilege` are given, Conjur lists the roles with the specified privilege on the resource.
+
+        If `check`, `privilege` and `role` are given, Conjur checks if the specified role has the privilege on the resource.
+
+        If `permitted_roles` and `check` are both given, Conjur responds to the `check` call ONLY.
+
         ##### Permissions Required
 
         `read` privilege on the resource."
@@ -341,6 +347,8 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
