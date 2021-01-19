@@ -47,21 +47,30 @@ def get_api_config(username='admin'):
     config.username = username
     return config
 
-def get_api_key(username):
+def get_api_key(username, role):
     """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
     auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
-    api_key = auth_api.rotate_api_key('authn', os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
+    api_key = auth_api.rotate_api_key(
+        'authn',
+        os.environ[CONJUR_ACCOUNT],
+        role=f'{role}:{username}'
+    )
     return api_key
 
-def get_api_client(username='admin'):
+def get_api_client(username='admin', role='user'):
     """
     Gets an authenticated ApiClient with the given
     username/password to be used with the testing setup
+
+    When authenticating, host's usernames must be given in the form `host/{id}`
     """
-    api_key = get_api_key(username)
+    api_key = get_api_key(username, role)
     account = os.environ[CONJUR_ACCOUNT]
+
+    if role == 'host':
+        username = f'host/{username}'
 
     config = get_api_config()
 

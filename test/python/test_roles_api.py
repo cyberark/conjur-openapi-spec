@@ -243,23 +243,11 @@ class TestRolesApi(api_config.ConfiguredTest):
             memberships=''
         )
 
-        target_membership_data = [
-            {
-                'admin_option': False,
-                'ownership': False,
-                'role': f'{self.account}:group:userGroup',
-                'member': f'{self.account}:user:bob'
-            },
-            {
-                'admin_option': False,
-                'ownership': False,
-                'role': f'{self.account}:group:anotherGroup',
-                'member': f'{self.account}:user:bob'
-            }
-        ]
+        memberships = [f'{self.account}:group:userGroup', f'{self.account}:group:anotherGroup']
 
         self.assertEqual(status, 200)
-        self.assertEqual(bob_membership_data, target_membership_data)
+        for i in range(0, 2):
+            self.assertIn(bob_membership_data[i]['role'], memberships)
 
     def test_get_direct_memberships_400(self):
         """Test case for 400 status response for GET requests using 'memberships' query parameter

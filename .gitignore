@@ -13,3 +13,6 @@ nose2-junit.xml
 spec.yml
 coverage.xml
 .coverage
+
+test-python.csr
+test-python.key

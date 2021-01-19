@@ -1,0 +1,98 @@
+components:
+  schemas:
+    CertificateJson:
+      type: object
+      properties:
+        certificate:
+          type: string
+
+    CertificatePem:
+      type: string
+      format: base64
+
+    CsrBody:
+      type: object
+      properties:
+        csr:
+          type: string
+        ttl:
+          type: string
+      required:
+        - csr
+        - ttl
+
+  responses:
+    Certificate:
+      description: "The response body is the newly signed certificate"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CertificateJson'
+        application/x-pem-file:
+          schema:
+            $ref: '#/components/schemas/CertificatePem'
+
+  paths:
+    Sign:
+      post:
+        tags:
+        - "certificate authority"
+        summary: "Gets a signed certificate from the configured Certificate Authority service."
+        description: "Gets a signed certificate from the configured Certificate Authority service.
+        
+          The request must include a valid Certificate Signing Request, and a desired TTL in ISO 8601 format.
+          
+          *** IMPORTANT ***
+          This endpoint is part of an early implementation of support for using Conjur as a certificate
+          authority, and is currently available at the Community (or early alpha) level.
+          This endpoint is still subject to breaking changes in the future.
+          "
+        operationId: "sign"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "service_id"
+          in: "path"
+          description: "Name of the Certificate Authority service"
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            example: "ca-service"
+        - name: "Accept"
+          in: "header"
+          description: "Setting the Accept header to `application/x-pem-file` allows Conjur to respond with a formatted certificate"
+          schema:
+            type: "string"
+            minLength: 1
+            example: "application/x-pem-file"
+        requestBody:
+          description: "Client Certificate Signing Request"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/CsrBody'
+
+        responses:
+          "201":
+            $ref: '#/components/responses/Certificate'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            description: "Either:          
+            The authenticated role is not a Host role,
+            The authenticated Host does not have `sign` privilege for the CA service, or
+            The authenticated Host ID does not match the of the CSR Common Name (CN).
+            "
+          "404":
+            description: "CA Service with the given ID does not exist"
+
+        security:
+        - conjurAuth: []

@@ -34,3 +34,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#75](https://github.com/cyberark/conjur-openapi-spec/issues/75)
 - Endpoint to configure enabled Conjur authenticators via the API.
   [cyberark/conjur-openapi-spec#66](https://github.com/cyberark/conjur-openapi-spec/issues/66)
+- `/ca/` endpoint now included in the OpenAPI specification.
+  [cyberark/conjur-openapi-spec#63](https://github.com/cyberark/conjur-openapi-spec/issues/63)
