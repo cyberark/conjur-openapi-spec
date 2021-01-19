@@ -2,3 +2,20 @@
 - !variable testSecret
 
 - !user alice
+- !user charles
+
+- !policy
+  id: conjur/authn-ldap/test
+  body:
+  - !webservice
+
+  - !group users
+
+  - !permit
+    role: !group users
+    privilege: [ read, authenticate ]
+    resource: !webservice
+
+- !grant
+  role: !group conjur/authn-ldap/test/users
+  member: !user alice

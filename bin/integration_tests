@@ -13,15 +13,7 @@ fi
 bin/generate_client
 bin/start_conjur
 
-echo "Configuring Conjur..."
-admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
-export CONJUR_AUTHN_API_KEY=$admin_api_key
-
-# Docker-compose will pick this file up when starting containers
-# so we will have these variables in the container
-cat <<ENV > .env
-CONJUR_AUTHN_API_KEY=$admin_api_key
-ENV
+bin/get_conjur_admin_key
 
 echo "Building and starting test env..."
 docker-compose build test-python
@@ -37,4 +29,4 @@ fi
 docker-compose run \
   --no-deps \
   test-python \
-  nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test/python/
+  nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test/python

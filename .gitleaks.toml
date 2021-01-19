@@ -180,5 +180,6 @@ tags = ["key", "twilio"]
 files = [
   '''(.*?)(jpg|gif|doc|pdf|bin)$''',
   '''(.*?)conjur.key$''',
-  '''.gitleaks.toml'''
+  '''.gitleaks.toml''',
+  '''ldap-server.key.pem'''
 ]

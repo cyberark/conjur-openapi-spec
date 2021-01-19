@@ -203,17 +203,26 @@ security:
   - conjurAuth: []
   
 paths:
-  '/authn/{account}/login':
+  '/{authenticator}/{account}/login':
     $ref: 'authentication.yaml#/components/paths/Login'
 
-  '/authn/{account}/{login}/authenticate':
+  '/{authenticator}/{service_id}/{account}/login':
+    $ref: 'authentication.yaml#/components/paths/ServiceLogin'
+
+  '/{authenticator}/{account}/{login}/authenticate':
     $ref: 'authentication.yaml#/components/paths/Authenticate'
+
+  '/{authenticator}/{service_id}/{account}/{login}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/AuthenticateService'
 
   '/authn/{account}/password':
     $ref: 'authentication.yaml#/components/paths/ChangePassword'
 
-  '/authn/{account}/api_key':
+  '/{authenticator}/{account}/api_key':
     $ref: 'authentication.yaml#/components/paths/RotateApiKey'
+
+  '/{authenticator}/{service_id}/{account}':
+    $ref: 'authentication.yaml#/components/paths/UpdateAuthenticatorConfig'
 
 # ========== STATUS ===========
 

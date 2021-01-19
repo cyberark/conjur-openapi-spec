@@ -1,6 +1,6 @@
 components:
   schemas:
-    Authenticators:
+    AuthenticatorsResponse:
       type: object
       properties:
         installed:
@@ -169,9 +169,12 @@ components:
             in: path
             schema:
               type: string
+              enum:
+              - oidc
+              - azure
             required: true
             description: "The type of authenticator"
-            example: "authn-oidc"
+            example: "oidc"
             
           - name: account
             in: path
@@ -229,4 +232,4 @@ components:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Authenticators'
+                  $ref: '#/components/schemas/AuthenticatorsResponse'

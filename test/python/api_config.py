@@ -15,12 +15,27 @@ CONJUR_AUTHN_API_KEY = 'CONJUR_AUTHN_API_KEY'
 CONJUR_AUTHN_LOGIN = 'CONJUR_AUTHN_LOGIN'
 CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
 
+WEBSERVICE_POLICY = pathlib.Path('test/config/webservice.yml')
+
+def get_webservice_policy():
+    """Gets the text for the webservice testing policy"""
+    with open(WEBSERVICE_POLICY, 'r') as policy:
+        return policy.read()
+
+
 def get_default_policy():
     """Gets the default testing policy"""
     with open(pathlib.Path('.').resolve() / 'test/config/policy.yaml', 'r') as default_policy:
         return default_policy.read()
 
-def get_api_config():
+def get_bad_auth_api_config(username='admin'):
+    """Gets a default API config to be used with the testsing setup with no password
+    specified"""
+    config = get_api_config(username=username)
+    config.password = None
+    return config
+
+def get_api_config(username='admin'):
     """Gets a default API config to be used with the testsing setup"""
     config = openapi_client.Configuration(
             host='https://conjur-https',
@@ -29,7 +44,7 @@ def get_api_config():
     config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
     config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
     config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
-    config.username = os.environ[CONJUR_AUTHN_LOGIN]
+    config.username = username
     return config
 
 def get_api_key(username):
@@ -37,7 +52,7 @@ def get_api_key(username):
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
     auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
-    api_key = auth_api.rotate_api_key(os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
+    api_key = auth_api.rotate_api_key('authn', os.environ[CONJUR_ACCOUNT], role=f'user:{username}')
     return api_key
 
 def get_api_client(username='admin'):
@@ -53,6 +68,7 @@ def get_api_client(username='admin'):
     client = openapi_client.ApiClient(config)
     auth = openapi_client.api.AuthnApi(client)
     api_token = auth.authenticate(
+            'authn',
             account,
             username,
             api_key,
