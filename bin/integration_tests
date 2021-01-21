@@ -11,6 +11,14 @@ cleanup() {
   docker-compose rm --stop --force -v
 }
 
+setup_keycloak(){
+  announce "Setting up Keycloak"
+
+  docker-compose exec -T oidc-keycloak bash -c "/scripts/create_client"
+  docker-compose exec -T oidc-keycloak bash -c "/scripts/create_user bob bob bob@conjur.net"
+  docker-compose exec -T conjur bash -c "/policy/oidc/fetchCertificate"
+}
+
 conjur_container_alive(){
   if [ -z `docker-compose ps -q conjur` ]; then
     echo 1
@@ -109,6 +117,7 @@ fi
 announce "Configuring Test Environment"
 bin/get_conjur_admin_key
 config/https/generate_csr
+setup_keycloak
 
 for i in "${tests[@]}"
 do
