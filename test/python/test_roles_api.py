@@ -164,7 +164,8 @@ class TestRolesApi(api_config.ConfiguredTest):
         ]
 
         self.assertEqual(status, 200)
-        self.assertEqual(bob_membership_data, target_membership_data)
+        for i in bob_membership_data:
+            self.assertIn(i, target_membership_data)
 
     def test_get_all_memberships_400(self):
         """Test case for 400 status response for GET requests using 'all' query parameter
