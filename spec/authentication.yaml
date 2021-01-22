@@ -63,6 +63,8 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
@@ -247,8 +249,6 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "404":
-            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
           "500":
@@ -299,6 +299,8 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
