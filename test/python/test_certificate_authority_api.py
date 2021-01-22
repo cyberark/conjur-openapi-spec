@@ -5,7 +5,7 @@ import unittest
 
 import openapi_client
 
-import api_config
+from . import api_config
 
 CA_POLICY = pathlib.Path('test/config/cert_auth_policy.yml')
 CERT_CHAIN_PATH = pathlib.Path('config/https/ca.crt')
