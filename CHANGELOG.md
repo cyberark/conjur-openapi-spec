@@ -38,3 +38,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#63](https://github.com/cyberark/conjur-openapi-spec/issues/63)
 - OIDC authenticate endpoint now included in the OpenAPI specification. Users can now authenticate with Conjur through an OIDC provider using a generated client.
   [cyberark/conjur-openapi-spec#60](https://github.com/cyberark/conjur-openapi-spec/issues/60)
+- Google Cloud Provider authenticate endpoint now included in the spec file. Users can now authenticate with Conjur using GCP.
+  [cyberark/conjur-openapi-spec#61](https://github.com/cyberark/conjur-openapi-spec/issues/61)
