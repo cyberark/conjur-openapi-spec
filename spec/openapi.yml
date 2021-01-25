@@ -230,9 +230,6 @@ paths:
     $ref: 'authentication.yaml#/components/paths/ServiceLogin'
 
   '/authn-oidc/{service_id}/{account}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/OIDCAuthenticateService'
-
-  '/authn-oidc/{account}/authenticate':
     $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
 
 # ========== STATUS ===========

@@ -68,14 +68,19 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    @unittest.expectedFailure
     def test_authenticator_service_status_200(self):
         """Test case for authenticator_service_status 200 return code
 
         We currently do not test this, see https://github.com/cyberark/conjur-openapi-spec/issues/84
         """
-        resp = self.api.authenticator_service_status('oidc', 'okta', self.account)
-        self.assertEqual(resp['status'], 'ok')
+        api_config.setup_oidc_webservice()
+        resp, status, _ = self.api.authenticator_service_status_with_http_info(
+            'oidc',
+            'test',
+            self.account
+        )
+        self.assertEqual(resp.status, 'ok')
+        self.assertEqual(status, 200)
 
     def test_authenticator_service_status_403(self):
         """Test case for authenticator_service_status 403 return code"""
@@ -111,7 +116,6 @@ class TestStatusApi(api_config.ConfiguredTest):
     @unittest.expectedFailure
     def test_authenticator_status_200(self):
         """Test case for authenticator_status 200 return code
-
         We currently do not test this, see https://github.com/cyberark/conjur-openapi-spec/issues/84
         """
         resp = self.api.authenticator_status('azure', self.account)

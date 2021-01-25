@@ -10,8 +10,6 @@ import openapi_client
 from . import api_config
 from .api_config import CONJUR_AUTHN_API_KEY
 
-OIDC_POLICY_FILE = 'test/config/oidc-webservice.yml'
-
 def get_oidc_id_token():
     """Authenticates with the OIDC server and gets the ID token for user bob"""
     oidc_request_form = {
@@ -295,40 +293,6 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         self.api = openapi_client.api.authn_api.AuthnApi(self.client)
         self.bad_auth_api = openapi_client.api.authn_api.AuthnApi(self.bad_auth_client)
 
-    def setup_oidc_webservice(self):
-        """Loads a policy for the oidc webservice into conjur"""
-        policy_api = openapi_client.api.policies_api.PoliciesApi(self.client)
-        with open(OIDC_POLICY_FILE, 'r') as policy_file:
-            policy = policy_file.read()
-        policy_api.modify_policy(self.account, 'root', policy)
-
-        secrets_api = openapi_client.api.secrets_api.SecretsApi(self.client)
-        secrets_api.create_variable(
-            self.account,
-            'variable',
-            'conjur/authn-oidc/test/provider-uri',
-            body='https://keycloak:8443/auth/realms/master'
-        )
-        secrets_api.create_variable(
-            self.account,
-            'variable',
-            'conjur/authn-oidc/test/id-token-user-property',
-            body='preferred_username'
-        )
-
-        secrets_api.create_variable(
-            self.account,
-            'variable',
-            'conjur/authn-oidc//provider-uri',
-            body='https://keycloak:8443/auth/realms/master'
-        )
-        secrets_api.create_variable(
-            self.account,
-            'variable',
-            'conjur/authn-oidc//id-token-user-property',
-            body='preferred_username'
-        )
-
     def test_update_authenticator_config_204(self):
         """Test case for update_authenticator_config 204 response
 
@@ -430,33 +394,13 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_oidc_authenticate_service_200(self):
-        """Test case for oidc_authenticate_service 200 response"""
-        self.setup_oidc_webservice()
-        id_token = get_oidc_id_token()
-
-        _, status, _ = self.api.oidc_authenticate_service_with_http_info(
-            'test',
-            self.account,
-            id_token=id_token
-        )
-        self.assertEqual(status, 200)
-
-    def test_oidc_authenticate_service_401(self):
-        """Test case for oidc_authenticate_service 401 response"""
-        self.setup_oidc_webservice()
-
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.oidc_authenticate_service('test', self.account, id_token='bad-token')
-
-        self.assertEqual(context.exception.status, 401)
-
     def test_oidc_authenticate_200(self):
         """Test case for oidc_authenticate 200 response"""
-        self.setup_oidc_webservice()
+        api_config.setup_oidc_webservice()
         id_token = get_oidc_id_token()
 
         _, status, _ = self.api.oidc_authenticate_with_http_info(
+            'test',
             self.account,
             id_token=id_token
         )
@@ -464,10 +408,10 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
     def test_oidc_authenticate_401(self):
         """Test case for oidc_authenticate 401 response"""
-        self.setup_oidc_webservice()
+        api_config.setup_oidc_webservice()
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.oidc_authenticate(self.account, id_token='bad-token')
+            self.api.oidc_authenticate('test', self.account, id_token='bad-token')
 
         self.assertEqual(context.exception.status, 401)
 

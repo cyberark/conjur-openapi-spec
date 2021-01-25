@@ -421,51 +421,6 @@ components:
         security:
           - basicAuth: []
 
-    OIDCAuthenticateService:
-      post:
-        tags:
-        - "authn"
-        summary: "Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API."
-        description: "A client can obtain an access token by presenting a valid OpenID ID token.
-
-        The client must first authenticate with the OpenID provider, then pass the id token to the conjur server to
-        retrieve an API token"
-        operationId: "oidcAuthenticateService"
-        parameters:
-        - name: "service_id"
-          in: "path"
-          description: "The authenticator service"
-          required: true
-          schema:
-            type: string
-          example: "keycloak"
-        - name: "account"
-          in: "path"
-          description: "Organization account name"
-          required: true
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
-        requestBody:
-          description: "API Key"
-          required: true
-          content:
-            application/x-www-form-urlencoded:
-              schema:
-                type: object
-                properties:
-                  id_token:
-                    type: string
-
-        responses:
-          "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
-          "400":
-            $ref: 'openapi.yml#/components/responses/BadRequest'
-          "401":
-            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "502":
-            description: "Error connecting conjur to the OIDC provider"
-
     OIDCAuthenticate:
       post:
         tags:
@@ -477,6 +432,13 @@ components:
         retrieve an API token"
         operationId: "oidcAuthenticate"
         parameters:
+        - name: "service_id"
+          in: "path"
+          description: "The authenticator service"
+          required: true
+          schema:
+            type: string
+          example: "keycloak"
         - name: "account"
           in: "path"
           description: "Organization account name"

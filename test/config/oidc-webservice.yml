@@ -3,7 +3,11 @@
   body:
   - !webservice
 
+  - !webservice status
+
   - !group users
+
+  - !group operators
 
   - !variable provider-uri
   - !variable id-token-user-property
@@ -12,29 +16,16 @@
     role: !group users
     privilege: [ read, authenticate ]
     resource: !webservice
+
+  - !permit
+    role: !group operators
+    privilege: [ read ]
+    resource: !webservice status
 
 - !grant
   role: !group conjur/authn-oidc/test/users
   member: !user bob
 
-- !policy
-  id: conjur/authn-oidc
-  body:
-  - !webservice
-
-  - !group users
-
-  - !permit
-    role: !group users
-    privilege: [ read, authenticate ]
-    resource: !webservice
-
-- !policy
-  id: conjur/authn-oidc/
-  body:
-  - !variable provider-uri
-  - !variable id-token-user-property
-
 - !grant
-  role: !group conjur/authn-oidc/users
-  member: !user bob
+  role: !group conjur/authn-oidc/test/operators
+  member: !user admin
