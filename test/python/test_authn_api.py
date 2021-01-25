@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import os
 import unittest
+from unittest.mock import patch
 import json
 
 import requests
@@ -412,6 +413,46 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
             self.api.oidc_authenticate('test', self.account, id_token='bad-token')
+
+        self.assertEqual(context.exception.status, 401)
+
+    def test_gcp_authenticate_200(self):
+        """Test case for gcp_authenticate 200 response"""
+        jwt_token = 'bad token'
+
+        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.gcp_authenticate(self.account, jwt=jwt_token)
+
+        mock.assert_called_once_with(
+            '/authn-gcp/{account}/authenticate',
+            'POST',
+            {'account': self.account},
+            [],
+            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            body=None,
+            post_params=[('jwt', jwt_token)],
+            files={},
+            response_type='str',
+            auth_settings=['basicAuth','conjurAuth'],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
+
+    def test_gcp_authenticate_400(self):
+        """Test case for gcp_authenticate 400 response"""
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.api.gcp_authenticate('\00', jwt='bad token')
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_gcp_authenticate_401(self):
+        """Test case for gcp_authenticate 401 response"""
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.api.gcp_authenticate(self.account, jwt='bad token')
 
         self.assertEqual(context.exception.status, 401)
 
