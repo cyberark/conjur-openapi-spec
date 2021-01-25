@@ -32,9 +32,11 @@ class TestRolesApi(api_config.ConfiguredTest):
         super().setUpClass()
         cls.ADMIN_ID = f'{cls.account}:user:admin'
         cls.ALICE_ID = f'{cls.account}:user:alice'
-        cls.BOB_ID   = f'{cls.account}:user:bob'
-        cls.GROUP_ID = f'{cls.account}:group:userGroup'
-        cls.ROOT_ID  = f'{cls.account}:policy:root'
+        cls.BOB_ID = f'{cls.account}:user:bob'
+        cls.USER_GROUP_ID = f'{cls.account}:group:userGroup'
+        cls.ANOTHER_GROUP_ID = f'{cls.account}:group:anotherGroup'
+        cls.LAYER_ID = f'{cls.account}:layer:testLayer'
+        cls.ROOT_ID = f'{cls.account}:policy:root'
 
     def setUp(self):
         self.api = openapi_client.RolesApi(self.client)
@@ -143,7 +145,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             'layer',
             'testLayer',
             members='',
-            member=self.GROUP_ID
+            member=self.USER_GROUP_ID
         )
 
         # testLayer will be listed in all memberships of bob
@@ -155,10 +157,10 @@ class TestRolesApi(api_config.ConfiguredTest):
         )
 
         target_membership_data = [
-            f'{self.account}:layer:testLayer',
-            f'{self.account}:group:anotherGroup',
-            f'{self.account}:group:userGroup',
-            f'{self.account}:user:bob'
+            self.LAYER_ID,
+            self.ANOTHER_GROUP_ID,
+            self.USER_GROUP_ID,
+            self.BOB_ID
         ]
 
         self.assertEqual(status, 200)
@@ -232,7 +234,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             'layer',
             'testLayer',
             members='',
-            member=self.GROUP_ID
+            member=self.USER_GROUP_ID
         )
 
         # testLayer will not be listed in direct memberships of bob
@@ -325,7 +327,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             {
                 'admin_option': True,
                 'ownership': True,
-                'role': self.GROUP_ID,
+                'role': self.USER_GROUP_ID,
                 'member': self.ADMIN_ID,
                 'policy': self.ROOT_ID
             }
@@ -429,7 +431,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             {
                 'admin_option': False,
                 'ownership': False,
-                'role': self.GROUP_ID,
+                'role': self.USER_GROUP_ID,
                 'member': self.BOB_ID
             }
         ]
@@ -456,14 +458,14 @@ class TestRolesApi(api_config.ConfiguredTest):
             {
                 'admin_option': True,
                 'ownership': True,
-                'role': self.GROUP_ID,
+                'role': self.USER_GROUP_ID,
                 'member': self.ADMIN_ID,
                 'policy': self.ROOT_ID
             },
             {
                 'admin_option': False,
                 'ownership': False,
-                'role': self.GROUP_ID,
+                'role': self.USER_GROUP_ID,
                 'member': self.ALICE_ID
             }
         ]
@@ -489,7 +491,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             {
                 'admin_option': False,
                 'ownership': False,
-                'role': self.GROUP_ID,
+                'role': self.USER_GROUP_ID,
                 'member': self.BOB_ID
             }
         ]
@@ -751,6 +753,80 @@ class TestRolesApi(api_config.ConfiguredTest):
             self.api.get_role(self.account, 'user', 'nonexist', graph='')
 
         self.assertEqual(context.exception.status, 404)
+
+    # Test combinations of optional query parameters when getting role information
+
+    def test_paarameter_combos_a(self):
+        """Test Conjur's response to being given all optional parameters in a single request
+        Conjur responds with `graph` results ONLY
+        """
+        details, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'admin',
+            all='',
+            memberships='',
+            members='',
+            graph=''
+        )
+
+        self.assertEqual(status, 200)
+
+        for i in details:
+            self.assertIn('parent', i)
+            self.assertIn('child', i)
+
+    def test_parameter_combos_b(self):
+        """Test Conjur's response to being given all optional parameters besides `graph`
+        Conjur responses with `all` results ONLY
+        """
+        details, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'admin',
+            all='',
+            memberships='',
+            members=''
+        )
+
+        target_details = [
+            self.ROOT_ID,
+            self.LAYER_ID,
+            self.ANOTHER_GROUP_ID,
+            self.ALICE_ID,
+            self.USER_GROUP_ID,
+            self.ADMIN_ID,
+            self.BOB_ID
+        ]
+
+        self.assertEqual(status, 200)
+        self.assertEqual(details, target_details)
+
+    def test_parameter_combos_c(self):
+        """Test Conjur's response to being given both `members` and `memberships`
+        Conjur response with `memberships` results ONLY
+        """
+        self.add_user_to_group('bob')
+
+        details, status, _ = self.api.get_role_with_http_info(
+            self.account,
+            'user',
+            'bob',
+            memberships='',
+            members=''
+        )
+
+        target_details = [
+            {
+                'admin_option': False,
+                'ownership': False,
+                'role': self.USER_GROUP_ID,
+                'member': self.BOB_ID
+            }
+        ]
+
+        self.assertEqual(status, 200)
+        self.assertEqual(details, target_details)
 
 if __name__ == '__main__':
     unittest.main()

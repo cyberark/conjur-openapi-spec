@@ -228,6 +228,22 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    def test_get_resource_403(self):
+        """Test case for 403 status response on /resources/{account}/{kind}/{identifier} endpoint
+        403 - the specified role does not have privilege over the resource
+        """
+        with self.assertRaises(openapi_client.ApiException) as context:
+            self.api.get_resource(
+                self.account,
+                'variable',
+                'testSecret',
+                check='',
+                privilege='read',
+                role='user:alice'
+            )
+
+        self.assertEqual(context.exception.status, 403)
+
     def test_get_resource_404a(self):
         """Test case for 404 status response on /resources/{account}/{kind}/{identifier} endpoint
         404 - the requested resource does not exist
@@ -257,6 +273,24 @@ class TestResourcesApi(api_config.ConfiguredTest):
             self.api.get_resource(self.account, 'variable', 'testSecret', check=NULL_BYTE)
 
         self.assertEqual(context.exception.status, 422)
+
+    # Test combinations of optional query parameters when getting a single resource
+
+    def test_permitted_roles_and_check(self):
+        """Test case for using both `permitted_roles` and `check` query parameters
+        When both parameters are used, Conjur responds to the `check` call only
+        """
+        response, status, _ = self.api.get_resource_with_http_info(
+            self.account,
+            'variable',
+            'testSecret',
+            permitted_roles='',
+            check='',
+            privilege='read'
+        )
+
+        self.assertEqual(status, 204)
+        self.assertEqual(response, '')
 
 if __name__ == '__main__':
     unittest.main()

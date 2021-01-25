@@ -1,4 +1,3 @@
-
 components:
   schemas:
     RolesGraph:
@@ -10,6 +9,7 @@ components:
             $ref: 'openapi.yml#/components/schemas/ResourceID'
           child:
             $ref: 'openapi.yml#/components/schemas/ResourceID'
+
   responses:
     Roles:
       description: "The response body contains the requested role(s)/member(s)"
@@ -23,6 +23,7 @@ components:
                 "id": "myorg:user:admin",
                 "members": []
               }
+
   paths:
     Roles:
       get:
@@ -46,6 +47,15 @@ components:
           ##### Text search
 
           If the search parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weights results so that those with matching id or a matching value of an annotation called name appear first, then those with another matching annotation value, and finally those with a matching kind.
+
+          ##### Parameter Priority
+
+          If Conjur is given any combination of optional parameters, it responds with ONLY results for the parameter of the highest priority.
+
+          1. `graph`
+          2. `all`
+          3. `memberships`
+          4. `members`
           "
         operationId: "getRole"
         parameters:
@@ -71,7 +81,7 @@ components:
             $ref: 'openapi.yml#/components/schemas/ResourceID'
         - name: "all"
           in: "query"
-          description: "Returns all role memberships, expanded recursively."
+          description: "Returns an array of Role IDs representing all role memberships, expanded recursively."
           schema:
             type: string
         - name: "memberships"
