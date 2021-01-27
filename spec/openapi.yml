@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 
 info:
-  description: "This is an API definition for CyberArk DAP (part of AAM) and Conjur OSS v10+. You can find out more at [Conjur](https://www.conjur.org/) and [AAM](https://www.cyberark.com/products/privileged-account-security-solution/application-access-manager/) pages."
+  description: "This is an API definition for CyberArk Conjur OSS. You can find out more at [Conjur.org](https://www.conjur.org/)."
   version: "0.0.1"
   title: "Conjur"
   contact:
