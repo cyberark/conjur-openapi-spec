@@ -205,11 +205,11 @@ security:
   - conjurAuth: []
   
 paths:
+
+# ========== AUTHENTICATION ===========
+
   '/{authenticator}/{account}/login':
     $ref: 'authentication.yaml#/components/paths/Login'
-
-  '/{authenticator}/{service_id}/{account}/login':
-    $ref: 'authentication.yaml#/components/paths/ServiceLogin'
 
   '/{authenticator}/{account}/{login}/authenticate':
     $ref: 'authentication.yaml#/components/paths/Authenticate'
@@ -226,21 +226,24 @@ paths:
   '/{authenticator}/{service_id}/{account}':
     $ref: 'authentication.yaml#/components/paths/UpdateAuthenticatorConfig'
 
-# ========== STATUS ===========
+  '/{authenticator}/{service_id}/{account}/login':
+    $ref: 'authentication.yaml#/components/paths/ServiceLogin'
+
+# ========== STATUS ===================
 
   '/whoami':
     $ref: 'status.yml#/components/paths/WhoAmI'
 
+  '/authn-{authenticator}/{service_id}/{account}/status':
+    $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
+
   '/authn-{authenticator}/{account}/status':
     $ref: 'status.yml#/components/paths/AuthenticatorStatus'
 
-  '/authn-{authenticator}/{service_id}/{account}/status':
-    $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
-  
   '/authenticators':
     $ref: 'status.yml#/components/paths/AuthenticatorsIndex'
 
-# ========== SECRETS ==========
+# ========== SECRETS ==================
 
   '/secrets/{account}/{kind}/{identifier}':
     $ref: 'secrets.yml#/components/paths/SingleSecret'
@@ -248,17 +251,17 @@ paths:
   '/secrets':
     $ref: 'secrets.yml#/components/paths/BatchSecrets'
 
-# ========== POLICIES ==========
+# ========== POLICIES =================
 
   '/policies/{account}/policy/{identifier}':
     $ref: 'policies.yml#/components/paths/Policies'
 
-# ========== Roles ==========
+# ========== ROLES ====================
 
   '/roles/{account}/{kind}/{identifier}':
     $ref: 'roles.yml#/components/paths/Roles'
 
-# ========== Resources ==========
+# ========== RESOURCES ================
 
   '/resources':
     $ref: 'resources.yml#/components/paths/ListResources'
@@ -272,7 +275,7 @@ paths:
   '/resources/{account}/{kind}/{identifier}':
     $ref: 'resources.yml#/components/paths/SingleResource'
 
-# ========== Host Factory ==========
+# ========== HOST FACTORY =============
 
   '/host_factory_tokens':
     $ref: 'host-factory.yml#/components/paths/CreateHostToken'
@@ -283,12 +286,12 @@ paths:
   '/host_factories/hosts':
     $ref: 'host-factory.yml#/components/paths/CreateHost'
 
-# ========== Public keys ==========
+# ========== PUBLIC KEYS ==============
 
   '/public_keys/{account}/{kind}/{identifier}':
     $ref: 'public-keys.yml#/components/paths/PublicKeys'
 
-# ========== Certificate Authority ==========
+# ========== CERTIFICATE AUTHORITY ====
 
   '/ca/{account}/{service_id}/sign':
     $ref: 'cert-auth.yml#/components/paths/Sign'
