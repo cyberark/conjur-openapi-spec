@@ -124,6 +124,19 @@ Run the current suite of integration tests using the script:
 $ ./bin/integration_tests
 ```
 
+You can run tests for only one client by specifying a client flag.
+
+```shell
+$ ./bin/integration_tests --python
+```
+
+A subset of a clients tests can be run by including an argument with the full package path of the tests
+to run.
+
+```shell
+$ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
+```
+
 ## Manual Testing
 
 You can access a compatible version of the the Conjur command line interface by starting the `cli` docker compose container

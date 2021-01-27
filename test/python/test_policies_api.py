@@ -4,7 +4,7 @@ import unittest
 
 import openapi_client
 
-import api_config
+from . import api_config
 
 NEW_VARIABLE = 'policy/test'
 
