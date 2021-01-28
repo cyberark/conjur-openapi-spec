@@ -18,6 +18,7 @@ streamline development processes.
 
 Find [more from CyberArk](https://github.com/cyberark).
 
+* [Api Documentation](https://github.com/cyberark/conjur-openapi-spec/wiki)
 * [Requirements](#requirements)
 * [Getting Started](#getting-started)
 * [Contributing](#contributing)
@@ -49,7 +50,7 @@ to help you get started.
 To generate a client library using the OpenAPI spec, use the provided script:
 
 ```shell
-$ ./bin/generate_client <language>
+$ ./bin/generate_client -l <language> [-o <output-dir>]
 ```
 
 The script will generate a Python client in the absence of a `<language>` argument.  
@@ -76,7 +77,7 @@ $ ./examples/ruby/start
 ```
 
 Each example performs the following steps:
-- Generate an OpenAPI client with `./bin/generate_client <language>` (if not already present)
+- Generate an OpenAPI client with `./bin/generate_client -l <language>` (if not already present)
 - Spin up the a Conjur environment from `docker-compose` (if not already present)
 - Perform language-specific environment setup
 - Run the example
