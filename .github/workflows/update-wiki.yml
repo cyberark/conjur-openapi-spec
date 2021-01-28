@@ -1,0 +1,47 @@
+name: Update Wiki
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-wiki:
+    name: Update Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Checkout Wiki
+        run: |
+          rm -rf conjur-openapi-spec.wiki
+          git clone https://github.com/cyberark/conjur-openapi-spec.wiki.git
+
+      - name: Configure Git
+        working-directory: ./conjur-openapi-spec.wiki
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Github Action"
+
+      - name: Generate new documentation
+        run: |
+          ./bin/generate_client -o ./conjur-openapi-spec.wiki -l markdown -n
+          mv ./conjur-openapi-spec.wiki/README.md ./conjur-openapi-spec.wiki/Home.md
+
+      - name: Update wiki git repository
+        working-directory: ./conjur-openapi-spec.wiki
+        run: |
+          git add -A
+
+          if ! git diff --staged --quiet; then
+            echo "Committing changes"
+
+            git commit -m "Auto-commit of new spec changes"
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Push changes to GitHub
+        working-directory: ./conjur-openapi-spec.wiki
+        run: |
+          git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" HEAD:master

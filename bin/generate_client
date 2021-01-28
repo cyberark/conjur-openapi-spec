@@ -34,7 +34,6 @@ do
             shift
             ;;
         -n)
-            echo testing
             make_client_dir=0
             ;;
         -h)
