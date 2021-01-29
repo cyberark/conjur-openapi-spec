@@ -232,6 +232,9 @@ paths:
   '/authn-oidc/{service_id}/{account}/authenticate':
     $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
 
+  '/authn-gcp/{account}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/GCPAuthenticate'
+
 # ========== STATUS ===========
 
   '/whoami':

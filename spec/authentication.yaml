@@ -427,7 +427,6 @@ components:
         - "authn"
         summary: "Gets a short-lived access token, which can be used to authenticate requests to (most of) the rest of the Conjur API."
         description: "A client can obtain an access token by presenting a valid OpenID ID token.
-
         The client must first authenticate with the OpenID provider, then pass the id token to the conjur server to
         retrieve an API token"
         operationId: "oidcAuthenticate"
@@ -465,3 +464,44 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "502":
             description: "Error connecting conjur to the OIDC provider"
+
+    GCPAuthenticate:
+      post:
+        tags:
+        - "authn"
+        summary: "Authenticate with Conjur via Google Cloud Platform"
+        description: "A client can obtain an access token by presenting a valid JWT identity token"
+        operationId: "gcpAuthenticate"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            type: string
+          example: "dev"
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: string
+            enum: [ "base64" ]
+        requestBody:
+          description: "JWT key for authentication"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  jwt:
+                    type: string
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/ApiKey'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
