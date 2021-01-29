@@ -2,7 +2,7 @@
 - !variable testSecret
 
 - !user alice
-- !user charles
+- !user bob
 
 - !policy
   id: conjur/authn-ldap/test

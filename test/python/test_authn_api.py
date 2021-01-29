@@ -4,10 +4,27 @@ import os
 import unittest
 import json
 
+import requests
 import openapi_client
 
 from . import api_config
 from .api_config import CONJUR_AUTHN_API_KEY
+
+def get_oidc_id_token():
+    """Authenticates with the OIDC server and gets the ID token for user bob"""
+    oidc_request_form = {
+        'grant_type': 'password',
+        'username': 'bob',
+        'password': 'bob',
+        'scope': 'openid'
+    }
+    result = requests.post(
+        'http://oidc-keycloak:8080/auth/realms/master/protocol/openid-connect/token',
+        data=oidc_request_form,
+        auth=('conjurClient', '1234')
+    )
+    result = json.loads(result.content)
+    return result['id_token']
 
 class TestAuthnApi(api_config.ConfiguredTest):
     """AuthnApi integration tests. Ensures that authentication with a Conjur server is working"""
@@ -377,6 +394,26 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
+    def test_oidc_authenticate_200(self):
+        """Test case for oidc_authenticate 200 response"""
+        api_config.setup_oidc_webservice()
+        id_token = get_oidc_id_token()
+
+        _, status, _ = self.api.oidc_authenticate_with_http_info(
+            'test',
+            self.account,
+            id_token=id_token
+        )
+        self.assertEqual(status, 200)
+
+    def test_oidc_authenticate_401(self):
+        """Test case for oidc_authenticate 401 response"""
+        api_config.setup_oidc_webservice()
+
+        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+            self.api.oidc_authenticate('test', self.account, id_token='bad-token')
+
+        self.assertEqual(context.exception.status, 401)
 
 if __name__ == '__main__':
     unittest.main()

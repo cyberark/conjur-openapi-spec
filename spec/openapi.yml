@@ -229,7 +229,10 @@ paths:
   '/{authenticator}/{service_id}/{account}/login':
     $ref: 'authentication.yaml#/components/paths/ServiceLogin'
 
-# ========== STATUS ===================
+  '/authn-oidc/{service_id}/{account}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
+
+# ========== STATUS ===========
 
   '/whoami':
     $ref: 'status.yml#/components/paths/WhoAmI'

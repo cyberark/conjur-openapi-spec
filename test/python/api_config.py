@@ -16,6 +16,7 @@ CONJUR_AUTHN_LOGIN = 'CONJUR_AUTHN_LOGIN'
 CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
 
 WEBSERVICE_POLICY = pathlib.Path('test/config/webservice.yml')
+OIDC_POLICY_FILE = 'test/config/oidc-webservice.yml'
 
 def get_webservice_policy():
     """Gets the text for the webservice testing policy"""
@@ -85,6 +86,29 @@ def get_api_client(username='admin', role='user'):
         )
     client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
     return client
+
+def setup_oidc_webservice():
+    """Loads a policy for the oidc webservice into conjur"""
+    client = get_api_client()
+    account = os.environ[CONJUR_ACCOUNT]
+    policy_api = openapi_client.api.policies_api.PoliciesApi(client)
+    with open(OIDC_POLICY_FILE, 'r') as policy_file:
+        policy = policy_file.read()
+    policy_api.modify_policy(account, 'root', policy)
+
+    secrets_api = openapi_client.api.secrets_api.SecretsApi(client)
+    secrets_api.create_variable(
+        account,
+        'variable',
+        'conjur/authn-oidc/test/provider-uri',
+        body='https://keycloak:8443/auth/realms/master'
+    )
+    secrets_api.create_variable(
+        account,
+        'variable',
+        'conjur/authn-oidc/test/id-token-user-property',
+        body='preferred_username'
+    )
 
 class ConfiguredTest(unittest.TestCase):
     """Meant for test classes to inherit. Sets up an authenticated api client

@@ -12,7 +12,7 @@ services:
       CONJUR_DATA_KEY: 'OyXV68Mip14xj33huGaQKewmmS+gKtDlp6ECZ2iATpU='
       DATABASE_URL: postgres://postgres@pg/postgres
       RAILS_ENV: development
-      CONJUR_AUTHENTICATORS: authn-ldap/test,authn
+      CONJUR_AUTHENTICATORS: authn-ldap/test,authn-oidc/test,authn
       LDAP_URI: ldap://ldap-server:389
       LDAP_BASE: dc=conjur,dc=net
       LDAP_BINDDN: cn=admin,dc=conjur,dc=net
@@ -25,6 +25,9 @@ services:
     depends_on:
       - pg
       - ldap-server
+      - oidc-keycloak
+    links:
+      - oidc-keycloak:keycloak
 
   conjur-https:
     image: nginx:alpine
@@ -119,3 +122,20 @@ services:
     volumes:
       - ./test/config/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
       - ./test/config/ldap/certs:/container/service/slapd/assets/certs:ro
+
+  oidc-keycloak:
+    image: jboss/keycloak:4.3.0.Final
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=H2
+      - KEYCLOAK_CLIENT_ID=conjurClient
+      - KEYCLOAK_REDIRECT_URI=http://locallhost.com/
+      - KEYCLOAK_CLIENT_SECRET=1234
+      - KEYCLOAK_SCOPE=openid
+      - KEYCLOAK_LOGLEVEL=ALL
+    ports:
+      - "7777:8080"
+    volumes:
+      - ./test/config/oidc:/scripts
+      - ./test/config/oidc/keycloak/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
