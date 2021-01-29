@@ -94,7 +94,7 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 * Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
-`bin/generate_client <language>`
+`bin/generate_client -l <language> [-o <output-directory>]`
 * Generates a client library for the desired `<language>`.  
 * Running the script with no argument will generate a Python client by default.
 

@@ -2,13 +2,63 @@
 
 set -euo pipefail
 
-client_lang="python"
-if [ $# -ge 1 ]; then
-  client_lang="$1"
-fi
+print_help(){
+    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n]"
+    echo -e "\tUses the OpenApi generator to create a client for the API spec"
+    echo -e "\tDefault output goes in the 'out' directory under the generated client language"
+    echo -e "\tIf no language is specified the Python client will be generated"
+    echo
+    echo -e "\tThe -n option will prevent the creation of a client language directory"
+    echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
+}
 
 generator_version="v4.3.1"
 GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
+
+client_lang="python"
+make_client_dir=1
+output_volume="out/"
+output_dir='/out'
+
+while test $# -gt 0
+do
+    param=$1
+    shift
+    case "$param" in
+        -o)
+            output_volume=$1
+            shift
+            ;;
+        -l)
+            client_lang=$1
+            shift
+            ;;
+        -n)
+            make_client_dir=0
+            ;;
+        -h)
+            print_help
+            exit 0
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+output_volume="$(realpath $output_volume)"
+
+if [ $make_client_dir -eq 1 ]; then
+    output_dir="$output_dir/$client_lang"
+fi
+
+# if templates for a language exist we use them for generation
+template_dir="templates/$client_lang"
+if [ -e $template_dir ]; then
+    template_arg="-t /local/$template_dir"
+else
+    template_arg=""
+fi
 
 echo "Pulling latest release $GENERATOR_IMAGE..."
 docker pull "$GENERATOR_IMAGE"
@@ -17,9 +67,10 @@ echo "Removing old client dir..."
 rm -rf "$(pwd)/out/$client_lang"
 
 echo "Generating $client_lang client..."
-docker run --rm -v ${PWD}:/local "$GENERATOR_IMAGE" generate \
+docker run --rm -v ${PWD}:/local -v $output_volume:/out "$GENERATOR_IMAGE" generate \
     -i "/local/spec/openapi.yml" \
     -g "$client_lang" \
-    -o "/local/out/$client_lang"
+    -o "$output_dir" \
+    $template_arg
 
 echo "Done! Client is in $(pwd)/out folder!"

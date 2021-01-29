@@ -30,18 +30,18 @@ conjur_container_alive(){
 }
 
 print_help(){
-  echo "Usage: ./bin/integration_tests [--<client> [test-specifier]] [--no-rebuild-conjur] [--no-regen-client]"
+  echo -e "Usage: ./bin/integration_tests [--<client> [test-specifier]] [--no-rebuild-conjur] [--no-regen-client]"
   echo
-  echo "\tRunning this script without parameters will run ALL integration tests"
-  echo "\tIn order to specify a subset of tests you can use a client flag (e.g. --python)"
-  echo "\tYou can also specify a subset of client tests by including a parameter after the client flag"
+  echo -e "\tRunning this script without parameters will run ALL integration tests"
+  echo -e "\tIn order to specify a subset of tests you can use a client flag (e.g. --python)"
+  echo -e "\tYou can also specify a subset of client tests by including a parameter after the client flag"
   echo
-  echo "\tThe --no-rebuild-conjur flag will prevent the conjur image from rebuilding"
-  echo "\t\tWarning: this may cause some tests to fail"
+  echo -e "\tThe --no-rebuild-conjur flag will prevent the conjur image from rebuilding"
+  echo -e "\t\tWarning: this may cause some tests to fail"
   echo
-  echo "\tThe --no-regen-client flag will prevent the client from re-generating before tests run"
+  echo -e "\tThe --no-regen-client flag will prevent the client from re-generating before tests run"
   echo
-  echo "\tThe -d flag will turn on debug mode for the integration test runs"
+  echo -e "\tThe -d flag will turn on debug mode for the integration test runs"
 }
 
 run_python_tests(){
