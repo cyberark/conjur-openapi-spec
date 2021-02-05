@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source bin/util
+
+announce "Bundling Spec"
+./bin/bundle_spec
+
+announce "Performing Transform"
+time python3 transform.py
