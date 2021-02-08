@@ -801,7 +801,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         ]
 
         self.assertEqual(status, 200)
-        self.assertEqual(details, target_details)
+        for i in target_details:
+            # This will throw an error causing the test to fail if
+            # i is not present in details
+            details.remove(i)
+
+        self.assertEqual(len(details), 0)
 
     def test_parameter_combos_c(self):
         """Test Conjur's response to being given both `members` and `memberships`
@@ -817,17 +822,16 @@ class TestRolesApi(api_config.ConfiguredTest):
             members=''
         )
 
-        target_details = [
-            {
+        target_details = {
                 'admin_option': False,
                 'ownership': False,
                 'role': self.USER_GROUP_ID,
                 'member': self.BOB_ID
             }
-        ]
 
         self.assertEqual(status, 200)
-        self.assertEqual(details, target_details)
+        self.assertEqual(len(details), 1)
+        self.assertEqual(details[0], target_details)
 
 if __name__ == '__main__':
     unittest.main()
