@@ -17,7 +17,7 @@ GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
 client_lang="python"
 make_client_dir=1
-output_volume="out/"
+output_volume="./out/"
 output_dir='/out'
 
 while test $# -gt 0
@@ -46,7 +46,10 @@ do
     esac
 done
 
-output_volume="$(realpath $output_volume)"
+if [ ! -e "$output_volume" ]; then
+    mkdir -p "$output_volume"
+fi
+output_volume="$(pushd $output_volume > /dev/null && echo ${PWD} && popd > /dev/null)"
 
 if [ $make_client_dir -eq 1 ]; then
     output_dir="$output_dir/$client_lang"
