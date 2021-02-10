@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if [ $1 = '' ]; then
+    echo "You must specify either --dap or --oss"
+fi
+
+# We dont bundle here because generating a client from a bundle
+# because you lose a lot of object name information. Instead
+# transform each file individually
+for name in ./spec/*
+do
+    echo $name $1
+    ./bin/transform.py $name $1
+done
