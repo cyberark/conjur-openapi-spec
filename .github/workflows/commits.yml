@@ -1,4 +1,4 @@
-name: Rebase Check
+name: Check Commits
 
 on:
   pull_request:
@@ -19,3 +19,15 @@ jobs:
         uses: cyberark/enforce-rebase@v2
         with:
           default-branch: main
+
+  check_commit:
+    runs-on: ubuntu-latest
+    name: Check commit style
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check commit style
+        uses: cyberark/enforce-commit-style@v1
