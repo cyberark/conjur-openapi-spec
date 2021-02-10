@@ -131,6 +131,8 @@ components:
         - `sales&marketing` -> `sales%26marketing`"
 
   responses:
+    Accepted:
+      description: "The injected certificate was accepted."
     AccessTokenGeneric:
       description: |
         This response schema is a generic string as opposed to the AccessToken component schema.
@@ -234,6 +236,9 @@ paths:
 
   '/authn-gcp/{account}/authenticate':
     $ref: 'authentication.yaml#/components/paths/GCPAuthenticate'
+
+  '/authn-k8s/{service_id}/inject_client_cert':
+    $ref: 'authentication.yaml#/components/paths/K8sInjectClientCert'
 
 # ========== STATUS ===========
 

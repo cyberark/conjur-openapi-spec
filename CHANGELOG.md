@@ -41,3 +41,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Google Cloud Provider authenticate endpoint now included in the spec file. Users can now authenticate with Conjur using GCP.
   [cyberark/conjur-openapi-spec#61](https://github.com/cyberark/conjur-openapi-spec/issues/61)
 - New options to `generate_client` script for greater control over generated output.
+- `/authn-k8s/:service_id/inject_client_cert` endpoint now included in the OpenAPI specification.
+  [cyberark/conjur-openapi-spec#3](https://github.com/cyberark/conjur-openapi-spec/issues/3)
