@@ -1,0 +1,206 @@
+#!/usr/bin/env bash
+
+set -e
+. test/python/k8s/utils
+
+generate_policy() {
+    # generate Conjur policies from templates
+    # defines authn-k8s endpoint and identies that can authenticate to it
+    announce "Generating Policy"
+    pushd test/python/k8s/policy
+        mkdir -p ./generated
+
+        sed "s#{{ AUTHENTICATOR_ID }}#$AUTHENTICATOR_ID#g" ./templates/cluster-authn-svc-def.template.yml > ./generated/$TEST_APP_NAMESPACE.cluster-authn-svc.yml
+
+        sed "s#{{ AUTHENTICATOR_ID }}#$AUTHENTICATOR_ID#g" ./templates/project-authn-def.template.yml |
+            sed "s#{{ TEST_APP_NAMESPACE_NAME }}#$TEST_APP_NAMESPACE#g" > ./generated/$TEST_APP_NAMESPACE.project-authn.yml
+
+        sed "s#{{ AUTHENTICATOR_ID }}#$AUTHENTICATOR_ID#g" ./templates/app-identity-def.template.yml |
+            sed "s#{{ TEST_APP_NAMESPACE_NAME }}#$TEST_APP_NAMESPACE#g" > ./generated/$TEST_APP_NAMESPACE.app-identity.yml
+    popd
+}
+
+init_cli() {
+    # intialize Conjur CLI pod
+    # pull image, push to local registry, and build CLI pod
+    set_namespace $CONJUR_NAMESPACE
+    conjur_cli_pod=$(get_conjur_cli_pod_name)
+    if [ -z "$conjur_cli_pod" ]; then
+
+        announce "Pulling and Pushing Conjur CLI Image"
+
+        cli_app_image="${DOCKER_REG_URL}/conjur-cli:$CONJUR_NAMESPACE"
+        docker pull cyberark/conjur-cli:5
+        docker tag cyberark/conjur-cli:5 $cli_app_image
+        docker push $cli_app_image
+
+        announce "Deploying Conjur CLI Pod"
+
+        IMAGE_PULL_POLICY='Always'
+
+        sed -e "s#{{ CONJUR_SERVICE_ACCOUNT }}#$SERVICE_ACCOUNT#g" ./test/python/k8s/kubernetes/conjur-cli.yml |
+            sed -e "s#{{ DOCKER_IMAGE }}#$cli_app_image#g" |
+            sed -e "s#{{ IMAGE_PULL_POLICY }}#$IMAGE_PULL_POLICY#g" |
+            kubectl create -f -
+
+        conjur_cli_pod=$(get_conjur_cli_pod_name)
+        wait_for_it 300 "kubectl get pod $conjur_cli_pod -o jsonpath='{.status.phase}'| grep -q Running"
+    fi
+
+    announce "Ensure that Conjur CLI pod is initialized"
+
+    conjur_url="https://conjur-oss.$CONJUR_NAMESPACE.svc.cluster.local"
+    kubectl exec $conjur_cli_pod -- bash -c "yes yes | conjur init -a $CONJUR_ACCOUNT -u $conjur_url"
+    kubectl exec $conjur_cli_pod -- conjur authn login -u admin -p $CONJUR_ADMIN_API_KEY
+}
+
+load_policy() {
+    # load Conjur policies generated from templates
+    announce "Loading Conjur Policy"
+
+    kubectl exec $conjur_cli_pod -- rm -rf /policy
+    kubectl cp ./test/python/k8s/policy $conjur_cli_pod:/policy
+
+    kubectl exec $conjur_cli_pod -- \
+        bash -c "
+        conjur_appliance_url=https://conjur-oss.$CONJUR_NAMESPACE.svc.cluster.local}
+            CONJUR_ACCOUNT=${CONJUR_ACCOUNT} \
+            CONJUR_ADMIN_PASSWORD=${CONJUR_ADMIN_API_KEY} \
+            TEST_APP_NAMESPACE_NAME=${TEST_APP_NAMESPACE} \
+            /policy/load_policies.sh
+        "
+
+    kubectl exec $conjur_cli_pod -- rm -rf ./policy
+
+    echo "Conjur Policy Loaded"
+}
+
+configure_conjur_ca() {
+    announce "Initializing Conjur certificate authority"
+
+    set_namespace $CONJUR_NAMESPACE
+
+    conjur_master="$(kubectl get pods --selector "app=conjur-oss" --no-headers | awk '{ print $1 }')"
+    kubectl exec $conjur_master -c conjur-oss -- bash -c "
+        CONJUR_ACCOUNT=$CONJUR_ACCOUNT
+        rake authn_k8s:ca_init['conjur/authn-k8s/$AUTHENTICATOR_ID']
+    "
+
+    echo "Certificate authority initialized"
+}
+
+setup_test_app() {
+    # Create test namespace
+    announce "Creating Test App Namespace"
+
+    set_namespace default
+
+    if has_namespace "$TEST_APP_NAMESPACE"; then
+        echo "Namespace '$TEST_APP_NAMESPACE' exists, not going to create it."
+    else
+        echo "Creating '$TEST_APP_NAMESPACE' namespace."
+        kubectl create namespace $TEST_APP_NAMESPACE
+    fi
+    set_namespace $TEST_APP_NAMESPACE
+
+    # create rolebinding
+    kubectl delete --ignore-not-found rolebinding test-app-conjur-authenticator-role-binding-$CONJUR_NAMESPACE
+    conjur_authn_cluster_role="$HELM_RELEASE-conjur-authenticator"
+
+    echo $SERVICE_ACCOUNT
+
+    sed "s#{{ TEST_APP_NAMESPACE_NAME }}#$TEST_APP_NAMESPACE#g" ./test/python/k8s/kubernetes/test-app-conjur-authenticator-role-binding.yml |
+        sed "s#{{ CONJUR_NAMESPACE_NAME }}#$CONJUR_NAMESPACE#g" |
+        sed "s#{{ CONJUR_AUTHN_CLUSTER_ROLE }}#$conjur_authn_cluster_role#g" |
+        sed "s#{{ CONJUR_SERVICE_ACCOUNT }}#$SERVICE_ACCOUNT#g" |
+        kubectl create -f -
+
+    # Store Conjur certificate in test namespace
+    announce "Storing Conjur cert for test app configuration."
+
+    set_namespace $CONJUR_NAMESPACE
+
+    echo "Retrieving Conjur certificate."
+    master_pod_name="$(kubectl get pods --selector "app=conjur-oss" --no-headers | awk '{ print $1 }')"
+    ssl_cert=$(kubectl exec -c "conjur-oss-nginx" $master_pod_name -- cat /opt/conjur/etc/ssl/cert/tls.crt)
+
+    set_namespace $TEST_APP_NAMESPACE
+
+    echo "Storing non-secret Conjur cert as test app configuration data"
+    kubectl delete --ignore-not-found=true configmap $TEST_APP_NAMESPACE
+    kubectl create configmap $TEST_APP_NAMESPACE --from-file=ssl-certificate=<(echo "$ssl_cert")
+
+    echo "Conjur certificate stored."
+
+    # Build and push test containers
+    announce "Building and pushing test app images"
+
+    echo "Building test app image"
+    docker build \
+        --build-arg namespace=$TEST_APP_NAMESPACE \
+        --tag test-app:$CONJUR_NAMESPACE \
+        --file test/python/k8s/Dockerfile .
+
+    test_app_image="${DOCKER_REG_URL}/test-app:$CONJUR_NAMESPACE"
+    docker tag test-app:$CONJUR_NAMESPACE $test_app_image
+    docker push $test_app_image
+}
+
+deploy_test_app() {
+    announce "Deploying Test App Into $TEST_APP_NAMESPACE Namespace"
+
+    set_namespace $TEST_APP_NAMESPACE
+
+    urlencoded_authn_id=$(urlencode $AUTHENTICATOR_ID)
+    authenticator_client_image="cyberark/conjur-authn-k8s-client"
+    conjur_appliance_url="https://conjur-oss.$CONJUR_NAMESPACE.svc.cluster.local"
+    conjur_authenticator_url="$conjur_appliance_url/authn-k8s/$urlencoded_authn_id"
+    conjur_auth_login_prefix=host/conjur/authn-k8s/$AUTHENTICATOR_ID/apps
+    IMAGE_PULL_POLICY='Always'
+
+    kubectl delete --ignore-not-found \
+        deployment/test-app \
+        service/test-app \
+        serviceaccount/test-app
+
+    sleep 5
+
+    conjur_pod="$(kubectl get pods --selector "app=conjur-oss" --no-headers -n $CONJUR_NAMESPACE | awk '{ print $1 }')"
+    conjur_ip="$(kubectl describe pod -n $CONJUR_NAMESPACE $conjur_pod | grep "IP:" | awk '{ print $2 }' | head -1)"
+
+    sed "s#{{ TEST_APP_DOCKER_IMAGE }}#$test_app_image#g" ./test/python/k8s/kubernetes/test-app.yml |
+        sed "s#{{ AUTHENTICATOR_CLIENT_IMAGE }}#$authenticator_client_image#g" |
+        sed "s#{{ IMAGE_PULL_POLICY }}#$IMAGE_PULL_POLICY#g" |
+        sed "s#{{ CONJUR_ACCOUNT }}#$CONJUR_ACCOUNT#g" |
+        sed "s#{{ CONJUR_IP }}#$conjur_ip#g" |
+        sed "s#{{ CONJUR_AUTHN_API_KEY }}#$CONJUR_ADMIN_API_KEY#g" |
+        sed "s#{{ CONJUR_AUTHN_LOGIN_PREFIX }}#$conjur_auth_login_prefix#g" |
+        sed "s#{{ CONJUR_APPLIANCE_URL }}#$conjur_appliance_url#g" |
+        sed "s#{{ CONJUR_AUTHN_URL }}#$conjur_authenticator_url#g" |
+        sed "s#{{ TEST_APP_NAMESPACE_NAME }}#$TEST_APP_NAMESPACE#g" |
+        sed "s#{{ AUTHENTICATOR_ID }}#$AUTHENTICATOR_ID#g" |
+        sed "s#{{ CONFIG_MAP_NAME }}#$TEST_APP_NAMESPACE#g" |
+        sed "s#{{ SERVICE_TYPE }}#NodePort#g" |
+        kubectl create -f -
+
+    echo "Test app deployed."
+}
+
+generate_policy
+init_cli
+load_policy
+configure_conjur_ca
+setup_test_app
+deploy_test_app
+
+echo "Waiting for test-app pod to be ready"
+while [[ "$(kubectl get pods -n $TEST_APP_NAMESPACE -o jsonpath={.items[*].status.containerStatuses[0].ready})" != "true" ]]; do
+    echo "."
+    sleep 2
+done
+echo "Pod ready"
+
+pod_name="$(kubectl get pods | grep 'test-app' | grep -v 'deploy' | awk '{ print $1 }')"
+bash_cmd="printf \"$conjur_ip conjur-oss\n\" >> /etc/hosts"
+kubectl exec $pod_name -c test-app \
+    -- bash -c "$bash_cmd"

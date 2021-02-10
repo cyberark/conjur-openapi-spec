@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+set -e
+. test/python/k8s/utils
+trap 'cleanup' ERR
+
+cleanup() {
+    echo "Cleaning up..."
+    kubectl delete namespace $CONJUR_NAMESPACE $TEST_APP_NAMESPACE
+}
+
+print_help(){
+  echo -e "Usage: ./test/python/k8s/start[--no-regen-client]"
+  echo
+  echo -e "\tThis script tests the functionality of Conjur's API endpoint to inject"
+  echo -e "\ta client certificate into a specified Kubernetes pod using Python client"
+  echo -e "\tgenerated from the OpenAPI spec. The script sets up a Conjur K8s deployment"
+  echo -e "\tand a test app."
+  echo
+  echo -e "\tThe --no-regen-client flag will prevent the client from re-generating before tests run"
+}
+
+no_regen_client=0
+
+while test $# -gt 0
+do
+  param=$1
+  shift
+  case "$param" in
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    --no-regen-client)
+      no_regen_client=1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# Set environment variables
+export KIND_CLUSTER_NAME="kind"
+export HELM_RELEASE="conjur-oss"
+export CONJUR_NAMESPACE="conjur-oss"
+export CONJUR_ACCOUNT="dev"
+export CONJUR_LOG_LEVEL="info"
+export CONJUR_VERSION="1.11.0"
+export VERSION="2.0.3"
+
+export TEST_APP_NAMESPACE="app-test"
+export ANNOTATION_BASE_AUTHN="true"
+export AUTHENTICATOR_ID="my-authenticator-id"
+export SERVICE_ACCOUNT='conjur-oss'
+
+export DOCKER_REG_NAME="kind-registry"
+export DOCKER_REG_PORT="5000"
+export DOCKER_REG_URL="localhost:$DOCKER_REG_PORT"
+
+# check for required tools
+if ! command -v kind &> /dev/null; then
+    echo "kind binary not found. See https://kind.sigs.k8s.io/docs/quick-start/"
+    echo "for installation instructions."
+    exit 1
+fi
+
+min_kind_version="0.7.0"
+kind_version="$(kind version -q)"
+if ! meets_min_version $kind_version $min_kind_version; then
+    echo "kind version $kind_version is invalid. Version must be $min_kind_version or newer"
+    exit 1
+fi
+
+if ! command -v helm &> /dev/null; then
+    echo "helm binary not found. See https://helm.sh/docs/intro/install/"
+    echo "for installation instructions."
+    exit 1
+fi
+
+min_helm_version="3.1"
+helm_version="$(helm version --template {{.Version}} | sed 's/^v//')"
+if ! meets_min_version $helm_version $min_helm_version; then
+    echo "helm version $helm_version is invalid. Version must be $min_helm_version or newer"
+    exit 1
+fi
+
+if [ $no_regen_client -eq 0 ]; then
+    announce "Generating Python Client"
+    ./bin/generate_client python
+fi
+
+# Set up Conjur K8s cluster and local Docker Registry
+./test/python/k8s/setup_env
+
+conjur_master_pod="$(kubectl get pods \
+    -n "$CONJUR_NAMESPACE" \
+    -l "app=conjur-oss,release=$HELM_RELEASE" \
+    -o jsonpath="{.items[0].metadata.name}")"
+
+export CONJUR_ADMIN_API_KEY="$(kubectl exec \
+    -n "$CONJUR_NAMESPACE" \
+    "$conjur_master_pod" \
+    --container=conjur-oss \
+    -- conjurctl role retrieve-key "$CONJUR_ACCOUNT":user:admin | tail -1)"
+
+# deploy test app
+./test/python/k8s/deploy_test
+
+# run endpoint tests
+announce "Running tests"
+pod_name="$(kubectl get pods | grep 'test-app' | grep -v 'deploy' | awk '{ print $1 }')"
+
+while [[ -z "$(kubectl exec $pod_name -c test-app -- cat /run/conjur/access-token 2>/dev/null)" ]]; do
+    echo "Waiting for Conjur access token in shared volume..."
+    sleep 2
+done
+
+kubectl exec $pod_name -c test-app \
+    -- nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test/python/k8s
+
+# remove test app deployments and namespaces
+announce "Destroying environment"
+cleanup
