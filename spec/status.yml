@@ -1,6 +1,7 @@
 components:
   schemas:
     AuthenticatorsResponse:
+      title: testing123
       type: object
       properties:
         installed:
@@ -235,3 +236,27 @@ components:
         responses:
           "200":
             $ref: '#/components/responses/AuthenticatorsIndex'
+
+    Health:
+      get:
+        x-conjur-settings:
+          dap-only: true
+        tags:
+        - "status"
+        summary: "Health info abut conjur"
+        description: |
+          "You can request health checks against any cluster node using the Conjur API.
+          These routes do not require authentication.
+
+          The health check attempts an internal HTTP or TCP connection to
+          each DAP service. It also attempts a simple transaction against all internal databases."
+        operationId: "health"
+        responses:
+          "200":
+            description: The tests were successful
+            content:
+              application/json:
+                schema:
+                  type: object
+          "502":
+            description: The tests failed

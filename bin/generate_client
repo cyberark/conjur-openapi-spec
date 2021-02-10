@@ -17,8 +17,13 @@ GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
 client_lang="python"
 make_client_dir=1
-output_volume="./out/"
-output_dir='/out'
+output_volume="out/"
+output_dir='/out/conjur'
+input_dir='out/conjur/spec'
+dap_spec=0
+
+mkdir -p out/dap
+mkdir -p out/conjur
 
 while test $# -gt 0
 do
@@ -39,6 +44,11 @@ do
         -h)
             print_help
             exit 0
+            ;;
+        --dap)
+            dap_spec=1
+            input_dir='out/dap/spec'
+            output_dir='/out/dap'
             ;;
         *)
             break
@@ -76,9 +86,15 @@ else
     client_config=""
 fi
 
+if [ dap_spec -eq 1 ]; then
+    ./bin/transform --dap
+else
+    ./bin/transform --oss
+fi
+
 echo "Generating $client_lang client..."
 docker run --rm -v ${PWD}:/local -v $output_volume:/out "$GENERATOR_IMAGE" generate \
-    -i "/local/spec/openapi.yml" \
+    -i "/local/$input_dir/openapi.yml" \
     -g "$client_lang" \
     -o "$output_dir" \
     $client_config \

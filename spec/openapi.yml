@@ -244,6 +244,11 @@ paths:
   '/authenticators':
     $ref: 'status.yml#/components/paths/AuthenticatorsIndex'
 
+  '/health':
+    x-conjur-settings:
+      dap-only: true
+    $ref: 'status.yml#/components/paths/Health'
+
 # ========== SECRETS ==================
 
   '/secrets/{account}/{kind}/{identifier}':
