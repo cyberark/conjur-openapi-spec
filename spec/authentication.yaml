@@ -505,3 +505,46 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+    K8sInjectClientCert:
+      post:
+        tags:
+        - "authn"
+        summary: "Requests a client certificate injection into the desired K8s pod"
+        description: "This request sends a Certificate Signing Request to Conjur, which in uses the Kubernetes API to inject a certificate into the desired pod.
+
+        This endpoint requires a properly configured Conjur Certificate Authority service alongside a properly configured K8s authenticator."
+        operationId: "k8sInjectClientCert"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          description: "The service id of the K8s authenticator"
+          required: true
+          schema:
+            type: string
+        - name: "Host-Id-Prefix"
+          in: header
+          description: "Host ID prefix"
+          schema:
+            type: string
+          example: "host/conjur/authn-k8s/my-authenticator-id/apps"
+        requestBody:
+          description: "The body of the request is a CSR"
+          required: true
+          content:
+            text/plain:
+              schema:
+                type: string
+
+        responses:
+          "202":
+            $ref: 'openapi.yml#/components/responses/Accepted'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+
+        security:
+          - conjurAuth: []
