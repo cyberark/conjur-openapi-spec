@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
 
 # Start Conjur docker-compose environment
 bin/start_conjur

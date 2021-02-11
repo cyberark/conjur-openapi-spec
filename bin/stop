@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # deconstruct docker-compose env
 echo "Stop and remove docker-compose environment"
