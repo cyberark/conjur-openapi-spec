@@ -1,0 +1,37 @@
+name: K8s Inject Test
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+    paths:
+    - 'test/python/k8s/**'
+    - 'spec/authentication.yaml'
+
+  schedule:
+    - cron: '0 17 * * *'
+
+jobs:
+  run-k8s-inject-test-script:
+    name: Run K8s Inject Test Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+
+      - name: Install KinD
+        run: |
+          curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
+          chmod 700 kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      - name: Install Kubernetes CLI
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+      - name: Run Test Scripts
+        run: ./test/python/k8s/start

@@ -38,6 +38,35 @@ pipeline {
             }
         }
 
+        stage('K8s Inject Test') {
+            when {
+                anyOf {
+                    expression {
+                        sh(returnStatus: true, script: 'git diff origin/main --name-only | grep --quiet "^test/python/k8s/.*"') == 0
+                    }
+                    expression {
+                        sh(returnStatus: true, script: 'git diff origin/main --name-only | grep --quiet "spec/authentication.yaml"') == 0
+                    }
+                }
+            }
+            steps {
+                sh '''
+                curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+                chmod 700 get_helm.sh
+                ./get_helm.sh
+
+                curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
+                chmod 700 kind
+                sudo mv ./kind /usr/local/bin/kind
+
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+                ./test/python/k8s/start --no-regen-client
+                '''
+            }
+        }
+
         stage('Lint Integration Tests') {
             steps {
                 sh './bin/lint_tests'
