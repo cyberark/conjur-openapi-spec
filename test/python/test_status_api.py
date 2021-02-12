@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import unittest
+from unittest.mock import patch
 
 import openapi_client
 
@@ -69,10 +70,7 @@ class TestStatusApi(api_config.ConfiguredTest):
         self.assertEqual(context.exception.status, 401)
 
     def test_authenticator_service_status_200(self):
-        """Test case for authenticator_service_status 200 return code
-
-        We currently do not test this, see https://github.com/cyberark/conjur-openapi-spec/issues/84
-        """
+        """Test case for authenticator_service_status 200 return code"""
         api_config.setup_oidc_webservice()
         resp, status, _ = self.api.authenticator_service_status_with_http_info(
             'oidc',
@@ -81,6 +79,28 @@ class TestStatusApi(api_config.ConfiguredTest):
         )
         self.assertEqual(resp.status, 'ok')
         self.assertEqual(status, 200)
+
+        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.authenticator_service_status('azure', 'test', self.account)
+
+        mock.assert_called_once_with(
+            '/authn-{authenticator}/{service_id}/{account}/status',
+            'GET',
+            {'account': self.account, 'authenticator': 'azure', 'service_id': 'test'},
+            [],
+            {'Accept': 'application/json'},
+            body=None,
+            files={},
+            post_params=[],
+            response_type='AuthenticatorStatus',
+            auth_settings=['conjurAuth'],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
 
     def test_authenticator_service_status_403(self):
         """Test case for authenticator_service_status 403 return code"""
@@ -113,13 +133,29 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 501)
 
-    @unittest.expectedFailure
     def test_authenticator_status_200(self):
-        """Test case for authenticator_status 200 return code
-        We currently do not test this, see https://github.com/cyberark/conjur-openapi-spec/issues/84
-        """
-        resp = self.api.authenticator_status('azure', self.account)
-        self.assertEqual(resp['status'], 'ok')
+        """Test case for authenticator_status 200 return code"""
+        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.authenticator_status('gcp', self.account)
+
+        mock.assert_called_once_with(
+            '/authn-{authenticator}/{account}/status',
+            'GET',
+            {'account': self.account, 'authenticator': 'gcp'},
+            [],
+            {'Accept': 'application/json'},
+            body=None,
+            files={},
+            post_params=[],
+            response_type='AuthenticatorStatus',
+            auth_settings=['conjurAuth'],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
 
     def test_authenticator_status_403(self):
         """Test case for authenticator_status 403 return code"""
