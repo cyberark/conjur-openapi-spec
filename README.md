@@ -36,6 +36,19 @@ This project requires Docker and access to DockerHub.
 The OpenAPI Specification is compatible with [Conjur OSS v1.9+](https://github.com/cyberark/conjur).  
 Clients are generated using [OpenAPI Generator v4.3.1](https://github.com/OpenAPITools/openapi-generator/tree/v4.3.1).
 
+### Use With Dynamic Access Provider (DAP)
+
+The Conjur API endpoints included in this spec are a subset of DAP's endpoints,
+for that reason this API specification (and by extension any generated
+clients/documentation) can be used with DAP.
+
+The following is a list of endpoints present in DAP but absent from this spec:
+
+* `/health`
+* `/remote_health`
+* `/configuration/{account}/seed/follower`
+* `/info`
+
 ## Getting Started
 
 To view the Conjur OpenAPI Specification directly, please see the [spec/](./spec/) directory.
