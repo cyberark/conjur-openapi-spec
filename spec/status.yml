@@ -1,7 +1,6 @@
 components:
   schemas:
     AuthenticatorsResponse:
-      title: testing123
       type: object
       properties:
         installed:
@@ -38,6 +37,37 @@ components:
           example: "#<Errors::Authentication::AuthenticatorNotFound: CONJ00001E Authenticator 'authn-oidc' is not implemented in Conjur>"
       required:
         - status
+
+    Info:
+      type: object
+      properties:
+        authenticators:
+          type: object
+          properties:
+            installed:
+              type: array
+              items:
+                type: string
+            configured:
+              type: array
+              items:
+                type: string
+            enabled:
+              type: array
+              items:
+                type: string
+        configuration:
+          type: object
+        role:
+          type: string
+        container:
+          type: string
+        release:
+          type: string
+        version:
+          type: string
+        services:
+          type: object
 
     WhoAmI:
       type: object
@@ -240,16 +270,16 @@ components:
     Health:
       get:
         x-conjur-settings:
-          dap-only: true
+          enterprise-only: true
         tags:
         - "status"
-        summary: "Health info abut conjur"
+        summary: "Health info about conjur"
         description: |
-          "You can request health checks against any cluster node using the Conjur API.
+          You can request health checks against any cluster node using the Conjur API.
           These routes do not require authentication.
 
           The health check attempts an internal HTTP or TCP connection to
-          each DAP service. It also attempts a simple transaction against all internal databases."
+          each DAP service. It also attempts a simple transaction against all internal databases.
         operationId: "health"
         responses:
           "200":
@@ -260,3 +290,53 @@ components:
                   type: object
           "502":
             description: The tests failed
+
+    RemoteHealth:
+      get:
+        x-conjur-settings:
+          enterprise-only: true
+        tags:
+          - "status"
+        summary: "Health info about a given DAP server"
+        description: |
+          Use the remote_health route to check the health of any DAP Server from any other DAP Server.
+          With this route, you can check master health relative to a follower, or follower health relative
+          to a standby, and so on.
+        operationId: "remoteHealth"
+        parameters:
+          - name: remote
+            in: path
+            schema:
+              type: string
+            required: true
+            description: "The hostname of the remote to check"
+            example: "conjur.myorg.com"
+        responses:
+          "200":
+            description: The tests were successful
+            content:
+              application/json:
+                schema:
+                  type: object
+          "502":
+            description: The tests failed
+    Info:
+      get:
+        x-conjur-settings:
+          enterprise-only: true
+        tags:
+          - "status"
+        summary: "Basic information about the DAP server"
+        description: |
+          Information about the DAP node which was queried against.
+
+          Includes authenticator info, release/version info, configuration details,
+          internal services, and role information.
+        operationId: "info"
+        responses:
+          "200":
+            description: "info"
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Info'

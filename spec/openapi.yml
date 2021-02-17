@@ -246,8 +246,18 @@ paths:
 
   '/health':
     x-conjur-settings:
-      dap-only: true
+      enterprise-only: true
     $ref: 'status.yml#/components/paths/Health'
+
+  '/remote_health/{remote}':
+    x-conjur-settings:
+      enterprise-only: true
+    $ref: 'status.yml#/components/paths/RemoteHealth'
+
+  '/info':
+    x-conjur-settings:
+      enterprise-only: true
+    $ref: 'status.yml#/components/paths/Info'
 
 # ========== SECRETS ==================
 

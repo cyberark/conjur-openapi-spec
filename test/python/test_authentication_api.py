@@ -279,7 +279,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
-@unittest.skipIf(api_config.DAP_TESTS == True, 'No environment available for DAP')
+@unittest.skipIf(api_config.DAP_TESTS, 'No environment available for DAP')
 class TestExternalAuthnApi(api_config.ConfiguredTest):
     """Class tests api functions relating to external authenticators
 
