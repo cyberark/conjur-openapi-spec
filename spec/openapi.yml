@@ -11,7 +11,7 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-- name: "authn"
+- name: "authentication"
   description: "Authentication"
 - name: "secrets"
   description: "Secrets"
@@ -29,29 +29,48 @@ tags:
   description: "Server status"
 - name: "certificate authority"
   description: "Certificate authority"
-  
+
 components:
   schemas:
-    ApiKey:
-      type: string
-      minLength: 55
-      description: "Example of a Conjur API key"
-      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
-
     AccountName:
+      description: "Conjur account name"
       type: string
       minLength: 1
-      example: "myorg"
+      example: "default"
+
+    ApiKey:
+      description: "Example of a Conjur API key"
+      type: string
+      minLength: 55
+      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
+
+    AWSSignatureHeader:
+      description: "AWS Signature Version 4 header"
+      type: string
+
+    AzureIdentityToken:
+      description: "Azure instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
 
     CheckPrivilege:
+      description: "Checks whether a role has a privilege on a resource."
       type: boolean
       example: true
-      description: "Checks whether a role has a privilege on a resource."
 
     Count:
       description: "Return only the count of results"
       type: boolean
       example: true
+
+    GoogleIdentityToken:
+      description: "Google Cloud instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
 
     Kind:
       type: string
@@ -67,6 +86,13 @@ components:
       description: "Skips this many items before returning the rest"
       type: integer
       example: 20
+
+    OIDCToken:
+      description: "OpenID Connect ID token"
+      type: object
+      properties:
+        id_token:
+          type: string
 
     PermittedRoles:
       type: boolean
@@ -112,7 +138,7 @@ components:
         - Layer: a collection of hosts that have the same privileges
 
         - Group: a collection of users and groups that have the same privileges
- 
+
         - Policy: a role which owns of a set of related object
 
 
@@ -136,7 +162,7 @@ components:
     AccessTokenGeneric:
       description: |
         This response schema is a generic string as opposed to the AccessToken component schema.
-        This is to allow users to use the "Accept-Encoding: base64" header in order to 
+        This is to allow users to use the "Accept-Encoding: base64" header in order to
         receive a pre-encoded token instead of a JSON object.
       content:
         text/plain:
@@ -193,31 +219,49 @@ components:
 
   securitySchemes:
     basicAuth:
-      description: "Basic authentication"
+      description: "Basic authentication with Conjur username and password (users only)
+        or API key (hosts and users)."
       type: http
       scheme: basic
     conjurAuth:
-      description: "Conjur access token in `Token token=<base64_encoded_token>` format"
+      description: "Conjur access token in `Token token=<base64_encoded_token>` format."
       type: apiKey
       in: header
       name: Authorization
+    conjurKubernetesMutualTls:
+      description: "Conjur Kubernetes authenticator mutual TLS authentication.
+        To authenticate using this method, you must provide a trusted client
+        certificate"
+      type: http
+      scheme: mutual
+
 
 security:
   - basicAuth: []
   - conjurAuth: []
-  
+  - conjurKubernetesMutualTls: []
+
 paths:
 
 # ========== AUTHENTICATION ===========
 
-  '/{authenticator}/{account}/login':
-    $ref: 'authentication.yaml#/components/paths/Login'
+  '/authn/{account}/login':
+    $ref: 'authentication.yaml#/components/paths/DefaultLogin'
 
-  '/{authenticator}/{account}/{login}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/Authenticate'
+  '/authn-ldap/{service_id}/{account}/login':
+    $ref: 'authentication.yaml#/components/paths/LDAPLogin'
+
+  '/authn/{account}/{login}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/DefaultAuthenticate'
 
   '/{authenticator}/{service_id}/{account}/{login}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/AuthenticateService'
+    $ref: 'authentication.yaml#/components/paths/ServiceAuthenticate'
+
+  '/authn-oidc/{service_id}/{account}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
+
+  '/authn-gcp/{account}/authenticate':
+    $ref: 'authentication.yaml#/components/paths/GCPAuthenticate'
 
   '/authn/{account}/password':
     $ref: 'authentication.yaml#/components/paths/ChangePassword'
@@ -226,16 +270,7 @@ paths:
     $ref: 'authentication.yaml#/components/paths/RotateApiKey'
 
   '/{authenticator}/{service_id}/{account}':
-    $ref: 'authentication.yaml#/components/paths/UpdateAuthenticatorConfig'
-
-  '/{authenticator}/{service_id}/{account}/login':
-    $ref: 'authentication.yaml#/components/paths/ServiceLogin'
-
-  '/authn-oidc/{service_id}/{account}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
-
-  '/authn-gcp/{account}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/GCPAuthenticate'
+    $ref: 'authentication.yaml#/components/paths/EnableAuthenticatorInstance'
 
   '/authn-k8s/{service_id}/inject_client_cert':
     $ref: 'authentication.yaml#/components/paths/K8sInjectClientCert'
