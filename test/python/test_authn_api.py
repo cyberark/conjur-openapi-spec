@@ -131,6 +131,8 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    @unittest.skipIf(api_config.DAP_TESTS,
+                     "Our DAP conf doesn't support bypassing ssl so we cannot evoke this response")
     def test_login_422(self):
         """Test case for 422 status response when logging in
         This test uses HTTP instead of HTTPS, letting Conjur reject malformed parameters
@@ -225,8 +227,6 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """Test case for 422 status response when logging in
         This test uses HTTP instead of HTTPS, letting Conjur reject malformed parameters
         """
-        self.config.host = 'http://conjur'
-
         with self.assertRaises(openapi_client.ApiException) as context:
             self.api.rotate_api_key('authn', self.account, role='\00')
 
@@ -285,6 +285,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
+@unittest.skipIf(api_config.DAP_TESTS == True, 'No environment available for DAP')
 class TestExternalAuthnApi(api_config.ConfiguredTest):
     """Class tests api functions relating to external authenticators
 

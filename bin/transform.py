@@ -2,6 +2,7 @@
 
 import sys
 import pathlib
+import os
 
 import yaml
 
@@ -61,9 +62,6 @@ if __name__ == "__main__":
         usage()
 
     input_file = pathlib.Path(sys.argv[1])
-    print(input_file)
-    print(pathlib.Path('.').resolve())
-    print(pathlib.Path(input_file).resolve())
     if '--dap' in sys.argv:
         generate_dap = True
     elif '--oss' in sys.argv:
@@ -71,7 +69,7 @@ if __name__ == "__main__":
     else:
         usage()
 
-    with open(input_file, "r") as f:
+    with input_file.open() as f:
         try:
             data = yaml.safe_load(f)
         except yaml.YAMLError as e:
@@ -84,5 +82,5 @@ if __name__ == "__main__":
             remove_object(data, i.obj_path)
 
     output_dir = get_output_dir(generate_dap)
-    with open(output_dir / input_file.name, "w") as f:
+    with (output_dir / input_file.name).open(mode="w") as f:
         f.write(yaml.dump(data))

@@ -216,7 +216,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
             self.api.create_variable(self.account, "variable", secret, body=value)
 
         # Secrets have to be in the format org:variable:secret_name
-        secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
+        secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
         response, status, _ = self.api.get_variables_with_http_info(
             ",".join(secret_list)
         )
@@ -228,7 +228,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
     def test_get_variables_401(self):
         """Test case for get_variables 401 response"""
-        secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
+        secret_list = ','.join([f"{self.account}:variable:{i}" for i in TEST_VARIABLES])
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
             self.bad_auth_api.get_variables(secret_list)
@@ -240,7 +240,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.grant_insufficient_permissions()
         alice_client = api_config.get_api_client(username='alice')
         alice_api = openapi_client.api.SecretsApi(alice_client)
-        secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
+        secret_list = ','.join([f"{self.account}:variable:{i}" for i in TEST_VARIABLES])
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
             alice_api.get_variables(secret_list)

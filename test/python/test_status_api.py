@@ -69,6 +69,8 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    @unittest.skipIf(api_config.DAP_TESTS == True,
+                     'Dont support testing external authenticators on DAP currently')
     def test_authenticator_service_status_200(self):
         """Test case for authenticator_service_status 200 return code"""
         api_config.setup_oidc_webservice()
