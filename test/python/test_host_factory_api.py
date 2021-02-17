@@ -2,13 +2,14 @@ from __future__ import absolute_import
 
 import unittest
 import datetime
+import os
 
 import conjur
 
 from . import api_config
 
 TEST_HOST = "testHost"
-HOST_FACTORY = "dev:host_factory:testFactory"
+HOST_FACTORY = f"{os.environ.get(api_config.CONJUR_ACCOUNT)}:host_factory:testFactory"
 FACTORY_POLICY = '''
 - !layer testLayer
 - !host_factory

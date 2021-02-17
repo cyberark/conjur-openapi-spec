@@ -3,13 +3,15 @@
 set -euo pipefail
 
 print_help(){
-    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n]"
+    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n] [--dap]"
     echo -e "\tUses the OpenApi generator to create a client for the API spec"
     echo -e "\tDefault output goes in the 'out' directory under the generated client language"
     echo -e "\tIf no language is specified the Python client will be generated"
     echo
     echo -e "\tThe -n option will prevent the creation of a client language directory"
     echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
+    echo
+    echo -e "\tThe --dap option will generate the spec with included DAP endpoints"
 }
 
 generator_version="v4.3.1"
@@ -86,7 +88,7 @@ else
     client_config=""
 fi
 
-if [ dap_spec -eq 1 ]; then
+if [ $dap_spec -eq 1 ]; then
     ./bin/transform --dap
 else
     ./bin/transform --oss
@@ -100,4 +102,4 @@ docker run --rm -v ${PWD}:/local -v $output_volume:/out "$GENERATOR_IMAGE" gener
     $client_config \
     $template_arg
 
-echo "Done! Client is in $(pwd)/out folder!"
+echo "Done! Client is in $output_dir folder!"

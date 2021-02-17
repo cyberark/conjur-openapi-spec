@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+source ./bin/util
+
+stop_dap(){
+    # This can error in CI so unset fail on error for DAP shutdown
+    set +e
+    pushd ./test/dap-intro
+    ./bin/dap --stop
+    popd
+}
+
+trap stop_dap EXIT
+
+# Stop default Conjur env to prevent overlap in exposed ports
+./bin/stop
+
+rm -rf test/dap-intro
+git clone https://github.com/conjurdemos/dap-intro.git test/dap-intro
+chmod -R 777 test/dap-intro
+
+# Set this after stopping containers because that can throw errors sometimes
+set -e
+
+announce Starting DAP
+params=""
+pushd  ./test/dap-intro
+
+./bin/dap --provision-master
+./bin/dap --wait-for-master
+api_key=$(curl --insecure --user admin:MySecretP@ss1 https://localhost/authn/demo/login)
+echo DAP API key: $api_key
+
+announce Setting up DAP Certificates
+./bin/dap --import-custom-certificates
+
+
+# Create the parameter to import volumes from the DAP container so we have its certificates
+for name in $(docker-compose ps -q)
+do
+    params+="--volumes-from $name "
+done
+
+popd
+
+cat <<ENV > .env
+CONJUR_AUTHN_API_KEY=$api_key
+CONJUR_ACCOUNT=demo
+CONJUR_HOST=https://conjur-master.mycompany.local
+ENTERPRISE_TESTS=1
+CERT_DIR=/etc/ssl/certs
+SSL_CERT_FILE=ca.pem
+CONJUR_CERT_FILE=conjur-master.mycompany.local.pem
+CONJUR_KEY_FILE=conjur-master.mycompany.local.key
+ENV
+
+
+config/https/generate_csr
+
+announce Generating client
+bin/generate_client --enterprise
+
+announce Building test environment
+docker build -f test/Dockerfile.python -t python-tests --build-arg APPLIANCE=enterprise .
+
+announce Running tests
+docker run $params --network dap_net --rm --env-file .env python-tests bash -c "nose2 -v -s test python"

@@ -9,6 +9,14 @@ pipeline {
     }
 
     stages {
+        stage('DAP Integration Tests') {
+            steps {
+                script {
+                    sh "./bin/test_enterprise"
+                }
+            }
+        }
+
         stage('Integration Tests') {
             steps {
                 script {

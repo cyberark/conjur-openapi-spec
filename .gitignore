@@ -22,3 +22,4 @@ test-python.key
 test/python/k8s/policy/generated/
 
 release_artifacts
+test/dap-intro

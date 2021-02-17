@@ -800,6 +800,9 @@ class TestRolesApi(api_config.ConfiguredTest):
             self.BOB_ID
         ]
 
+        if api_config.DAP_TESTS:
+            target_details.append('!:!:root')
+
         self.assertEqual(status, 200)
         for i in target_details:
             # This will throw an error causing the test to fail if

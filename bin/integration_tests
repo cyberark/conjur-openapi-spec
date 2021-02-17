@@ -85,7 +85,7 @@ run_csharp_tests(){
   announce "Running C# Integration Tests"
   docker-compose exec -T \
     test-dotnet \
-    bash -c "cd out/csharp-netcore && dotnet test"
+    bash -c "cd out/conjur/csharp-netcore && dotnet test"
 }
 
 # if there are no parameters specified run just the python tests
