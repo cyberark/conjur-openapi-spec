@@ -144,3 +144,41 @@ You can access a compatible version of the the Conjur command line interface by 
 ```shell
 $ ./bin/cli
 ```
+
+## Releasing
+
+A new release must be created whenever a new version of [Conjur](https://github.com/cyberark/conjur)
+is released that has updates to the REST API.
+
+### Verify and update dependencies
+1. Review the [NOTICES.txt](./NOTICES.txt) file and ensure it reflects the current
+   set of dependencies in the [Gemfile](./Gemfile)
+1. If a new dependency has been added, a dependency has been dropped, or a version
+   has changed since the last tag - make sure the NOTICES file is up-to-date with
+   the new versions
+
+### Update the version and changelog
+1. Examine the changelog and decide on the version bump rank (major, minor, patch).
+1. Change the title of _Unreleased_ section of the changelog to the target
+version.
+   - Be sure to add the date (ISO 8601 format) to the section header.
+1. Add a new, empty _Unreleased_ section to the changelog.
+   - Remember to update the references at the bottom of the document.
+1. Change `spec/openapi.yml` file's version object to reflect the change.
+1. Commit these changes (including the changes to NOTICES.txt, if there are any).
+   `Bump version to x.y.z` is an acceptable commit message.
+1. Push your changes to a branch, and get the PR reviewed and merged.
+
+### Tag the version
+1. Tag the version on the master branch using eg. `git tag -s vx.y.z -m vx.y.z`. Note this
+   requires you to be able to sign releases. Consult the
+   [github documentation on signing commits](https://help.github.com/articles/signing-commits-with-gpg/)
+   on how to set this up.
+
+1. Push the tag: `git push vx.y.z` (or `git push origin vx.y.z` if you are working
+   from your local machine).
+
+### Add a new GitHub release
+
+1. Create a new release from the tag in the GitHub UI
+1. Add the [CHANGELOG](./CHANGELOG.txt) for the current version to the GitHub release description

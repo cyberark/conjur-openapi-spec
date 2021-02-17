@@ -5,6 +5,7 @@
 
 ### What ticket does this PR close?
 Resolves #[relevant GitHub issues, eg 76]
+Relates to cyberark/conjur#[Relevant conjur issue number]
 
 ### Checklists
 
