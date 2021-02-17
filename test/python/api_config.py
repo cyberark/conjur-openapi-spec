@@ -4,7 +4,6 @@ import os
 import unittest
 
 import openapi_client
-import urllib3
 
 CONJUR_HOST = os.environ.get('CONJUR_HOST', default='https://conjur-https')
 CERT_DIR = pathlib.Path(os.environ.get('CERT_DIR', default='config/https'))

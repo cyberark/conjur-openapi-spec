@@ -69,7 +69,7 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    @unittest.skipIf(api_config.DAP_TESTS == True,
+    @unittest.skipIf(api_config.DAP_TESTS,
                      'Dont support testing external authenticators on DAP currently')
     def test_authenticator_service_status_200(self):
         """Test case for authenticator_service_status 200 return code"""
@@ -209,6 +209,46 @@ class TestStatusApi(api_config.ConfiguredTest):
             for value in lst:
                 self.assertIsInstance(value, str)
                 self.assertNotEqual(value, '')
+
+    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    def test_health_200(self):
+        """Test case for DAP health 200 response"""
+        resp, status, _ = self.api.health_with_http_info()
+        status_keys = ['services', 'audit', 'database']
+
+        self.assertEqual(status, 200)
+        self.assertTrue(resp['ok'])
+        for i in status_keys:
+            self.assertTrue(resp[i]['ok'])
+
+    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    def test_remote_health_200(self):
+        """Test case for DAP remote health 200 response"""
+        resp, status, _ = self.api.remote_health_with_http_info('conjur-master.mycompany.local')
+        status_keys = ['services', 'audit', 'database']
+
+        self.assertEqual(status, 200)
+        self.assertTrue(resp['ok'])
+        for i in status_keys:
+            self.assertTrue(resp[i]['ok'])
+
+    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    def test_info_200(self):
+        """Test case for DAP info 200 response"""
+        resp, status, _ = self.api.info_with_http_info()
+        keys = [
+            'release',
+            'version',
+            'services',
+            'container',
+            'role',
+            'configuration',
+            'authenticators'
+        ]
+
+        self.assertEqual(status, 200)
+        for i in keys:
+            self.assertIn(i, resp)
 
 if __name__ == '__main__':
     unittest.main()

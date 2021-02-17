@@ -21,13 +21,13 @@ jobs:
           python-version: '3.x'
 
       - name: Generate python client
-        run: ./bin/generate_client --oss
+        run: ./bin/generate_client --dap
 
       - name: Install the requirements
         run: python -m pip install -r requirements.txt
 
       - name: Install the client
-        run: python -m pip install out/conjur/python pylint pyyaml
+        run: python -m pip install out/dap/python pylint pyyaml
 
       - name: Run Pylint
         run: pylint test/python --rcfile=test/config/.pylintrc

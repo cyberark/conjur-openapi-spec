@@ -17,7 +17,7 @@ trap stop_dap EXIT
 ./bin/stop
 
 rm -rf test/dap-intro
-git clone https://github.com/telday/dap-intro.git test/dap-intro
+git clone https://github.com/conjurdemos/dap-intro.git test/dap-intro
 chmod -R 777 test/dap-intro
 
 announce Starting DAP

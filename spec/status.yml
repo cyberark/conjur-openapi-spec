@@ -1,7 +1,6 @@
 components:
   schemas:
     AuthenticatorsResponse:
-      title: testing123
       type: object
       properties:
         installed:
@@ -241,7 +240,7 @@ components:
           dap-only: true
         tags:
         - "status"
-        summary: "Health info abut conjur"
+        summary: "Health info about conjur"
         description: |
           "You can request health checks against any cluster node using the Conjur API.
           These routes do not require authentication.
@@ -258,3 +257,50 @@ components:
                   type: object
           "502":
             description: The tests failed
+
+    RemoteHealth:
+      get:
+        x-conjur-settings:
+          dap-only: true
+        tags:
+          - "status"
+        summary: "Health info about a given DAP server"
+        description: |
+          "Use the remote_health route to check the health of any DAP Server from any other DAP Server.
+          With this route, you can check master health relative to a follower, or follower health relative
+          to a standby, and so on."
+        operationId: "remoteHealth"
+        parameters:
+          - name: remote
+            in: path
+            schema:
+              type: string
+            required: true
+            description: "The hostname of the remote to check"
+            example: "conjur.myorg.com"
+        responses:
+          "200":
+            description: The tests were successful
+            content:
+              application/json:
+                schema:
+                  type: object
+          "502":
+            description: The tests failed
+    Info:
+      get:
+        x-conjur-settings:
+          dap-only: true
+        tags:
+          - "status"
+        summary: "Basic information about the DAP server"
+        description: |
+          "Information about authenticator services in the Conjur configuration"
+        operationId: "info"
+        responses:
+          "200":
+            description: "info"
+            content:
+              application/json:
+                schema:
+                  type: object
