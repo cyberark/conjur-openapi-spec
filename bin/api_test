@@ -40,7 +40,7 @@ if [[ -z "$(docker-compose ps -q)" ]]; then
 fi
 
 announce "Bundling spec file"
-./bin/bundle_spec
+./bin/bundle_spec --oss
 
 announce "Building API test container image..."
 docker-compose build test-api

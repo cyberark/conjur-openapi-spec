@@ -74,24 +74,6 @@ pipeline {
                 '''
             }
         }
-
-        stage('Lint Integration Tests') {
-            steps {
-                sh './bin/lint_tests'
-            }
-        }
-
-        stage('Lint Spec File') {
-            steps {
-                sh './bin/lint_spec'
-            }
-        }
-        
-        stage('API Contract Test') {
-            steps {
-                sh './bin/api_test'
-            }
-        }
     }
 
     post {
