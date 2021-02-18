@@ -19,8 +19,8 @@ CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
 WEBSERVICE_POLICY = pathlib.Path('test/config/webservice.yml')
 OIDC_POLICY_FILE = 'test/config/oidc-webservice.yml'
 
-if (DAP_TESTS := os.environ.get('DAP_TESTS', default=False)) == '1':
-    DAP_TESTS = True
+if (ENTERPRISE_TESTS := os.environ.get('ENTERPRISE_TESTS', default=False)) == '1':
+    ENTERPRISE_TESTS = True
 
 def get_webservice_policy():
     """Gets the text for the webservice testing policy"""

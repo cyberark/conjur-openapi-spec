@@ -3,21 +3,24 @@ set -e
 
 source ./bin/util
 
-ensure_client_is_generated ruby
+ensure_client_is_generated ruby conjur
 ensure_conjur_up
 
 # Remove the gem if it is already built so we dont create a gemfile
 # which contains itself when we build
-if [ -e ./out/ruby/conjur-sdk-*.gem ]; then
+if [ -e ./out/enterprise/ruby/conjur-sdk-*.gem ]; then
   announce "Remove old gem file"
-  rm ./out/ruby/conjur-sdk-*.gem
+  rm ./out/enterprise/ruby/conjur-sdk-*.gem
+elif [ -e ./out/oss/ruby/conjur-*.gem ]; then
+  announce "Remove old gem file"
+  rm ./out/oss/ruby/conjur-sdk-*.gem
 fi
 
 export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
 
 announce "Running example in container..."
 docker run --rm \
-  -v ${PWD}/out/ruby:/src \
+  -v ${PWD}/out/oss/ruby:/src \
   -v ${PWD}/examples/ruby/ruby_client.rb:/src/ruby_client.rb \
   -v ${PWD}/examples/config:/config/policy \
   -v ${PWD}/config/https:/config/https \

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-./bin/bundle_spec
+./bin/bundle_spec --enterprise
 
 docker run --rm \
     -v ${PWD}/spec.yml:/code/spec.yml \

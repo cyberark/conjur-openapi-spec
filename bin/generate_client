@@ -3,7 +3,7 @@
 set -euo pipefail
 
 print_help(){
-    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n] [--dap]"
+    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n] [--enterprise]"
     echo -e "\tUses the OpenApi generator to create a client for the API spec"
     echo -e "\tDefault output goes in the 'out' directory under the generated client language"
     echo -e "\tIf no language is specified the Python client will be generated"
@@ -11,7 +11,7 @@ print_help(){
     echo -e "\tThe -n option will prevent the creation of a client language directory"
     echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
     echo
-    echo -e "\tThe --dap option will generate the spec with included DAP endpoints"
+    echo -e "\tThe --enterprise option will generate the spec with included Conjur Enterprise endpoints"
 }
 
 generator_version="v4.3.1"
@@ -20,12 +20,12 @@ GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 client_lang="python"
 make_client_dir=1
 output_volume="out/"
-output_dir='/out/conjur'
-input_dir='out/conjur/spec'
+output_dir='/out/oss'
+input_dir='out/oss/spec'
 dap_spec=0
 
-mkdir -p out/dap
-mkdir -p out/conjur
+mkdir -p out/enterprise
+mkdir -p out/oss
 
 while test $# -gt 0
 do
@@ -47,10 +47,10 @@ do
             print_help
             exit 0
             ;;
-        --dap)
+        --enterprise)
             dap_spec=1
-            input_dir='out/dap/spec'
-            output_dir='/out/dap'
+            input_dir='out/enterprise/spec'
+            output_dir='/out/enterprise'
             ;;
         *)
             break
@@ -89,7 +89,7 @@ else
 fi
 
 if [ $dap_spec -eq 1 ]; then
-    ./bin/transform --dap
+    ./bin/transform --enterprise
 else
     ./bin/transform --oss
 fi

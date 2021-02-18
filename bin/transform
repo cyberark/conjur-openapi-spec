@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-if [ $1 = '' ]; then
-    echo "You must specify either --dap or --oss"
-elif [ $1 = '--oss' ]; then
-    mkdir -p out/conjur
-elif [ $1 = '--dap' ]; then
-    mkdir -p out/dap
+if [ "$1" = '' ]; then
+    echo "You must specify either --enterprise or --oss"
+elif [ "$1" = '--oss' ]; then
+    mkdir -p out/oss
+elif [ "$1" = '--enterprise' ]; then
+    mkdir -p out/enterprise
 fi
 
-export VERSION=$1
+export VERSION="$1"
 
 docker run --rm \
     -v ${PWD}:/code \
@@ -23,7 +23,9 @@ docker run --rm \
         # transform each file individually
         for name in ./spec/*
         do
-            echo \$name \$VERSION
-            ./bin/transform.py \$name \$VERSION
+            if [ -f \$name ]; then
+                echo \$name \$VERSION
+                ./bin/transform.py \$name \$VERSION
+            fi
         done
     "

@@ -7,28 +7,42 @@ import os
 import yaml
 
 class Annotation:
+    """Defines an object annotation in the spec
+
+    Defined as all fields under x-conjur-settings.
+    e.g. to annotate the object Path:
+
+    .. code-block:: yaml
+
+        Path:
+            x-conjur-settings:
+                enterprise-only: true
+    """
     def __init__(self, annotation: dict, obj_path: list):
         annotation = annotation['x-conjur-settings']
         self.annotation = annotation
         self.obj_path = obj_path
-        if 'dap-only' in annotation and isinstance(annotation['dap-only'], bool):
-            self.dap_only = annotation['dap-only']
+        if 'enterprise-only' in annotation and isinstance(annotation['enterprise-only'], bool):
+            self.dap_only = annotation['enterprise-only']
         else:
             self.dap_only = False
 
-def find_annotations(obj, object_path=[]):
+def __find_annotations(obj, object_path=[]):
+    """Helper function recurses through a yaml object and returns a list of all annotations"""
     annotations = list()
     if not isinstance(obj, dict):
         return annotations
     for i in obj:
         if i == 'x-conjur-settings':
             annotations.append(Annotation({i: obj[i]}, object_path))
-        new_annotations = find_annotations(obj[i], object_path + [i])
-        if new_annotations:
-            annotations += new_annotations
+        annotations += find_annotations(obj[i], object_path + [i])
     return annotations
 
+def find_annotations(obj):
+    return __find_annotations(obj, [])
+
 def verify_object_exists(obj: dict, obj_path: list):
+    """Verifies that a given object has a given sub-object defined by obj_path"""
     if not obj_path:
         return True
     if obj_path[0] in obj:
@@ -36,23 +50,26 @@ def verify_object_exists(obj: dict, obj_path: list):
     else:
         return False
 
-def remove_object(data, obj_path):
+def remove_object(obj, obj_path):
+    """Removes the sub-object defined by obj_path from obj"""
     if len(obj_path) == 1:
-        del data[obj_path[0]]
+        del obj[obj_path[0]]
     else:
-        remove_object(data[obj_path[0]], obj_path[1:])
-        if data[obj_path[0]] == {}:
-            del data[obj_path[0]]
+        remove_object(obj[obj_path[0]], obj_path[1:])
+        if obj[obj_path[0]] == {}:
+            del obj[obj_path[0]]
 
 def usage():
-    print("Usage: transform <input-file> [--dap/--conjur]")
+    print("Usage: transform <input-file> [--enterprise/--oss]")
     exit()
 
 def get_output_dir(generate_dap):
+    """Finds which directory to output to, this is dependant on whether we
+    are generating the enterprise or oss version of the spec"""
     if generate_dap:
-        output_dir = pathlib.Path('./out/dap/spec')
+        output_dir = pathlib.Path('./out/enterprise/spec')
     else:
-        output_dir = pathlib.Path('./out/conjur/spec')
+        output_dir = pathlib.Path('./out/oss/spec')
     if not output_dir.exists():
         output_dir.mkdir()
     return output_dir
@@ -62,13 +79,14 @@ if __name__ == "__main__":
         usage()
 
     input_file = pathlib.Path(sys.argv[1])
-    if '--dap' in sys.argv:
+    if '--enterprise' in sys.argv:
         generate_dap = True
     elif '--oss' in sys.argv:
         generate_dap = False
     else:
         usage()
 
+    # read in the input object we are parsing
     with input_file.open() as f:
         try:
             data = yaml.safe_load(f)
@@ -76,11 +94,15 @@ if __name__ == "__main__":
             print(e)
             exit(1)
 
-    annotations = find_annotations(data, [])
+    # retrieve a list of annotations in the object we are parsing
+    annotations = find_annotations(data)
+
+    # For each found annotation check if we need to remove it then do so
     for i in annotations:
         if i.dap_only and not generate_dap and verify_object_exists(data, i.obj_path):
             remove_object(data, i.obj_path)
 
+    # write the output file
     output_dir = get_output_dir(generate_dap)
     with (output_dir / input_file.name).open(mode="w") as f:
         f.write(yaml.dump(data))

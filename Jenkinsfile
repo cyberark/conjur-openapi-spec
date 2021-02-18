@@ -9,7 +9,7 @@ pipeline {
     }
 
     stages {
-        stage('DAP Integration Tests') {
+        stage('Enterprise Integration Tests') {
             steps {
                 script {
                     sh "./bin/test_enterprise"
@@ -72,24 +72,6 @@ pipeline {
 
                 ./test/python/k8s/start --no-regen-client
                 '''
-            }
-        }
-
-        stage('Lint Integration Tests') {
-            steps {
-                sh './bin/lint_tests'
-            }
-        }
-
-        stage('Lint Spec File') {
-            steps {
-                sh './bin/lint_spec'
-            }
-        }
-        
-        stage('API Contract Test') {
-            steps {
-                sh './bin/api_test'
             }
         }
     }

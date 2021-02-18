@@ -278,8 +278,8 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    @unittest.skipIf(api_config.DAP_TESTS,
-                     "Our DAP conf doesn't support bypassing ssl so we cannot evoke this response")
+    @unittest.skipIf(api_config.ENTERPRISE_TESTS,
+             "Our Enterprise conf doesn't support bypassing ssl so we cannot evoke this response")
     def test_sign_422(self):
         """Test case for 422 response when requesting a signed certificate
         422 - Conjur received a malformed parameter

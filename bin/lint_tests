@@ -2,12 +2,12 @@
 
 echo "Linting Python integration tests:"
 
-./bin/generate_client --dap
+./bin/generate_client --enterprise
 
 docker run --rm \
     -v ${PWD}/test/python:/code/test \
     -v ${PWD}/test/config/.pylintrc:/code/.pylintrc \
-    -v ${PWD}/out/dap/python:/code/module \
+    -v ${PWD}/out/enterprise/python:/code/module \
     -v ${PWD}/requirements.txt:/requirements.txt \
     python:3.8 \
     /bin/bash -c "pip install -r /requirements.txt && pip install pylint -e /code/module && pylint --rcfile=/code/.pylintrc /code/test"

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import unittest
-import base64
+from unittest.mock import patch
 
 import conjur
 
@@ -273,22 +273,29 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
-        try:
-            response, status, headers = self.api.get_secrets_with_http_info(
+        with patch.object(conjur.api_client.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.get_secrets(
                 ",".join(secret_list),
                 accept_encoding="base64"
             )
-        except conjur.ApiException as error:
-            if error.status == 500 and api_config.DAP_TESTS:
-                return unittest.skip("DAP not up to date with latest Conjur version")
-
-        for secret, value in zip(secret_list, secret_values):
-            self.assertIn(secret, response)
-            decoded = base64.b64decode(response[secret])
-            self.assertEqual(decoded, value)
-
-        self.assertEqual(status, 200)
-        self.assertEqual(headers['Content-Encoding'].lower(), "base64")
+        mock.assert_called_once_with(
+            '/secrets',
+            'GET',
+            {},
+            [('variable_ids', ','.join(secret_list))],
+            {'Accept-Encoding': 'base64', 'Accept': 'application/json'},
+            body=None,
+            post_params=[],
+            files={},
+            response_type='object',
+            auth_settings=['conjurAuth'],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
 
 if __name__ == '__main__':
     unittest.main()

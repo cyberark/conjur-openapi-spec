@@ -69,8 +69,8 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    @unittest.skipIf(api_config.DAP_TESTS,
-                     'Dont support testing external authenticators on DAP currently')
+    @unittest.skipIf(api_config.ENTERPRISE_TESTS,
+                     'Dont support testing external authenticators on Enterprise currently')
     def test_get_service_authenticator_status_200(self):
         """Test case for get_service_authenticator_status 200 return code"""
         api_config.setup_oidc_webservice()
@@ -204,9 +204,9 @@ class TestStatusApi(api_config.ConfiguredTest):
         self.assertEqual(status, 200)
         self.assertEqual(headers['X-Request-Id'], request_id)
 
-    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
     def test_health_200(self):
-        """Test case for DAP health 200 response"""
+        """Test case for Enterprise health 200 response"""
         resp, status, _ = self.api.health_with_http_info()
         status_keys = ['services', 'audit', 'database']
 
@@ -215,9 +215,9 @@ class TestStatusApi(api_config.ConfiguredTest):
         for i in status_keys:
             self.assertTrue(resp[i]['ok'])
 
-    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
     def test_remote_health_200(self):
-        """Test case for DAP remote health 200 response"""
+        """Test case for Enterprise remote health 200 response"""
         resp, status, _ = self.api.remote_health_with_http_info('conjur-master.mycompany.local')
         status_keys = ['services', 'audit', 'database']
 
@@ -226,9 +226,9 @@ class TestStatusApi(api_config.ConfiguredTest):
         for i in status_keys:
             self.assertTrue(resp[i]['ok'])
 
-    @unittest.skipUnless(api_config.DAP_TESTS, "Endpoint not available in Conjur")
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
     def test_info_200(self):
-        """Test case for DAP info 200 response"""
+        """Test case for Enterprise info 200 response"""
         resp, status, _ = self.api.info_with_http_info()
         keys = [
             'release',
@@ -242,7 +242,7 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 200)
         for i in keys:
-            self.assertIn(i, resp)
+            self.assertIsNotNone(getattr(resp, i))
 
 if __name__ == '__main__':
     unittest.main()

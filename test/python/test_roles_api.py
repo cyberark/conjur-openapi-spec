@@ -800,7 +800,7 @@ class TestRolesApi(api_config.ConfiguredTest):
             self.BOB_ID
         ]
 
-        if api_config.DAP_TESTS:
+        if api_config.ENTERPRISE_TESTS:
             target_details.append('!:!:root')
 
         self.assertEqual(status, 200)
