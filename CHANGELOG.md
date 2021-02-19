@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- DAP endpoints and scripts to run tests against a DAP instance.
+  [cyberark/conjur-openapi-spec#144](https://github.com/cyberark/conjur-openapi-spec/issues/144)
 
 ## [5.1.0] - 2021-04-12
 ### Added

@@ -127,8 +127,6 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 
 ### Utility Script Reference
 
-#### Automated tests
-
 `bin/api_test [-e <endpoint>]`
 * Uses Schemathesis to generate test cases for API endpoints, which test the
   conformance between Conjur OSS and the OpenAPI specification.
@@ -150,6 +148,10 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
   $ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
   ```
 
+`bin/dap_test`
+* Used to run the integration tests against a DAP instance
+* You will need to have access to the Cyberark Docker registry in order to pull the DAP images
+
 #### Linters
 
 `./bin/lint_tests`
@@ -160,6 +162,10 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Will find broken references, malformed objects, and any other errors in the spec itself.
 
 #### Utility scripts
+
+`bin/transform [--enterprise/--oss]`
+* Generates a usable version of the specification for either Conjur (--oss) or Conjur Enterprise (--enterprise)
+* Generates the Conjur version of the spec by default
 
 `bin/generate_client -l <language> [-o <output-directory>]`
 * Generates a client library for the desired `<language>`.
