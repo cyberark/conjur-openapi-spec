@@ -99,6 +99,31 @@ Each example performs the following steps:
 - Perform language-specific environment setup
 - Run the example
 
+### Exploring the Conjur API with Postman
+
+#### 1. Start a local Conjur server
+
+Use the provided script `bin/start_conjur`.
+
+#### 2. Setup Postman environment
+
+Use the provided script `postman/setup_postman`.
+
+This script generates a Postman Collection, as well as an 
+importable Postman Environment of important variables
+
+#### 3. Import the collection and environment into Postman
+
+These are saved under the filenames `postman/collection.json` and `postman/env.json`, respectively.
+
+Postman documentation for importing a collection is found
+[here](https://learning.postman.com/docs/getting-started/importing-and-exporting-data/#importing-postman-data).
+
+#### 4. Make a request
+
+Be sure to read each endpoint's accompanying documentation for required parameters and 
+authentication schemes.
+
 ## Contributing
 
 We welcome contributions of all kinds to the Conjur OpenAPI Spec. For instructions on how to  
