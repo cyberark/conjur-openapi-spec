@@ -47,3 +47,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#94](https://github.com/cyberark/conjur-openapi-spec/issues/94)
 - Optional Accept-Encoding header parameter now included in secrets batch endpoint.
   [cyberark/conjur-openapi-spec#145](https://github.com/cyberark/conjur-openapi-spec/issues/145)
+- Instructions and scripts for using the API spec with Postman included.
+  [cyberark/conjur-openapi-spec#92](https://github.com/cyberark/conjur-openapi-spec/issues/92)
