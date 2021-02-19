@@ -90,6 +90,10 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 
 ### Utility Script Reference
 
+`bin/transform [--dap/--oss]`
+* Generates a usable version of the specification for either Conjur (--oss) or DAP (--dap)
+* Generates the Conjur version of the spec by default
+
 `bin/api_test [-e <endpoint>]`
 * Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
@@ -124,6 +128,10 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 `bin/parse_changelog`
 * Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards
 
+`bin/dap_test`
+* Used to run the integration tests against a DAP instance
+* You will need to have access to the Cyberark Docker registry in order to pull the DAP images
+
 ## Integration Tests
 
 Run the current suite of integration tests using the script:
@@ -143,6 +151,12 @@ to run.
 
 ```shell
 $ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
+```
+
+You can run the integration tests against DAP using the `dap_test` script:
+
+```shell
+$ ./bin/dap_test
 ```
 
 ## Manual Testing

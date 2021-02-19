@@ -45,3 +45,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#3](https://github.com/cyberark/conjur-openapi-spec/issues/3)
 - Basic C#/.NET client tests and generation templates are now included in the project.
   [cyberark/conjur-openapi-spec#94](https://github.com/cyberark/conjur-openapi-spec/issues/94)
+- DAP endpoints and scripts to run tests against a DAP instance.
+  [cyberark/conjur-openapi-spec#144](https://github.com/cyberark/conjur-openapi-spec/issues/144)
