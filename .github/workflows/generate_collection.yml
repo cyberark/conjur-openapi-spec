@@ -1,0 +1,17 @@
+name: Generate Postman Collection
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  generate_collection:
+    runs-on: ubuntu-latest
+    name: Generate Collection
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Run collection generation script
+        run: sudo ./bin/generate_postman_collection
