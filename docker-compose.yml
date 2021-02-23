@@ -74,6 +74,25 @@ services:
       - conjur-https
     volumes:
       - ./config/https/:/config
+
+  test-dotnet:
+    image: mcr.microsoft.com/dotnet/sdk:2.1
+    command: ['sleep', '999d']
+    depends_on:
+      - conjur
+      - conjur-https
+    environment:
+      CONJUR_HTTP_APPLIANCE_URL: http://conjur
+      CONJUR_HTTPS_APPLIANCE_URL: https://conjur-https
+      CONJUR_ACCOUNT: dev
+      CONJUR_AUTHN_LOGIN: admin
+      CONJUR_AUTHN_API_KEY: Null
+      CONJUR_CA_BUNDLE: /opt/conjur-openapi-spec/config/https/ca.crt
+    volumes:
+      - .:/opt/conjur-openapi-spec
+      - ./test/config/ldap/certs:/ldap-certs:ro
+    working_dir: /opt/conjur-openapi-spec
+
   
   example-ruby:
     build:
