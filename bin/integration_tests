@@ -83,14 +83,14 @@ run_csharp_tests(){
   docker-compose exec -T test-dotnet bash -c "cp -v -R ./test/csharp-netcore/* -t ./out/csharp-netcore/src/Org.OpenAPITools.Test/"
 
   announce "Running C# Integration Tests"
-  docker-compose exec \
+  docker-compose exec -T \
     test-dotnet \
     bash -c "cd out/csharp-netcore && dotnet test"
 }
 
 # if there are no parameters specified run just the python tests
 if [[ $# == 0 ]] || [[ $# == 1 && $1 == '--no-rebuild-conjur' ]]; then
-  tests+="run_all_tests"
+  tests+="run_python_tests"
 fi
 
 while test $# -gt 0

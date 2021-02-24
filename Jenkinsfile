@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     ccCoverage.dockerPrep()
-                    sh './bin/integration_tests'
+                    sh './bin/integration_tests --python'
                 }
             }
 
