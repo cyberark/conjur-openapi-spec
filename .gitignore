@@ -16,3 +16,5 @@ coverage.xml
 
 test-python.csr
 test-python.key
+
+test/python/k8s/policy/generated/
