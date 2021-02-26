@@ -51,6 +51,10 @@ The following is a list of endpoints present in DAP but absent from this spec:
 
 ## Getting Started
 
+If you are new to OpenAPI you may want to visit the
+[understanding the spec](https://github.com/cyberark/conjur-openapi-spec/wiki/Interpreting-The-Spec)
+wiki page, which will give you a brief overview of how to interpret and make changes to the spec file.
+
 To view the Conjur OpenAPI Specification directly, please see the [spec/](./spec/) directory.
 
 In the sections below, we review some of the ways you can leverage the spec in your own workflows.
