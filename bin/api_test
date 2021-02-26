@@ -67,4 +67,4 @@ docker-compose run --rm --no-deps \
     --checks response_schema_conformance \
     -H \"Authorization: Basic \"$ENCODED_LOGIN\"\" \
     -H \"Authentication: Token token=\"$CONJUR_ADMIN_TOKEN\"\" \
-    --base-url https://conjur-https spec.yml"
+    --base-url http://conjur spec.yml"
