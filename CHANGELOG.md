@@ -43,3 +43,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - New options to `generate_client` script for greater control over generated output.
 - `/authn-k8s/:service_id/inject_client_cert` endpoint now included in the OpenAPI specification.
   [cyberark/conjur-openapi-spec#3](https://github.com/cyberark/conjur-openapi-spec/issues/3)
+- Basic C#/.NET client tests and generation templates are now included in the project.
+  [cyberark/conjur-openapi-spec#94](https://github.com/cyberark/conjur-openapi-spec/issues/94)

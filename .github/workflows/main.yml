@@ -16,4 +16,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run integration test script
-        run: ./bin/integration_tests
+        run: ./bin/integration_tests --python
+
+  dot-net:
+    runs-on: ubuntu-latest
+    name: C#/.NET Integration Tests
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+
+      - name: run integration test script
+        run: ./bin/integration_tests --csharp

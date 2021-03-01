@@ -47,7 +47,7 @@ print_help(){
 run_python_tests(){
   if [ $no_regen_client -eq 0 ]; then
     announce "Generating Python Client"
-    bin/generate_client python
+    bin/generate_client -l python
   fi
 
   docker-compose build test-python
@@ -71,7 +71,24 @@ run_python_tests(){
     nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test ${test_params}
 }
 
-# if there are no parameters specified run all tests
+run_csharp_tests(){
+  if [ $no_regen_client -eq 0 ]; then
+    announce "Generating C# Client"
+    bin/generate_client -l csharp-netcore
+  fi
+
+  docker-compose up -d --no-deps test-dotnet
+  rm -rf ./out/csharp-netcore/src/Org.OpenAPITools.Test/Api
+  rm -rf ./out/csharp-netcore/src/Org.OpenAPITools.Test/Model
+  docker-compose exec -T test-dotnet bash -c "cp -v -R ./test/csharp-netcore/* -t ./out/csharp-netcore/src/Org.OpenAPITools.Test/"
+
+  announce "Running C# Integration Tests"
+  docker-compose exec -T \
+    test-dotnet \
+    bash -c "cd out/csharp-netcore && dotnet test"
+}
+
+# if there are no parameters specified run just the python tests
 if [[ $# == 0 ]] || [[ $# == 1 && $1 == '--no-rebuild-conjur' ]]; then
   tests+="run_python_tests"
 fi
@@ -92,6 +109,9 @@ do
         shift
       fi
       ;;
+    --csharp)
+      tests+="run_csharp_tests"
+      ;;
     -h|--help)
       print_help
       exit 0
@@ -108,8 +128,7 @@ do
   esac
 done
 
-
-if [ $no_rebuild_conjur -eq 0 ] || [ "$(conjur_container_alive)" = "0" ]; then
+if [ $no_rebuild_conjur -eq 0 ] || [ "$(conjur_container_alive)" = "1" ]; then
   announce "Starting Conjur Container"
   bin/start_conjur
 fi
