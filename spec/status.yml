@@ -96,7 +96,7 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorServiceStatus"
+        operationId: "authenticatorService"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the
@@ -159,7 +159,7 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorStatus"
+        operationId: "authenticator"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the

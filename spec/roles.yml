@@ -57,7 +57,7 @@ components:
           3. `memberships`
           4. `members`
           "
-        operationId: "getRole"
+        operationId: "show"
         parameters:
         - name: "account"
           in: "path"
