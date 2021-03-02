@@ -156,6 +156,16 @@ components:
 
         - `sales&marketing` -> `sales%26marketing`"
 
+  parameters:
+    ServiceID:
+      name: service_id
+      in: path
+      required: true
+      description: "URL-Encoded authenticator service ID"
+      example: prod%2fgke
+      schema:
+        type: string
+
   responses:
     Accepted:
       description: "The injected certificate was accepted."
@@ -351,7 +361,6 @@ paths:
   '/ca/{account}/{service_id}/sign':
     $ref: 'cert-auth.yml#/components/paths/Sign'
 
-# TODO: Inject client cert
 # TODO: Seed Service
 
 externalDocs:

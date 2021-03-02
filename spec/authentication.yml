@@ -96,12 +96,8 @@ components:
           For detailed instructions, see [the documentation](https://docs.conjur.org/Latest/en/Content/Integrations/kubernetes.htm)."
         operationId: "k8sInjectClientCert"
         parameters:
-        - name: "service_id"
-          in: "path"
-          description: "URL-encoded service ID of the K8s authenticator"
-          required: true
-          schema:
-            type: string
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "Host-Id-Prefix"
           in: header
           description: "Dot-separated policy tree, prefixed by `host.`, where the application identity is defined"
@@ -150,13 +146,8 @@ components:
           Your HTTP/REST client probably provides HTTP basic authentication support."
         operationId: "getAPIKeyViaLDAP"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded service ID of the authenticator"
-          schema:
-            type: string
-          example: "authn"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
@@ -277,25 +268,22 @@ components:
           [AWS IAM Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/AWS_IAM_Authenticator.htm) (`authn-iam`)."
         operationId: "getAccessTokenViaAWS"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded authenticator service ID"
-          schema:
-            type: string
-          example: "prod/okta"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+
         - name: "login"
           in: "path"
           required: true
           description: "URL-encoded login name. For hosts, the login name is `host/<host-id>`"
           schema:
             $ref: '#/components/schemas/LoginName'
+
         - name: "Accept-Encoding"
           in: "header"
           description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
@@ -305,6 +293,7 @@ components:
               - "application/json"
               - "base64"
             default: "application/json"
+
         requestBody:
           description: "AWS Signature header"
           required: true
@@ -348,25 +337,22 @@ components:
           documentation: [Azure Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/azure_authn.htm) (`authn-azure`)."
         operationId: "getAccessTokenViaAzure"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded authenticator service ID"
-          schema:
-            type: string
-          example: "prod/okta"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+
         - name: "login"
           in: "path"
           required: true
           description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
           schema:
             $ref: '#/components/schemas/LoginName'
+
         - name: "Accept-Encoding"
           in: "header"
           description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
@@ -376,6 +362,7 @@ components:
               - "application/json"
               - "base64"
             default: "application/json"
+
         requestBody:
           description: "Azure identity token"
           required: true
@@ -464,25 +451,22 @@ components:
           documentation: [Kubernetes Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/k8s_auth.htm) (`authn-k8s`)."
         operationId: "getAccessTokenViaKubernetes"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded authenticator service ID"
-          schema:
-            type: string
-          example: "prod/okta"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+
         - name: "login"
           in: "path"
           required: true
           description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
           schema:
             $ref: '#/components/schemas/LoginName'
+
         - name: "Accept-Encoding"
           in: "header"
           description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
@@ -536,25 +520,22 @@ components:
           [LDAP Authenticator](https://docs.conjur.org/Latest/en/Content/Integrations/ldap/ldap_authenticator.html) (`authn-ldap`)."
         operationId: "getAccessTokenViaLDAP"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded authenticator service ID"
-          schema:
-            type: string
-          example: "prod/okta"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+
         - name: "login"
           in: "path"
           required: true
           description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
           schema:
             $ref: '#/components/schemas/LoginName'
+
         - name: "Accept-Encoding"
           in: "header"
           description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
@@ -564,6 +545,7 @@ components:
               - "application/json"
               - "base64"
             default: "application/json"
+
         requestBody:
           description: "API key"
           required: false
@@ -597,19 +579,15 @@ components:
           For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm)."
         operationId: "getAccessTokenViaOIDC"
         parameters:
-        - name: "service_id"
-          in: "path"
-          required: true
-          description: "URL-encoded service ID"
-          schema:
-            type: string
-          example: "keycloak"
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           required: true
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+
         requestBody:
           description: "ID token"
           required: true
@@ -781,13 +759,9 @@ components:
           schema:
             $ref: '#/components/schemas/ServiceAuthenticators'
           example: "authn-oidc"
-        - name: "service_id"
-          in: "path"
-          description: "URL-encoded service id of the authenticator"
-          required: true
-          schema:
-            type: string
-          example: "prod/gke"
+
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
         - name: "account"
           in: "path"
           description: "Organization account name"
@@ -795,6 +769,7 @@ components:
           schema:
             type: string
           example: "dev"
+
         requestBody:
           description: "Contains either `enabled=true` or `enabled=false` to
             enable or disable an authenticator"

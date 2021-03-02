@@ -41,7 +41,7 @@ components:
 
 
           **Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted!**."
-        operationId: "loadPolicy"
+        operationId: "replace"
         parameters:
         - name: "account"
           in: "path"
@@ -102,7 +102,7 @@ components:
           ##### Permissions required
 
           `create` privilege on the policy."
-        operationId: "updatePolicy"
+        operationId: "load"
         parameters:
         - name: "account"
           in: "path"
@@ -164,7 +164,7 @@ components:
           ##### Permissions required
 
           `create` privilege on the policy."
-        operationId: "modifyPolicy"
+        operationId: "update"
         parameters:
         - name: "account"
           in: "path"

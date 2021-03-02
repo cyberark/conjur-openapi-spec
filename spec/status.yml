@@ -96,7 +96,7 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorServiceStatus"
+        operationId: "serviceAuthenticator"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the
@@ -110,13 +110,7 @@ components:
             description: "The type of authenticator"
             example: "authn-oidc"
             
-          - name: service_id
-            in: path
-            schema:
-              type: string
-            required: true
-            description: "The ID of the authenticator provider"
-            example: "okta"
+          - $ref: 'openapi.yml#/components/parameters/ServiceID'
             
           - name: account
             in: path
@@ -135,6 +129,8 @@ components:
                   $ref: '#/components/schemas/AuthenticatorStatus'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
@@ -159,7 +155,7 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorStatus"
+        operationId: "gcpAuthenticator"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the
