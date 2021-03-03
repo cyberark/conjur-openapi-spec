@@ -19,3 +19,8 @@
 - !grant
   role: !group conjur/authn-ldap/test/users
   member: !user alice
+
+- !permit
+  role: !user alice
+  privileges: [ read ]
+  resource: !policy root
