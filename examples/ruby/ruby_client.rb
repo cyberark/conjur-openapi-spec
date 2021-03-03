@@ -2,7 +2,7 @@
 # confirmed for ruby versions 2.6+
 
 # Load the gem
-require 'openapi_client'
+require 'conjur'
 
 CERT_DIR = '/config/https'
 SSL_CERT_FILE = 'ca.crt'
@@ -27,7 +27,7 @@ empty_policy = IO.read("/config/policy/simple.yml")
 policy = IO.read("/config/policy/policy.yml")
 
 # Setup client configuration
-config = OpenapiClient.configure
+config = Conjur.configure
 # config.debugging = true
 config.scheme = "https"
 config.host = "conjur-https"
@@ -41,7 +41,7 @@ config.cert_file = File.join(CERT_DIR, CONJUR_CERT_FILE)
 config.key_file = File.join(CERT_DIR, CONJUR_KEY_FILE)
 
 # Authenticating admin using basicAuth
-authn_instance = OpenapiClient::AuthenticationApi.new
+authn_instance = Conjur::AuthenticationApi.new
 token = nil
 puts "Authenticating admin..."
 token = authn_instance.get_access_token(
@@ -68,8 +68,8 @@ token_body = 'token="%s"' % [token]
 config.api_key['Authorization'] = token_body
 config.api_key_prefix['Authorization'] = 'Token'
 
-policy_instance = OpenapiClient::PoliciesApi.new
-authn_instance = OpenapiClient::AuthenticationApi.new
+policy_instance = Conjur::PoliciesApi.new
+authn_instance = Conjur::AuthenticationApi.new
 
 # Load empty policy, allows the example to be run multiple times sequentially
 # Loading a policy returns data for users CREATED when the policy is loaded. Without loading
@@ -77,7 +77,7 @@ authn_instance = OpenapiClient::AuthenticationApi.new
 # the full policy will not respond with alice's api key.
 puts
 puts "Loading empty root policy..."
-policy_instance.load_policy(
+policy_instance.replace_policy(
   account=ACCOUNT,
   identifier="root",
   body=empty_policy
@@ -86,7 +86,7 @@ puts "Empty policy loaded."
 
 puts
 puts "Loading root policy..."
-loaded_results = policy_instance.load_policy(
+loaded_results = policy_instance.replace_policy(
   account=ACCOUNT,
   identifier="root",
   body=policy
@@ -106,11 +106,11 @@ alice_api_key = authn_instance.rotate_api_key(
 puts "New API key: #{alice_api_key}"
 
 # Store a secret, uses conjurAuth
-secrets_instance = OpenapiClient::SecretsApi.new
+secrets_instance = Conjur::SecretsApi.new
 puts
 puts "Storing secret..."
 puts "Secret data: #{secret}"
-secrets_instance.create_variable(
+secrets_instance.create_secret(
   account=ACCOUNT,
   kind="variable",
   identifier=secret_id,
@@ -121,7 +121,7 @@ puts "Secret stored."
 # Retrieve a secret, uses conjurAuth
 puts
 puts "Retrieving secret..."
-retrieved_secret = secrets_instance.get_variable(
+retrieved_secret = secrets_instance.get_secret(
   account=ACCOUNT,
   kind="variable",
   identifier=secret_id

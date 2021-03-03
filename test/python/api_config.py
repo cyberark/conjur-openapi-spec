@@ -3,7 +3,7 @@ import pathlib
 import os
 import unittest
 
-import openapi_client
+import conjur
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
@@ -38,7 +38,7 @@ def get_bad_auth_api_config(username='admin'):
 
 def get_api_config(username='admin'):
     """Gets a default API config to be used with the testsing setup"""
-    config = openapi_client.Configuration(
+    config = conjur.Configuration(
             host='https://conjur-https',
         )
 
@@ -52,7 +52,7 @@ def get_api_key(username, role):
     """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
-    auth_api = openapi_client.api.AuthenticationApi(get_api_client())
+    auth_api = conjur.api.AuthenticationApi(get_api_client())
     api_key = auth_api.rotate_api_key(
         os.environ[CONJUR_ACCOUNT],
         role=f'{role}:{username}'
@@ -74,8 +74,8 @@ def get_api_client(username='admin', role='user'):
 
     config = get_api_config()
 
-    client = openapi_client.ApiClient(config)
-    auth = openapi_client.api.AuthenticationApi(client)
+    client = conjur.ApiClient(config)
+    auth = conjur.api.AuthenticationApi(client)
     api_token = auth.get_access_token(
             account,
             username,
@@ -89,19 +89,19 @@ def setup_oidc_webservice():
     """Loads a policy for the oidc webservice into conjur"""
     client = get_api_client()
     account = os.environ[CONJUR_ACCOUNT]
-    policy_api = openapi_client.api.PoliciesApi(client)
+    policy_api = conjur.api.PoliciesApi(client)
     with open(OIDC_POLICY_FILE, 'r') as policy_file:
         policy = policy_file.read()
-    policy_api.modify_policy(account, 'root', policy)
+    policy_api.update_policy(account, 'root', policy)
 
-    secrets_api = openapi_client.api.SecretsApi(client)
-    secrets_api.create_variable(
+    secrets_api = conjur.api.SecretsApi(client)
+    secrets_api.create_secret(
         account,
         'variable',
         'conjur/authn-oidc/test/provider-uri',
         body='https://keycloak:8443/auth/realms/master'
     )
-    secrets_api.create_variable(
+    secrets_api.create_secret(
         account,
         'variable',
         'conjur/authn-oidc/test/id-token-user-property',
@@ -116,7 +116,7 @@ class ConfiguredTest(unittest.TestCase):
         cls.account = os.environ[CONJUR_ACCOUNT]
 
         cls.client = get_api_client()
-        cls.bad_auth_client = openapi_client.ApiClient(get_api_config())
+        cls.bad_auth_client = conjur.ApiClient(get_api_config())
 
     @classmethod
     def tearDownClass(cls):
@@ -131,5 +131,5 @@ class ConfiguredTest(unittest.TestCase):
         Compartmentalizes test cases by replacing any loaded policy
         """
         default_policy = get_default_policy()
-        policy_api = openapi_client.api.PoliciesApi(cls.client)
-        policy_api.load_policy(cls.account, 'root', default_policy)
+        policy_api = conjur.api.PoliciesApi(cls.client)
+        policy_api.replace_policy(cls.account, 'root', default_policy)

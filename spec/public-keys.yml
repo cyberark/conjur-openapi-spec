@@ -17,7 +17,7 @@ components:
 
 
           Returns an empty string if the resource does not exist, to prevent attackers from determining whether a resource exists."
-        operationId: "show"
+        operationId: "showPublicKeys"
         parameters:
         - name: "account"
           in: "path"

@@ -299,10 +299,10 @@ paths:
   '/whoami':
     $ref: 'status.yml#/components/paths/WhoAmI'
 
-  '/authn-{authenticator}/{service_id}/{account}/status':
+  '/{authenticator}/{service_id}/{account}/status':
     $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
 
-  '/authn-{authenticator}/{account}/status':
+  '/authn-gcp/{account}/status':
     $ref: 'status.yml#/components/paths/AuthenticatorStatus'
 
   '/authenticators':

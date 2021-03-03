@@ -5,8 +5,8 @@ import os
 import pathlib
 import sys
 
-import openapi_client
-from openapi_client.rest import ApiException
+import conjur
+from conjur.rest import ApiException
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
@@ -29,7 +29,7 @@ with open("config/policy/policy.yml", "r") as file:
     policy = file.read()
 
 # Setup API client config
-config = openapi_client.Configuration()
+config = conjur.Configuration()
 config.host = "https://conjur-https"
 # config.debug = True
 config.verify_ssl = True
@@ -39,8 +39,8 @@ config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
 config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
 config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
 
-api_client = openapi_client.ApiClient(config)
-login_api = openapi_client.AuthenticationApi(api_client)
+api_client = conjur.ApiClient(config)
+login_api = conjur.AuthenticationApi(api_client)
 
 # Authenticate admin using basicAuth, receiving short-lived access token
 print("Authenticating admin...")
@@ -68,8 +68,8 @@ token_body = 'token="{}"'.format(access_token)
 api_client.configuration.api_key = {'Authorization': token_body}
 api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
 
-policy_api = openapi_client.PoliciesApi(api_client)
-login_api = openapi_client.AuthenticationApi(api_client)
+policy_api = conjur.PoliciesApi(api_client)
+login_api = conjur.AuthenticationApi(api_client)
 
 # Load simple policy, which only defines an admin user
 # Allows the example to be run multiple times sequentially
@@ -77,7 +77,7 @@ login_api = openapi_client.AuthenticationApi(api_client)
 # the simple policy, if the user alice already exists due to a prior example run, loading
 # the full policy will not respond with alice's api key.
 print("\nLoading simple root policy...")
-policy_api.load_policy(
+policy_api.replace_policy(
     ACCOUNT_NAME,
     "root",
     empty_policy
@@ -86,7 +86,7 @@ print("Empty policy loaded.")
 
 # Load a policy using api client
 print("\nLoading root policy...")
-loaded_results = policy_api.load_policy(
+loaded_results = policy_api.replace_policy(
     ACCOUNT_NAME,
     "root",
     body=policy
@@ -106,9 +106,9 @@ print("New API key:", alice_api_key)
 
 # Store a secret, uses conjurAuth
 print("\nStoring secret...")
-secrets_api = openapi_client.SecretsApi(api_client)
+secrets_api = conjur.SecretsApi(api_client)
 print("Secret data: ", secret)
-secrets_api.create_variable(
+secrets_api.create_secret(
     ACCOUNT_NAME,
     "variable",
     secret_id,
@@ -118,7 +118,7 @@ print("Secret stored.")
 
 # Retrieve secrets, uses conjurAuth
 print("\nRetrieving secret...")
-retrieved_secret = secrets_api.get_variable(
+retrieved_secret = secrets_api.get_secret(
     ACCOUNT_NAME,
     "variable",
     secret_id

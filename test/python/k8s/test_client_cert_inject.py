@@ -5,7 +5,7 @@ import os
 import pathlib
 import unittest
 
-import openapi_client
+import conjur
 
 from OpenSSL import crypto, SSL
 
@@ -49,7 +49,7 @@ class TestClientCertInject(unittest.TestCase):
         with open(os.environ['CONJUR_AUTHN_TOKEN_FILE'], 'r') as content:
             encoded_token = base64.b64encode(content.read().replace('\r', '').encode()).decode('utf-8')
 
-        config = openapi_client.Configuration(
+        config = conjur.Configuration(
                 host='https://conjur-oss:9443'
             )
 
@@ -60,8 +60,8 @@ class TestClientCertInject(unittest.TestCase):
         config.username = 'admin'
         config.api_key = {'Authorization': 'Token token="{}"'.format(encoded_token)}
 
-        self.client = openapi_client.ApiClient(config)
-        self.api = openapi_client.api.AuthenticationApi(self.client)
+        self.client = conjur.ApiClient(config)
+        self.api = conjur.api.AuthenticationApi(self.client)
 
         key = generateKey(crypto.TYPE_RSA, 2048)
         self.csr = generateCSR('app-test/*/*', key)
@@ -87,7 +87,7 @@ class TestClientCertInject(unittest.TestCase):
         """Test 400 status response when successfully requesting a cert injection
         400 - Bad Request caught by NGINX
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.k8s_inject_client_cert(
                 '\00',
                 body=self.csr
@@ -100,7 +100,7 @@ class TestClientCertInject(unittest.TestCase):
         401 - unauthorized request. This happens from invalid Conjur auth token,
         incorrect service ID, malformed CSR and others
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.k8s_inject_client_cert(
                 'wrong-service-id',
                 body=self.csr
@@ -112,7 +112,7 @@ class TestClientCertInject(unittest.TestCase):
         """Test 404 status response when requesting a cert injection
         404 - Resource not found, malformed service ID
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.k8s_inject_client_cert(
                 '00.00',
                 body=self.csr

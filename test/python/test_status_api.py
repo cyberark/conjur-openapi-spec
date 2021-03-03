@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import unittest
 from unittest.mock import patch
 
-import openapi_client
+import conjur
 
 from . import api_config
 
@@ -26,16 +26,16 @@ class TestStatusApi(api_config.ConfiguredTest):
     @classmethod
     def setup_webservice(cls):
         """loads the webservice policy into conjur and gets it setup"""
-        policies_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
-        secrets_api = openapi_client.api.secrets_api.SecretsApi(cls.client)
-        policies_api.modify_policy(cls.account, 'root', api_config.get_webservice_policy())
-        secrets_api.create_variable(
+        policies_api = conjur.api.policies_api.PoliciesApi(cls.client)
+        secrets_api = conjur.api.secrets_api.SecretsApi(cls.client)
+        policies_api.update_policy(cls.account, 'root', api_config.get_webservice_policy())
+        secrets_api.create_secret(
             cls.account,
             "variable",
             'conjur/authn-oidc/okta/provider-uri',
             body='invalid'
         )
-        secrets_api.create_variable(
+        secrets_api.create_secret(
             cls.account,
             "variable",
             'conjur/authn-oidc/okta/id-token-user-property',
@@ -48,14 +48,14 @@ class TestStatusApi(api_config.ConfiguredTest):
         cls.setup_webservice()
 
     def setUp(self):
-        self.api = openapi_client.api.status_api.StatusApi(self.client)
-        self.bad_auth_api = openapi_client.api.status_api.StatusApi(self.bad_auth_client)
+        self.api = conjur.api.status_api.StatusApi(self.client)
+        self.bad_auth_api = conjur.api.status_api.StatusApi(self.bad_auth_client)
 
     def test_who_am_i_200(self):
         """Test case for who_am_i 200 response"""
         result = self.api.who_am_i()
 
-        self.assertIsInstance(result, openapi_client.models.who_am_i.WhoAmI)
+        self.assertIsInstance(result, conjur.models.who_am_i.WhoAmI)
 
         for i in WHOAMI_FIELDS:
             value = getattr(result, i)
@@ -64,30 +64,30 @@ class TestStatusApi(api_config.ConfiguredTest):
 
     def test_who_am_i_401(self):
         """Test case for who_am_i 401 response"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.bad_auth_api.who_am_i()
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_authenticator_service_status_200(self):
-        """Test case for authenticator_service_status 200 return code"""
+    def test_get_service_authenticator_status_200(self):
+        """Test case for authenticator 200 return code"""
         api_config.setup_oidc_webservice()
-        resp, status, _ = self.api.authenticator_service_status_with_http_info(
-            'oidc',
+        resp, status, _ = self.api.get_service_authenticator_status_with_http_info(
+            'authn-oidc',
             'test',
             self.account
         )
         self.assertEqual(resp.status, 'ok')
         self.assertEqual(status, 200)
 
-        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+        with patch.object(conjur.api_client.ApiClient, 'call_api', return_value=None) \
                 as mock:
-            self.api.authenticator_service_status('azure', 'test', self.account)
+            self.api.get_service_authenticator_status('authn-azure', 'test', self.account)
 
         mock.assert_called_once_with(
-            '/authn-{authenticator}/{service_id}/{account}/status',
+            '/{authenticator}/{service_id}/{account}/status',
             'GET',
-            {'account': self.account, 'authenticator': 'azure', 'service_id': 'test'},
+            {'account': self.account, 'authenticator': 'authn-azure', 'service_id': 'test'},
             [],
             {'Accept': 'application/json'},
             body=None,
@@ -102,49 +102,49 @@ class TestStatusApi(api_config.ConfiguredTest):
             collection_formats={}
         )
 
-    def test_authenticator_service_status_403(self):
-        """Test case for authenticator_service_status 403 return code"""
+    def test_get_service_authenticator_status_403(self):
+        """Test case for get_service_authenticator_status 403 return code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.status_api.StatusApi(alice_client)
+        alice_api = conjur.api.status_api.StatusApi(alice_client)
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            alice_api.authenticator_service_status('oidc', 'okta', self.account)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            alice_api.get_service_authenticator_status('authn-oidc', 'okta', self.account)
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_authenticator_service_status_404(self):
-        """Test case for authenticator_service_status 404 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_service_status('nonexist', 'test', self.account)
+    def test_get_service_authenticator_status_404(self):
+        """Test case for get_service_authenticator_status 404 return code"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_service_authenticator_status('nonexist', 'test', self.account)
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_authenticator_service_status_500(self):
-        """Test case for authenticator_service_status 500 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_service_status('oidc', 'okta', self.account)
+    def test_get_service_authenticator_status_500(self):
+        """Test case for get_service_authenticator_status 500 return code"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_service_authenticator_status('authn-oidc', 'okta', self.account)
 
         self.assertEqual(context.exception.status, 500)
 
-    def test_authenticator_service_status_501(self):
-        """Test case for authenticator_service_status 500 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_service_status('ldap', 'test', self.account)
+    def test_get_service_authenticator_status_501(self):
+        """Test case for get_service_authenticator_status 500 return code"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_service_authenticator_status('authn-ldap', 'test', self.account)
 
         self.assertEqual(context.exception.status, 501)
 
-    def test_authenticator_status_200(self):
-        """Test case for authenticator_status 200 return code"""
-        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+    def test_get_gcp_authenticator_status_200(self):
+        """Test case for get_gcp_authenticator_status 200 return code"""
+        with patch.object(conjur.api_client.ApiClient, 'call_api', return_value=None) \
                 as mock:
-            self.api.authenticator_status('gcp', self.account)
+            self.api.get_gcp_authenticator_status(self.account)
 
         mock.assert_called_once_with(
-            '/authn-{authenticator}/{account}/status',
+            '/authn-gcp/{account}/status',
             'GET',
-            {'account': self.account, 'authenticator': 'gcp'},
+            { 'account': self.account },
             [],
-            {'Accept': 'application/json'},
+            { 'Accept': 'application/json' },
             body=None,
             files={},
             post_params=[],
@@ -157,45 +157,31 @@ class TestStatusApi(api_config.ConfiguredTest):
             collection_formats={}
         )
 
-    def test_authenticator_status_403(self):
-        """Test case for authenticator_status 403 return code"""
+    def test_get_gcp_authenticator_status_403(self):
+        """Test case for get_gcp_authenticator_status 403 return code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.status_api.StatusApi(alice_client)
+        alice_api = conjur.api.status_api.StatusApi(alice_client)
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            alice_api.authenticator_status('azure', self.account)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            alice_api.get_gcp_authenticator_status(self.account)
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_authenticator_status_404(self):
-        """Test case for authenticator_status 404 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_status('nonexist', self.account)
-
-        self.assertEqual(context.exception.status, 404)
-
-    def test_authenticator_status_500(self):
-        """Test case for authenticator_status 500 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_status('azure', self.account)
+    def test_get_gcp_authenticator_status_500(self):
+        """Test case for get_gcp_authenticator_status 500 return code"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_gcp_authenticator_status(self.account)
 
         self.assertEqual(context.exception.status, 500)
 
-    def test_authenticator_status_501(self):
-        """Test case for authenticator_status 501 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_status('ldap', self.account)
-
-        self.assertEqual(context.exception.status, 501)
-
-    def test_authenticators_index_200(self):
+    def test_get_authenticators_200(self):
         """Test case for authenticators 200 response"""
-        authenticators, status, _ = self.api.authenticators_index_with_http_info()
+        authenticators, status, _ = self.api.get_authenticators_with_http_info()
 
         self.assertEqual(status, 200)
         self.assertIsInstance(
             authenticators,
-            openapi_client.models.authenticators_response.AuthenticatorsResponse
+            conjur.models.authenticators_response.AuthenticatorsResponse
         )
 
         for i in AUTHENTICATOR_FIELDS:
