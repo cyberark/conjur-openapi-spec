@@ -54,7 +54,6 @@ def get_api_key(username, role):
         return os.environ[CONJUR_AUTHN_API_KEY]
     auth_api = openapi_client.api.AuthenticationApi(get_api_client())
     api_key = auth_api.rotate_api_key(
-        'authn',
         os.environ[CONJUR_ACCOUNT],
         role=f'{role}:{username}'
     )

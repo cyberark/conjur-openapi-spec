@@ -146,7 +146,6 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """
         # Rotate the key and attempt to login with it
         new_key, status, _ = self.api.rotate_api_key_with_http_info(
-            'authn',
             self.account
         )
         self.assertEqual(status, 200)
@@ -163,7 +162,6 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """
         # Rotate the key and attempt to login with it
         new_key, status, _ = self.api.rotate_api_key_with_http_info(
-            'authn',
             self.account,
             role=f'user:{self.config.username}'
         )
@@ -182,7 +180,6 @@ class TestAuthnApi(api_config.ConfiguredTest):
         authenticated_api = openapi_client.api.AuthenticationApi(api_config.get_api_client())
 
         new_key_alice, status, _ = authenticated_api.rotate_api_key_with_http_info(
-            'authn',
             self.account,
             role='user:alice'
         )
@@ -203,7 +200,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', '\00')
+            self.api.rotate_api_key('\00')
 
         self.assertEqual(context.exception.status, 400)
 
@@ -214,7 +211,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.password = "FakePassword123"
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', self.account)
+            self.api.rotate_api_key(self.account)
 
         self.assertEqual(context.exception.status, 401)
 
@@ -225,7 +222,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.host = 'http://conjur'
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', self.account, role='\00')
+            self.api.rotate_api_key(self.account, role='\00')
 
         self.assertEqual(context.exception.status, 422)
 
@@ -359,8 +356,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         alice_client = openapi_client.ApiClient(alice_config)
         alice_api = openapi_client.api.AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.get_access_token_via_authenticator_with_http_info(
-            'authn-ldap',
+        _, status, _ = alice_api.get_access_token_via_ldap_with_http_info(
             'test',
             self.account,
             'alice',
@@ -375,8 +371,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         Login with the given authenticator
         """
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_access_token_via_authenticator(
-                'authn-ldap',
+            self.api.get_access_token_via_ldap(
                 'test',
                 self.account,
                 'admin',
@@ -385,18 +380,19 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_get_access_token_service_404(self):
-        """Test case for authenticate_service 404 response"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_access_token_via_authenticator(
-                'nonexist',
-                'nonexist',
-                self.account,
-                'admin',
-                body='badpass'
-            )
-
-        self.assertEqual(context.exception.status, 404)
+# we should write one of these for each service; commenting out for now
+#    def test_get_access_token_service_404(self):
+#        """Test case for authenticate_service 404 response"""
+#        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+#            self.api.get_access_token_via_authenticator(
+#                'nonexist',
+#                'nonexist',
+#                self.account,
+#                'admin',
+#                body='badpass'
+#            )
+#
+#        self.assertEqual(context.exception.status, 404)
 
     def test_oidc_authenticate_200(self):
         """Test case for oidc_authenticate 200 response"""
