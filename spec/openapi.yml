@@ -246,34 +246,43 @@ paths:
 # ========== AUTHENTICATION ===========
 
   '/authn/{account}/login':
-    $ref: 'authentication.yaml#/components/paths/DefaultLogin'
-
-  '/authn-ldap/{service_id}/{account}/login':
-    $ref: 'authentication.yaml#/components/paths/LDAPLogin'
-
-  '/authn/{account}/{login}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/DefaultAuthenticate'
-
-  '/{authenticator}/{service_id}/{account}/{login}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/ServiceAuthenticate'
-
-  '/authn-oidc/{service_id}/{account}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/OIDCAuthenticate'
-
-  '/authn-gcp/{account}/authenticate':
-    $ref: 'authentication.yaml#/components/paths/GCPAuthenticate'
-
-  '/authn/{account}/password':
-    $ref: 'authentication.yaml#/components/paths/ChangePassword'
-
-  '/{authenticator}/{account}/api_key':
-    $ref: 'authentication.yaml#/components/paths/RotateApiKey'
-
-  '/{authenticator}/{service_id}/{account}':
-    $ref: 'authentication.yaml#/components/paths/EnableAuthenticatorInstance'
+    $ref: 'authentication.yml#/components/paths/DefaultLogin'
 
   '/authn-k8s/{service_id}/inject_client_cert':
-    $ref: 'authentication.yaml#/components/paths/K8sInjectClientCert'
+    $ref: 'authentication.yml#/components/paths/K8sInjectClientCert'
+
+  '/authn-ldap/{service_id}/{account}/login':
+    $ref: 'authentication.yml#/components/paths/LDAPLogin'
+
+  '/authn/{account}/{login}/authenticate':
+    $ref: 'authentication.yml#/components/paths/DefaultAuthenticate'
+
+  '/authn-iam/{service_id}/{account}/{login}/authenticate':
+    $ref: 'authentication.yml#/components/paths/AWSAuthenticate'
+
+  '/authn-azure/{service_id}/{account}/{login}/authenticate':
+    $ref: 'authentication.yml#/components/paths/AzureAuthenticate'
+
+  '/authn-gcp/{account}/authenticate':
+    $ref: 'authentication.yml#/components/paths/GCPAuthenticate'
+
+  '/authn-k8s/{service_id}/{account}/{login}/authenticate':
+    $ref: 'authentication.yml#/components/paths/KubernetesAuthenticate'
+
+  '/authn-ldap/{service_id}/{account}/{login}/authenticate':
+    $ref: 'authentication.yml#/components/paths/LDAPAuthenticate'
+
+  '/authn-oidc/{service_id}/{account}/authenticate':
+    $ref: 'authentication.yml#/components/paths/OIDCAuthenticate'
+
+  '/authn/{account}/password':
+    $ref: 'authentication.yml#/components/paths/ChangePassword'
+
+  '/authn/{account}/api_key':
+    $ref: 'authentication.yml#/components/paths/RotateApiKey'
+
+  '/{authenticator}/{service_id}/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableAuthenticatorInstance'
 
 # ========== STATUS ===========
 
