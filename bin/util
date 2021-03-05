@@ -18,3 +18,32 @@ function announce() {
   echo "$@"
   echo $banner
 }
+
+function ensure_client_is_generated(){
+    client_lang=$1
+    if [ $client_lang = "" ]; then
+        echo "ensure_client_is_generated requires the client language as an argument"
+        exit 1;
+    fi
+
+    if [ ! -d "./out/$client_lang" ]; then
+        announce "Generating $client_lang client"
+        ./bin/generate_client -l $client_lang
+    else
+        announce "Using pre-generated $client_lang client"
+    fi
+}
+
+function ensure_conjur_up(){
+  if [ -z $(docker-compose ps -q conjur) ]; then
+    announce "Starting Conjur container"
+    ./bin/start_conjur
+  else
+    announce "Conjur already up!"
+  fi
+}
+
+function get_conjur_admin_api_key(){
+  admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+  echo $admin_api_key
+}

@@ -93,19 +93,6 @@ services:
       - ./test/config/ldap/certs:/ldap-certs:ro
     working_dir: /opt/conjur-openapi-spec
 
-  
-  example-ruby:
-    build:
-      context: .
-      dockerfile: examples/ruby/Dockerfile.ruby
-    command: ['sleep', '999d']
-    depends_on:
-      - conjur
-      - conjur-https
-    volumes:
-      - ./examples/config/:/config/policy
-      - ./config/https/:/config/https
-
   cli:
     image: cyberark/conjur-cli:5
     entrypoint: sleep
@@ -158,3 +145,8 @@ services:
     volumes:
       - ./test/config/oidc:/scripts
       - ./test/config/oidc/keycloak/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
+
+networks:
+  default:
+    external:
+      name: openapi-spec
