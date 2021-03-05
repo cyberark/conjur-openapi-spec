@@ -1,0 +1,22 @@
+name: Run Examples
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    name: Check Client Examples
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+
+      - name: run examples
+        run: |
+          for i in examples/*; do
+              if [ -x $i/start ]; then
+                  eval "./$i/start"
+              fi
+          done
