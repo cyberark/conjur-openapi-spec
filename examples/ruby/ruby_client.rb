@@ -44,14 +44,22 @@ config.key_file = File.join(CERT_DIR, CONJUR_KEY_FILE)
 authn_instance = OpenapiClient::AuthnApi.new
 token = nil
 puts "Authenticating admin..."
-token = authn_instance.authenticate(account=ACCOUNT, login=LOGIN, 
-                                    body=ADMIN_API_KEY, opts={accept_encoding: 'base64'})
+token = authn_instance.authenticate(
+  "authn",
+  account=ACCOUNT,
+  login=LOGIN,
+  body=ADMIN_API_KEY,
+  opts={accept_encoding: 'base64'}
+)
 puts "Base64 encoded token: #{token}"
 
 # Change admin password using basicAuth
 puts
 puts "Changing admin password..."
-authn_instance.set_password(account=ACCOUNT, body=new_password)
+authn_instance.set_password(
+  account=ACCOUNT,
+  body=new_password
+)
 puts "Password change successful."
 
 config.password = new_password
@@ -70,12 +78,20 @@ authn_instance = OpenapiClient::AuthnApi.new
 # the full policy will not respond with alice's api key.
 puts
 puts "Loading empty root policy..."
-policy_instance.load_policy(account=ACCOUNT, identifier="root", body=empty_policy)
+policy_instance.load_policy(
+  account=ACCOUNT,
+  identifier="root",
+  body=empty_policy
+)
 puts "Empty policy loaded."
 
 puts
 puts "Loading root policy..."
-loaded_results = policy_instance.load_policy(account=ACCOUNT, identifier="root", body=policy)
+loaded_results = policy_instance.load_policy(
+  account=ACCOUNT,
+  identifier="root",
+  body=policy
+)
 puts "Policy loaded."
 
 alice_api_key = loaded_results[:created_roles]["dev:user:alice".to_sym][:api_key]
@@ -84,7 +100,11 @@ puts "Alice API key: #{alice_api_key}"
 # Rotate alice API key as admin, uses conjurAuth
 puts
 puts "Rotating alice API key..."
-alice_api_key = authn_instance.rotate_api_key(account=ACCOUNT, opts={role: 'user:alice'})
+alice_api_key = authn_instance.rotate_api_key(
+  "authn",
+  account=ACCOUNT,
+  opts={role: 'user:alice'}
+)
 puts "New API key: #{alice_api_key}"
 
 # Store a secret, uses conjurAuth
@@ -92,13 +112,22 @@ secrets_instance = OpenapiClient::SecretsApi.new
 puts
 puts "Storing secret..."
 puts "Secret data: #{secret}"
-secrets_instance.create_variable(account=ACCOUNT, kind="variable", identifier=secret_id, body=secret)
+secrets_instance.create_variable(
+  account=ACCOUNT,
+  kind="variable",
+  identifier=secret_id,
+  opts={body: secret}
+)
 puts "Secret stored."
 
 # Retrieve a secret, uses conjurAuth
 puts
 puts "Retrieving secret..."
-retrieved_secret = secrets_instance.get_variable(account=ACCOUNT, kind="variable", identifier=secret_id)
+retrieved_secret = secrets_instance.get_variable(
+  account=ACCOUNT,
+  kind="variable",
+  identifier=secret_id
+)
 puts "Retrieved secret: #{retrieved_secret}"
 
 if retrieved_secret != secret
