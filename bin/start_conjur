@@ -5,6 +5,12 @@ cleanup() {
   docker-compose rm --stop --force -v
 }
 
+make_network(){
+  if [ ! -z $(docker network inspect openapi-spec > /dev/null || echo $?) ]; then
+    docker network create openapi-spec
+  fi
+}
+
 if [ "$1" == "-d" ]; then
   DEBUG="true"
   shift
@@ -13,6 +19,7 @@ fi
 trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
 cleanup
 
+make_network
 echo "Building services..."
 docker-compose build pg conjur conjur-https
 
