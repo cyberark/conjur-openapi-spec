@@ -116,6 +116,11 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 * Used to deconstruct the development environmnet.  
 * Stops and removes the `docker-compose` environment and Swagger Editor.
 
+`bin/bundle_spec`
+* Bundles all the sharded spec files into one file named `spec.yml` in the root project directory.
+* It should be noted that this bundled spec file loses some of the names/reference info when bundled and shouldn't
+  be used directly to generate a client.
+
 ## Integration Tests
 
 Run the current suite of integration tests using the script:
