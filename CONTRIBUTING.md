@@ -121,6 +121,9 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 * It should be noted that this bundled spec file loses some of the names/reference info when bundled and shouldn't
   be used directly to generate a client.
 
+`bin/parse_changelog`
+* Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards
+
 ## Integration Tests
 
 Run the current suite of integration tests using the script:

@@ -1,0 +1,22 @@
+name: Ensure Changelog Integrity
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, edited]
+    paths:
+      - 'CHANGELOG.md'
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    name: Changelog Parsing
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Parse Changelog
+        run: ./bin/parse_changelog
+
