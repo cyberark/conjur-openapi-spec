@@ -21,17 +21,11 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v1
+        with:
+          version: v3.2.1
 
-      - name: Install KinD
-        run: |
-          curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
-          chmod 700 kind
-          sudo mv ./kind /usr/local/bin/kind
-
-      - name: Install Kubernetes CLI
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      - name: Create k8s KinD Cluster
+        uses: helm/kind-action@v1.1.0
 
       - name: Run Test Scripts
         run: ./test/python/k8s/start
