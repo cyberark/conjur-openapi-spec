@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import unittest
+import base64
 
 import openapi_client
 
@@ -206,14 +207,18 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
+    def set_variables(self, variables, values):
+        """Sets the values of an array of variables"""
+        for secret, value in zip(variables, values):
+            self.api.create_variable(self.account, "variable", secret, body=value)
+
     def test_get_variables_200(self):
         """Test case for get_variables 200 response
 
         Fetch multiple secrets
         """
         secret_values = ['one', 'two']
-        for secret, value in zip(TEST_VARIABLES, secret_values):
-            self.api.create_variable(self.account, "variable", secret, body=value)
+        self.set_variables(TEST_VARIABLES, secret_values)
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
@@ -264,6 +269,26 @@ class TestSecretsApi(api_config.ConfiguredTest):
             self.api.get_variables(secret_list)
 
         self.assertEqual(context.exception.status, 422)
+
+    def test_get_variables_encoded(self):
+        """Test case for get_variables 200 response with base64 encoded binary secrets"""
+        secret_values = [b'one\xffbinary', b'two']
+        self.set_variables(TEST_VARIABLES, secret_values)
+
+        # Secrets have to be in the format org:variable:secret_name
+        secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
+        response, status, headers = self.api.get_variables_with_http_info(
+            ",".join(secret_list),
+            accept_encoding="base64"
+        )
+
+        for secret, value in zip(secret_list, secret_values):
+            self.assertIn(secret, response)
+            decoded = base64.b64decode(response[secret])
+            self.assertEqual(decoded, value)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers['Content-Encoding'].lower(), "base64")
 
 if __name__ == '__main__':
     unittest.main()
