@@ -1,4 +1,6 @@
 out/
+examples/python/.venv
+.venv
 *.swp
 
 *.pyc

@@ -41,17 +41,17 @@ config.cert_file = File.join(CERT_DIR, CONJUR_CERT_FILE)
 config.key_file = File.join(CERT_DIR, CONJUR_KEY_FILE)
 
 # Authenticating admin using basicAuth
-authn_instance = OpenapiClient::AuthnApi.new
+authn_instance = OpenapiClient::AuthenticationApi.new
 token = nil
 puts "Authenticating admin..."
-token = authn_instance.authenticate(account=ACCOUNT, login=LOGIN, 
+token = authn_instance.get_access_token(account=ACCOUNT, login=LOGIN,
                                     body=ADMIN_API_KEY, opts={accept_encoding: 'base64'})
 puts "Base64 encoded token: #{token}"
 
 # Change admin password using basicAuth
 puts
 puts "Changing admin password..."
-authn_instance.set_password(account=ACCOUNT, body=new_password)
+authn_instance.change_password(account=ACCOUNT, body=new_password)
 puts "Password change successful."
 
 config.password = new_password
@@ -62,11 +62,11 @@ config.api_key['Authorization'] = token_body
 config.api_key_prefix['Authorization'] = 'Token'
 
 policy_instance = OpenapiClient::PoliciesApi.new
-authn_instance = OpenapiClient::AuthnApi.new
+authn_instance = OpenapiClient::AuthenticationApi.new
 
 # Load empty policy, allows the example to be run multiple times sequentially
-# Loading a policy returns data for users CREATED when the policy is loaded. Without loading 
-# an "empty" policy, if the user alice already exists due to a prior example run, loading 
+# Loading a policy returns data for users CREATED when the policy is loaded. Without loading
+# an "empty" policy, if the user alice already exists due to a prior example run, loading
 # the full policy will not respond with alice's api key.
 puts
 puts "Loading empty root policy..."
@@ -92,7 +92,14 @@ secrets_instance = OpenapiClient::SecretsApi.new
 puts
 puts "Storing secret..."
 puts "Secret data: #{secret}"
-secrets_instance.create_variable(account=ACCOUNT, kind="variable", identifier=secret_id, body=secret)
+secrets_instance.create_variable(
+  account=ACCOUNT,
+  kind="variable",
+  identifier=secret_id,
+  {
+    body: secret
+  }
+)
 puts "Secret stored."
 
 # Retrieve a secret, uses conjurAuth
