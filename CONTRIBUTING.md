@@ -98,6 +98,9 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 * Generates a client library for the desired `<language>`.  
 * Running the script with no argument will generate a Python client by default.
 
+`bin/generate_kong_config`
+* Generates a declarative configuration used by Kong Gateway.
+
 `bin/integration_tests`
 * Used to run the suite of integration tests.  
 * Stands up a new `docker-compose` environment, and runs the integration tests in a designated container.
