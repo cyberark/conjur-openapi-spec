@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+. bin/util
+
+bin/generate_kong_config
+
+if [[ -z $(docker container ls -q --filter name=kong) ]]; then
+    announce "Starting Kong in Docker"
+    docker run -d --name kong \
+        -v $(pwd):/opt/openapi \
+        -e "KONG_DATABASE=off" \
+        -e "KONG_DECLARATIVE_CONFIG=/opt/openapi/kong/kong.yml" \
+        -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
+        -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
+        -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
+        -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
+        -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" \
+        -p 8000:8000 \
+        -p 8443:8443 \
+        -p 8001:8001 \
+        -p 8444:8444 \
+        kong kong start
+else
+    announce "Reloading Kong config"
+    docker exec kong kong reload
+fi
+
+announce "Making requests to Conjur through Kong Gateway"
+
+ensure_conjur_up
+admin_api_key="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+token="$(curl http://localhost:8000/authn/dev/admin/authenticate \
+    --header "Accept-Encoding: base64" \
+    --data $admin_api_key)"
+
+secret_data="Hello World!"
+
+curl -i http://localhost:8000/secrets/dev/variable/testSecret \
+    -H "Authorization: Token token=\"$token\"" \
+    --data "$secret_data"
+
+retrieved_secret="$(curl http://localhost:8000/secrets/dev/variable/testSecret \
+    -H "Authorization: Token token=\"$token\"")"
+
+if [ "$secret_data" == "$retrieved_secret" ]; then
+    announce "Secret stored and retrieved!"
+else
+    announce "Unsuccessful secret storage and retrieval."
+fi
