@@ -38,12 +38,6 @@ components:
       minLength: 1
       example: "default"
 
-    ApiKey:
-      description: "Example of a Conjur API key"
-      type: string
-      minLength: 55
-      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
-
     AWSSignatureHeader:
       description: "AWS Signature Version 4 header"
       type: string
@@ -167,38 +161,14 @@ components:
         type: string
 
   responses:
-    Accepted:
-      description: "The injected certificate was accepted."
-    AccessTokenGeneric:
-      description: |
-        This response schema is a generic string as opposed to the AccessToken component schema.
-        This is to allow users to use the "Accept-Encoding: base64" header in order to
-        receive a pre-encoded token instead of a JSON object.
-      content:
-        text/plain:
-          schema:
-            type: string
-    AddMemberSuccess:
-      description: "Member was added to role successfully"
-    ApiKey:
-      description: "The response body is the API key"
-      content:
-        text/plain:
-          schema:
-            type: string
-            example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
     BadRequest:
       description: "The server cannot process the request due to malformed request syntax"
     Busy:
       description: "Similar operation already in progress, retry after a delay"
-    DeleteMemberSuccess:
-      description: "Member was deleted from role successfully"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
     InternalServerError:
       description: "Malfromed request, rejected by the server"
-    PermissionCheckSuccess:
-      description: "Permissions check was successful"
     ResourceNotFound:
       description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:

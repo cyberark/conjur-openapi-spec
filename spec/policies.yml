@@ -13,23 +13,31 @@ components:
             id: db-password
             owner: !host db-host
 
+    LoadPolicy:
+      type: object
+      properties:
+        created_roles:
+          type: object
+        version:
+          type: number
+      example:
+        {
+          "created_roles": {
+            "myorg:host:database/db-host": {
+              "id": "myorg:host:database/db-host",
+              "api_key": "309yzpa1n5kp932waxw6d37x4hew2x8ve8w11m8xn92acfy672m929en"
+            }
+          },
+          "version": 1
+        }
+
   responses:
-    LoadedPolicy:
+    LoadPolicy:
       description: "Decsribes new data created by a successful policy load"
       content:
         application/json:
           schema:
-            type: object
-            example:
-              {
-                "created_roles": {
-                  "myorg:host:database/db-host": {
-                    "id": "myorg:host:database/db-host",
-                    "api_key": "309yzpa1n5kp932waxw6d37x4hew2x8ve8w11m8xn92acfy672m929en"
-                  }
-                },
-                "version": 1
-              }
+            $ref: "#/components/schemas/LoadPolicy"
 
   paths:
     Policies:
@@ -37,10 +45,11 @@ components:
         tags:
         - "policies"
         summary: "Loads or replaces a Conjur policy document."
-        description: "Loads or replaces a Conjur policy document.
+        description: |
+          Loads or replaces a Conjur policy document.
 
-
-          **Any policy data which already exists on the server but is not explicitly specified in the new policy file will be deleted!**."
+          **Any policy data which already exists on the server but is not
+          explicitly specified in the new policy file will be deleted!**.
         operationId: "replacePolicy"
         parameters:
         - name: "account"
@@ -76,7 +85,7 @@ components:
 
         responses:
           "201":
-            $ref: '#/components/responses/LoadedPolicy'
+            $ref: '#/components/responses/LoadPolicy'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -97,7 +106,10 @@ components:
         tags:
         - "policies"
         summary: "Adds data to the existing Conjur policy."
-        description: "Adds data to the existing Conjur policy. Deletions are not allowed. Any policy objects that exist on the server but are omitted from the policy file will not be deleted and any explicit deletions in the policy file will result in an error.
+        description: |
+          Adds data to the existing Conjur policy. Deletions are not allowed.
+          Any policy objects that exist on the server but are omitted from the
+          policy file will not be deleted and any explicit deletions in the policy file will result in an error.
 
           ##### Permissions required
 
@@ -137,7 +149,7 @@ components:
 
         responses:
           "201":
-            $ref: '#/components/responses/LoadedPolicy'
+            $ref: '#/components/responses/LoadPolicy'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -158,12 +170,13 @@ components:
         tags:
         - "policies"
         summary: "Modifies an existing Conjur policy."
-        description: "Modifies an existing Conjur policy. Data may be explicitly deleted using the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode, no data is ever implicitly deleted.
-
+        description: |
+          Modifies an existing Conjur policy. Data may be explicitly deleted using
+          the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode,
+          no data is ever implicitly deleted.
 
           ##### Permissions required
 
-          `create` privilege on the policy."
         operationId: "updatePolicy"
         parameters:
         - name: "account"
@@ -199,7 +212,7 @@ components:
 
         responses:
           "201":
-            $ref: '#/components/responses/LoadedPolicy'
+            $ref: '#/components/responses/LoadPolicy'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":

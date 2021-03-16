@@ -23,6 +23,7 @@ components:
           items:
             type: string
           example: [ "authn" ]
+
     AuthenticatorStatus:
       type: object
       properties:
@@ -67,6 +68,28 @@ components:
           type: string
           example: "2017-08-04T22:27:20+00:00"
 
+  responses:
+    AuthenticatorsIndex:
+      description: "Details about authenticators for this Conjur server"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticatorsResponse'
+
+    WhoAmI:
+      description: "Details about the client making the request"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WhoAmI'
+
+    AuthenticatorStatus:
+      description: The response contains info about the result
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticatorStatus'
+
   paths:
     WhoAmI:
       get:
@@ -81,11 +104,7 @@ components:
         operationId: "whoAmI"
         responses:
           "200":
-            description: "Details about the client making the request"
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/WhoAmI'
+            $ref: '#/components/responses/WhoAmI'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
 
@@ -98,22 +117,22 @@ components:
         - 'status'
         operationId: "getServiceAuthenticatorStatus"
         summary: "Details whether an authentication service has been configured properly"
-        description: "Once the status webservice has been properly configured and the relevant user
-                      groups have been given permissions to access the status webservice, the
-                      users in those groups can check the status of the authenticator.
+        description: |
+          Once the status webservice has been properly configured and the relevant user
+          groups have been given permissions to access the status webservice, the
+          users in those groups can check the status of the authenticator.
 
-                      Supported Authenticators:
-                        - Azure
-                        - OIDC
+          Supported Authenticators:
+            - Azure
+            - OIDC
 
-                      Not Supported:
-                        - AWS IAM
-                        - Kubernetes
-                        - LDAP
+          Not Supported:
+            - AWS IAM
+            - Kubernetes
+            - LDAP
 
-                      See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
-                      for details on setting up the authenticator status webservice.
-                      "
+          See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
+          for details on setting up the authenticator status webservice.
         parameters:
           - name: authenticator
             in: path
@@ -135,11 +154,7 @@ components:
             
         responses:
           '200':
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -149,17 +164,9 @@ components:
           "404":
             description: "The service was not found"
           "500":
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
           '501':
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
 
         security:
           - conjurAuth: []
@@ -170,15 +177,15 @@ components:
         - 'status'
         operationId: "getGCPAuthenticatorStatus"
         summary: "Details whether an authentication service has been configured properly"
-        description: "Once the status webservice has been properly configured and the relevant user
-                      groups have been given permissions to access the status webservice, the
-                      users in those groups can check the status of the authenticator.
+        description: |
+          Once the status webservice has been properly configured and the relevant user
+          groups have been given permissions to access the status webservice, the
+          users in those groups can check the status of the authenticator.
 
-                      This operation only supports the GCP authenticator
+          This operation only supports the GCP authenticator
 
-                      See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
-                      for details on setting up the authenticator status webservice.
-                      "
+          See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
+          for details on setting up the authenticator status webservice.
         parameters:
           - name: account
             in: path
@@ -190,11 +197,7 @@ components:
             
         responses:
           '200':
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "403":
@@ -202,17 +205,9 @@ components:
           "404":
             description: "The service was not found"
           "500":
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
           '501':
-            description: The response contains info about the result
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorStatus'
+            $ref: '#/components/responses/AuthenticatorStatus'
 
         security:
           - conjurAuth: []
@@ -223,17 +218,12 @@ components:
         - "status"
         summary: "Details about which authenticators are on the Conjur Server"
         description: |
-          "Response contains three members: installed, configured, and enabled.
+          Response contains three members: installed, configured, and enabled.
           
           installed: The authenticator is implemented in Conjur and is available for configuration
           configured: The authenticator has a webservice in the DB that was loaded by policy
           enabled: The authenticator is enabled (in the DB or in the ENV) and is ready for authentication
-          "
         operationId: "getAuthenticators"
         responses:
           "200":
-            description: "Details about authenticators for this Conjur server"
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthenticatorsResponse'
+            $ref: '#/components/responses/AuthenticatorsIndex'

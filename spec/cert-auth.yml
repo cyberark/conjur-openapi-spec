@@ -38,7 +38,8 @@ components:
         tags:
         - "certificate authority"
         summary: "Gets a signed certificate from the configured Certificate Authority service."
-        description: "Gets a signed certificate from the configured Certificate Authority service.
+        description: |
+          Gets a signed certificate from the configured Certificate Authority service.
         
           The request must include a valid Certificate Signing Request, and a desired TTL in ISO 8601 format.
           
@@ -46,7 +47,6 @@ components:
           This endpoint is part of an early implementation of support for using Conjur as a certificate
           authority, and is currently available at the Community (or early alpha) level.
           This endpoint is still subject to breaking changes in the future.
-          "
         operationId: "sign"
         parameters:
         - name: "account"
@@ -86,11 +86,11 @@ components:
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
-            description: "Either:          
-            The authenticated role is not a Host role,
-            The authenticated Host does not have `sign` privilege for the CA service, or
-            The authenticated Host ID does not match the of the CSR Common Name (CN).
-            "
+            description: |
+              Either          
+              - The authenticated role is not a Host role,
+              - The authenticated Host does not have `sign` privilege for the CA service, or
+              - The authenticated Host ID does not match the of the CSR Common Name (CN).
           "404":
             description: "CA Service with the given ID does not exist"
 

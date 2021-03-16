@@ -19,7 +19,6 @@ FACTORY_POLICY = '''
 '''
 
 HOST_TOKEN_MEMBERS = ['expiration', 'cidr', 'token']
-NEW_HOST_MEMBERS = ['created_at',  'id', 'owner', 'api_key']
 
 class TestHostFactoryApi(api_config.ConfiguredTest):
     """HostFactoryApi unit test stubs"""
@@ -52,16 +51,14 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         self.client.configuration.api_key = old_key
 
         # Ensure the return object has the correct members
-        self.assertIsInstance(new_host, dict)
-        for member in NEW_HOST_MEMBERS:
-            self.assertIn(member, new_host)
+        self.assertIsInstance(new_host, conjur.models.CreateHost)
 
         # Make sure the new host can authenticate
         authn = conjur.api.AuthenticationApi(self.client)
         authn.get_access_token(
             self.account,
             f'host/{TEST_HOST}',
-            body=new_host['api_key']
+            body=new_host.api_key
         )
 
     def test_create_token(self):

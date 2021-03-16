@@ -93,7 +93,7 @@ loaded_results = policy_api.replace_policy(
 )
 print("Policy loaded.")
 
-alice_api_key = loaded_results["created_roles"]["dev:user:alice"]["api_key"]
+alice_api_key = loaded_results.created_roles["dev:user:alice"]["api_key"]
 print("Alice API key: ", alice_api_key)
 
 # Rotate Alice's API key, uses conjurAuth

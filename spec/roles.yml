@@ -30,9 +30,11 @@ components:
         tags:
         - "roles"
         summary: "Get role information"
-        description: "Gets detailed information about a specific role, including the role members.
+        description: |
+          Gets detailed information about a specific role, including the role members.
 
-          If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON.
+          If a role A is granted to a role B, then role A is said to have role B as a member.
+          These relationships are described in the “members” portion of the returned JSON.
 
           ##### Listing members
 
@@ -40,23 +42,29 @@ components:
 
           If a `kind` query parameter is given, narrows results to only resources of that kind.
 
-          If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give limit a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+          If a `limit` is given, returns no more than that number of results. Providing an `offset`
+          skips a number of resources before returning the rest. In addition, providing an `offset`
+          will give limit a default value of 10 if none other is provided. These two parameters
+          can be combined to page through results.
 
           If the parameter `count` is true, returns only the number of items in the list.
 
           ##### Text search
 
-          If the search parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weights results so that those with matching id or a matching value of an annotation called name appear first, then those with another matching annotation value, and finally those with a matching kind.
+          If the search parameter is provided, narrows results to those pertaining to the search query.
+          Search works across resource IDs and the values of annotations. It weights results so that
+          those with matching id or a matching value of an annotation called name appear first, then
+          those with another matching annotation value, and finally those with a matching kind.
 
           ##### Parameter Priority
 
-          If Conjur is given any combination of optional parameters, it responds with ONLY results for the parameter of the highest priority.
+          If Conjur is given any combination of optional parameters, it responds with ONLY results
+          for the parameter of the highest priority.
 
           1. `graph`
           2. `all`
           3. `memberships`
           4. `members`
-          "
         operationId: "showRole"
         parameters:
         - name: "account"
@@ -144,14 +152,16 @@ components:
         tags:
         - "roles"
         summary: "Update or modify an existing role membership"
-        description: "Updates or modifies an existing role membership.
+        description: |
+          Updates or modifies an existing role membership.
 
-          If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON.
+          If a role A is granted to a role B, then role A is said to have role B as a member.
+          These relationships are described in the “members” portion of the returned JSON.
 
           When the `members` query parameter is provided, you will get the members of a role.
 
-          When the `members` and `member` query parameters are provided, the role specfified by `member` will be added as a member of the role specified in the endpoint URI.
-          "
+          When the `members` and `member` query parameters are provided, the role specfified by
+          `member` will be added as a member of the role specified in the endpoint URI.
         operationId: "addMemberToRole"
         parameters:
         - name: "account"
@@ -190,7 +200,7 @@ components:
 
         responses:
           "204":
-            $ref: 'openapi.yml#/components/responses/AddMemberSuccess'
+            description: "Member was added to role successfully"
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -209,14 +219,16 @@ components:
         tags:
         - "roles"
         summary: "Deletes an existing role membership"
-        description: "Deletes an existing role membership.
+        description: |
+          Deletes an existing role membership.
 
-          If a role A is granted to a role B, then role A is said to have role B as a member. These relationships are described in the “members” portion of the returned JSON.
+          If a role A is granted to a role B, then role A is said to have role B as a member.
+          These relationships are described in the “members” portion of the returned JSON.
 
           When the `members` query parameter is provided, you will get the members of a role.
 
-          When the `members` and `member` query parameters are provided, the role specfified by `member` will be removed as a member of the role specified in the endpoint URI.
-          "
+          When the `members` and `member` query parameters are provided, the role specfified by
+          `member` will be removed as a member of the role specified in the endpoint URI.
         operationId: "removeMemberFromRole"
         parameters:
         - name: "account"
@@ -255,7 +267,7 @@ components:
 
         responses:
           "204":
-            $ref: 'openapi.yml#/components/responses/DeleteMemberSuccess'
+            description: "Member was deleted from role successfully"
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":

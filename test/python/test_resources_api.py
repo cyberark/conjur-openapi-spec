@@ -19,6 +19,7 @@ def authenticated_client_without_privilege():
 
     return conjur.ResourcesApi(alice_client)
 
+
 class TestResourcesApi(api_config.ConfiguredTest):
     """ResourcesApi unit test stubs"""
     def setUp(self):
@@ -31,13 +32,14 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources endpoint
         200 - successful, resources returned as JSON
         """
-        response = self.api.show_resources_for_all_accounts_with_http_info()
+        resp, status, _ = self.api.show_resources_for_all_accounts_with_http_info()
 
-        self.assertEqual(response[1], 200)
-        self.assertIsInstance(response[0], list)
-        for resource in response[0]:
+        self.assertEqual(status, 200)
+        self.assertIsInstance(resp, list)
+        for resource in resp:
+            self.assertIsInstance(resource, conjur.models.SingleResource)
             for member in RESOURCE_MEMBERS:
-                self.assertIn(member, resource)
+                self.assertIsNotNone(getattr(resource, member))
 
     def test_show_resources_for_all_accounts_401(self):
         """Test case for 401 status response on /resources endpoint
@@ -72,13 +74,13 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account} endpoint
         200 - successful request, resources returned as JSON
         """
-        response = self.api.show_resources_for_account_with_http_info(self.account)
+        resp, status, _ = self.api.show_resources_for_account_with_http_info(self.account)
 
-        self.assertEqual(response[1], 200)
-        self.assertIsInstance(response[0], list)
-        for resource in response[0]:
+        self.assertEqual(status, 200)
+        self.assertIsInstance(resp, list)
+        for resource in resp:
             for member in RESOURCE_MEMBERS:
-                self.assertIn(member, resource)
+                self.assertIsNotNone(getattr(resource, member))
 
     def test_show_resources_for_account_400(self):
         """Test case for 400 status response on /resources/{account} endpoint
@@ -124,16 +126,16 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}
         200 - successful request, resources returned as JSON
         """
-        response = self.api.show_resources_for_kind_with_http_info(
+        resp, status, _ = self.api.show_resources_for_kind_with_http_info(
             self.account,
-            "variable"
+            "policy"
         )
 
-        self.assertEqual(response[1], 200)
-        self.assertIsInstance(response[0], list)
-        for resource in response[0]:
+        self.assertEqual(status, 200)
+        self.assertIsInstance(resp, list)
+        for resource in resp:
             for member in RESOURCE_MEMBERS:
-                self.assertIn(member, resource)
+                self.assertIsNotNone(getattr(resource, member))
 
     def test_show_resources_for_kind_400(self):
         """Test case for 400 status response on /resources/{account}/{kind} endpoint
@@ -183,30 +185,33 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}/{identifier}
         200 - successful, role memberships returned as JSON
         """
-        response = self.api.show_resource_with_http_info(
+        resp, status, _ = self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret'
         )
 
-        self.assertEqual(response[1], 200)
-        self.assertIsInstance(response[0], dict)
+        self.assertEqual(status, 200)
+        self.assertIsInstance(resp, conjur.models.SingleResource)
         for i in RESOURCE_MEMBERS:
-            self.assertIn(i, response[0])
+            self.assertIsNotNone(getattr(resp, i))
 
     def test_show_resource_204(self):
         """Test case for 204 status response on /resources/{account}/{kind}/{identifier}
         204 - permission check successful
         """
-        response = self.api.show_resource_with_http_info(
+        resp, status, _ = self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret',
             privilege="update",
             check=True
         )
-        self.assertEqual(response[1], 204)
-        self.assertEqual(response[0], "")
+
+        self.assertEqual(status, 204)
+        # Response here should be empty string so all fields need to be None
+        for i in RESOURCE_MEMBERS:
+            self.assertIsNone(getattr(resp, i))
 
     def test_show_resource_400(self):
         """Test case for 400 status response on /resources/{account}/{kind}/{identifier} endpoint
@@ -289,7 +294,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for using both `permitted_roles` and `check` query parameters
         When both parameters are used, Conjur responds to the `check` call only
         """
-        response, status, _ = self.api.show_resource_with_http_info(
+        resp, status, _ = self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret',
@@ -299,7 +304,9 @@ class TestResourcesApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(status, 204)
-        self.assertEqual(response, '')
+        # Response here should be empty string so all fields need to be None
+        for i in RESOURCE_MEMBERS:
+            self.assertIsNone(getattr(resp, i))
 
 if __name__ == '__main__':
     unittest.main()

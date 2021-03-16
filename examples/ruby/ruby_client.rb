@@ -93,7 +93,7 @@ loaded_results = policy_instance.replace_policy(
 )
 puts "Policy loaded."
 
-alice_api_key = loaded_results[:created_roles]["dev:user:alice".to_sym][:api_key]
+alice_api_key = loaded_results.created_roles["dev:user:alice".to_sym][:api_key]
 puts "Alice API key: #{alice_api_key}"
 
 # Rotate alice API key as admin, uses conjurAuth
