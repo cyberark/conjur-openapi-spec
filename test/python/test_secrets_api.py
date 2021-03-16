@@ -81,7 +81,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
             "variable",
             TEST_VARIABLES[0],
             expirations="",
-            body=""
         )
 
         self.assertEqual(status, 201)
@@ -94,7 +93,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
                 "variable",
                 TEST_VARIABLES[0],
                 expirations="",
-                body=""
             )
 
         self.assertEqual(context.exception.status, 401)
@@ -111,7 +109,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
                 "variable",
                 TEST_VARIABLES[0],
                 expirations="",
-                body=""
             )
 
         self.assertEqual(context.exception.status, 403)
@@ -124,7 +121,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
                 "variable",
                 'nonexist',
                 expirations="",
-                body=""
             )
 
         self.assertEqual(context.exception.status, 404)
