@@ -53,3 +53,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Workaround for request body issue on revokeHostToken operation is now removed and tests have been updated.
   [cyberark/conjur-openapi-spec#52](https://github.com/cyberark/conjur-openapi-spec/issues/52)
+- Workaround for request body issue on createSecret operation is now removed and tests have been updated.
+  [cyberark/conjur-openapi-spec#105](https://github.com/cyberark/conjur-openapi-spec/issues/105)
