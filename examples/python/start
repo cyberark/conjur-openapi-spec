@@ -1,37 +1,23 @@
 #!/bin/bash
+set -e
 
-function announce() {
-  echo "++++++++++"
-  echo "$@"
-  echo "++++++++++"
-}
+source ./bin/util
 
-if [[ ! -d "./out/python" ]]; then
-  announce "Client not found. Generating..."
-  ./bin/generate_client 1> /dev/null
-  echo
-fi
+ensure_client_is_generated python
+ensure_conjur_up
 
-if [[ -z "$(docker-compose ps -q)" ]]; then
-  announce "Environment not found. Spinning up..."
-  ./bin/start_conjur 1> /dev/null
-  echo
-fi
-
-if [[ ! -d "./.venv" ]]; then
-  announce "Python virtual environment not found. Creating..."
-  python3 -m venv .venv
-  echo
-fi
-
-announce "Setting up Python virtual environment..."
-source .venv/bin/activate
-pip3 install -e out/python
-echo
-
-export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
 
 announce "Running Python Example..."
-./examples/python/python_client.py
-
-deactivate
+docker run --rm \
+  -v ${PWD}/out/python:/src \
+  -v ${PWD}/examples/python/python_client.py:/src/python_client.py \
+  -v ${PWD}/examples/config:/config/policy \
+  -v ${PWD}/config/https:/config/https \
+  --network openapi-spec \
+  -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
+  python:3 \
+  bash -c "
+    python -m pip install -e /src && \
+    python /src/python_client.py
+  "

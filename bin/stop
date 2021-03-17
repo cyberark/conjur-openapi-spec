@@ -8,3 +8,5 @@ docker-compose down -v
 echo "Stop and remove Swagger container"
 docker stop swagger-editor || true
 docker rm swagger-editor || true
+
+docker network rm openapi-spec

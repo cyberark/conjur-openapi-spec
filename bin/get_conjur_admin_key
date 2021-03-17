@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
+source ./bin/util
+
+admin_api_key=$(get_conjur_admin_api_key)
 export CONJUR_AUTHN_API_KEY=$admin_api_key
 
 echo "Conjur admin api key $admin_api_key"

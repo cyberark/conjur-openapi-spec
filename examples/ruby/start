@@ -1,30 +1,32 @@
-#!/bin/bash -e
-function announce() {
-  echo "++++++++++"
-  echo "$@"
-  echo "++++++++++"
-}
+#!/bin/bash
+set -e
 
-if [[ ! -d "./out/ruby" ]]; then
-  announce "Client not found. Generating..."
-  ./bin/generate_client ruby 1> /dev/null
-  echo
+source ./bin/util
+
+ensure_client_is_generated ruby
+ensure_conjur_up
+
+# Remove the gem if it is already built so we dont create a gemfile
+# which contains itself when we build
+if [ -e ./out/ruby/openapi_client-*.gem ]; then
+  announce "Remove old gem file"
+  rm ./out/ruby/openapi_client-*.gem
 fi
 
-if [[ -z "$(docker-compose ps -q)" ]]; then
-  announce "Environment not found. Spinning up..."
-  ./bin/start_conjur 1> /dev/null
-  echo
-fi
-
-announce "Building Ruby example container image..."
-docker-compose build example-ruby
-echo
-
-export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
 
 announce "Running example in container..."
-docker-compose run --no-deps \
-    -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
-    example-ruby \
-    ruby ./ruby_client.rb
+docker run --rm \
+  -v ${PWD}/out/ruby:/src \
+  -v ${PWD}/examples/ruby/ruby_client.rb:/src/ruby_client.rb \
+  -v ${PWD}/examples/config:/config/policy \
+  -v ${PWD}/config/https:/config/https \
+  --network openapi-spec \
+  -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
+  -w /src \
+  ruby:3 \
+  bash -c "
+    gem build ./openapi_client && \
+    gem install ./openapi_client-*.gem && \
+    ruby /src/ruby_client.rb
+  "
