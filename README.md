@@ -99,6 +99,10 @@ Each example performs the following steps:
 - Perform language-specific environment setup
 - Run the example
 
+### Exploring the Conjur API with Postman
+
+A step-by-step guide can be found in the [`examples/postman`](examples/postman) directory.
+
 ## Contributing
 
 We welcome contributions of all kinds to the Conjur OpenAPI Spec. For instructions on how to  
