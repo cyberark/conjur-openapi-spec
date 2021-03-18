@@ -40,25 +40,24 @@ config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
 config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
 
 api_client = openapi_client.ApiClient(config)
-login_api = openapi_client.AuthnApi(api_client)
+login_api = openapi_client.AuthenticationApi(api_client)
 
 # Authenticate admin using basicAuth, receiving short-lived access token
 print("Authenticating admin...")
-access_token = login_api.authenticate(
-    "authn",
-    ACCOUNT_NAME,
-    LOGIN,
-    ADMIN_API_KEY,
+
+access_token = login_api.get_access_token(
+    account=ACCOUNT_NAME,
+    login=LOGIN,
+    body=ADMIN_API_KEY,
     accept_encoding="base64"
 )
-
 print("Base64 encoded token:", access_token)
 
 # Change admin password, uses basicAuth
 print("\nChanging admin password...")
-login_api.set_password(
-    ACCOUNT_NAME,
-    new_password
+login_api.change_password(
+    body=new_password,
+    account=ACCOUNT_NAME
 )
 print("Password change successful.")
 
@@ -70,12 +69,12 @@ api_client.configuration.api_key = {'Authorization': token_body}
 api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
 
 policy_api = openapi_client.PoliciesApi(api_client)
-login_api = openapi_client.AuthnApi(api_client)
+login_api = openapi_client.AuthenticationApi(api_client)
 
 # Load simple policy, which only defines an admin user
 # Allows the example to be run multiple times sequentially
-# Loading a policy returns data for users CREATED when the policy is loaded. Without loading 
-# the simple policy, if the user alice already exists due to a prior example run, loading 
+# Loading a policy returns data for users CREATED when the policy is loaded. Without loading
+# the simple policy, if the user alice already exists due to a prior example run, loading
 # the full policy will not respond with alice's api key.
 print("\nLoading simple root policy...")
 policy_api.load_policy(
@@ -100,7 +99,6 @@ print("Alice API key: ", alice_api_key)
 # Rotate Alice's API key, uses conjurAuth
 print("\nRotating alice API key...")
 alice_api_key = login_api.rotate_api_key(
-    "authn",
     ACCOUNT_NAME,
     role="user:alice"
 )

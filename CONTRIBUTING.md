@@ -86,21 +86,54 @@ $ ./bin/stop
     * `File` > `Save as YAML`
 5. Overwrite [`openapi.yml`](openapi.yml) with the downloaded YAML file
 
-After editing the OpenAPI spec, it's important to test your changes using `bin/api_test`.
+Modifications to the spec should go with updated integration tests, which can
+be found in `test/python/`. The tests are based on a generated client, so to
+see the impact of your spec changes you can generate a Python client using
+`./bin/generate_client -l python` and view the generated client in `out/python/`.
+
+To ensure your changes work as expected, you can run the [automated tests](#automated-tests).
 
 ### Utility Script Reference
 
+#### Automated tests
+
 `bin/api_test [-e <endpoint>]`
+* Uses Schemathesis to generate test cases for API endpoints, which test the
+  conformance between Conjur OSS and the OpenAPI specification.
 * Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
+
+`bin/integration_tests`
+* Used to run the suite of integration tests.  
+* Stands up a new Conjur `docker-compose` environment, generates a Python client
+  library, and runs the integration test suite.
+* Run tests for only one client by specifying a client flag (currently only Python
+  is supported):
+  ```shell
+  $ ./bin/integration_tests --python
+  ```
+* Run a subset of a clients tests by including an argument with the full package
+  path of the tests to run:
+  ```shell
+  $ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
+  ```
+
+#### Linters
+
+`./bin/lint_tests`
+* Lints the Python integration tests using Pylint.
+
+`./bin/lint_spec`
+* Uses [spectral](https://github.com/stoplightio/spectral) to lint the OpenAPI YAML.
+
+#### Utility scripts
 
 `bin/generate_client -l <language> [-o <output-directory>]`
 * Generates a client library for the desired `<language>`.  
 * Running the script with no argument will generate a Python client by default.
 
-`bin/integration_tests`
-* Used to run the suite of integration tests.  
-* Stands up a new `docker-compose` environment, and runs the integration tests in a designated container.
+`bin/start_editor`
+* Used to start a Swagger Editor container independent of a Conjur instance.  
 
 `bin/start`
 * Used to set up a new development environment.  
@@ -108,9 +141,6 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 
 `bin/start_conjur`
 * Used to start a new local Conjur instance based on the project's `docker-compose`.
-
-`bin/start_editor`
-* Used to start a Swagger Editor container independent of a Conjur instance.  
 
 `bin/stop`
 * Used to deconstruct the development environmnet.  
@@ -124,31 +154,10 @@ After editing the OpenAPI spec, it's important to test your changes using `bin/a
 `bin/parse_changelog`
 * Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards
 
-## Integration Tests
-
-Run the current suite of integration tests using the script:
-
-```shell
-$ ./bin/integration_tests
-```
-
-You can run tests for only one client by specifying a client flag.
-
-```shell
-$ ./bin/integration_tests --python
-```
-
-A subset of a clients tests can be run by including an argument with the full package path of the tests
-to run.
-
-```shell
-$ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
-```
-
 ## Manual Testing
 
-You can access a compatible version of the the Conjur command line interface by starting the `cli` docker compose container
-
+You can access a compatible version of the the Conjur (Ruby-based) command line
+interface by starting the `cli` docker compose container:
 ```shell
 $ ./bin/cli
 ```

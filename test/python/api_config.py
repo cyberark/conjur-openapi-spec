@@ -52,9 +52,8 @@ def get_api_key(username, role):
     """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
-    auth_api = openapi_client.api.authn_api.AuthnApi(get_api_client())
+    auth_api = openapi_client.api.AuthenticationApi(get_api_client())
     api_key = auth_api.rotate_api_key(
-        'authn',
         os.environ[CONJUR_ACCOUNT],
         role=f'{role}:{username}'
     )
@@ -76,12 +75,11 @@ def get_api_client(username='admin', role='user'):
     config = get_api_config()
 
     client = openapi_client.ApiClient(config)
-    auth = openapi_client.api.AuthnApi(client)
-    api_token = auth.authenticate(
-            'authn',
+    auth = openapi_client.api.AuthenticationApi(client)
+    api_token = auth.get_access_token(
             account,
             username,
-            api_key,
+            body=api_key,
             accept_encoding='base64'
         )
     client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
@@ -91,12 +89,12 @@ def setup_oidc_webservice():
     """Loads a policy for the oidc webservice into conjur"""
     client = get_api_client()
     account = os.environ[CONJUR_ACCOUNT]
-    policy_api = openapi_client.api.policies_api.PoliciesApi(client)
+    policy_api = openapi_client.api.PoliciesApi(client)
     with open(OIDC_POLICY_FILE, 'r') as policy_file:
         policy = policy_file.read()
     policy_api.modify_policy(account, 'root', policy)
 
-    secrets_api = openapi_client.api.secrets_api.SecretsApi(client)
+    secrets_api = openapi_client.api.SecretsApi(client)
     secrets_api.create_variable(
         account,
         'variable',
@@ -133,5 +131,5 @@ class ConfiguredTest(unittest.TestCase):
         Compartmentalizes test cases by replacing any loaded policy
         """
         default_policy = get_default_policy()
-        policy_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
+        policy_api = openapi_client.api.PoliciesApi(cls.client)
         policy_api.load_policy(cls.account, 'root', default_policy)

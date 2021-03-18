@@ -1,0 +1,823 @@
+components:
+  schemas:
+    LoginName:
+      type: string
+      minLength: 1
+      example: "admin"
+
+    Authenticators:
+      type: string
+      enum:
+      - authn
+      - authn-iam
+      - authn-oidc
+      - authn-ldap
+      - authn-k8s
+      - authn-gcp
+      - authn-azure
+
+    ServiceAuthenticators:
+      type: string
+      enum:
+      - authn-iam
+      - authn-oidc
+      - authn-ldap
+      - authn-k8s
+      - authn-gcp
+      - authn-azure
+
+  paths:
+    DefaultLogin:
+      get:
+        tags:
+        - "authentication"
+        summary: "Gets the API key of a user given the username and password
+          via HTTP Basic Authentication."
+        description: "Passwords are stored in the Conjur database using `bcrypt`
+          with a work factor of 12. Therefore, login is a fairly expensive operation.
+          However, once the API key is obtained, it may be used to inexpensively
+          obtain access tokens by calling the Authenticate method. An access token
+          is required to use most other parts of the Conjur API.
+
+          The Basic authentication-compliant header is formed by:
+          1. Concatenating the role's name, a literal colon character ':',
+             and the password or API key to create the authentication string.
+          2. Base64-encoding the authentication string.
+          3. Prefixing the authentication string with the scheme: `Basic `
+             (note the required space).
+          4. Providing the result as the value of the `Authorization` HTTP header:
+             `Authorization: Basic <authentication string>`.
+
+          Your HTTP/REST client probably provides HTTP basic authentication support.
+          For example, `curl` and all of the Conjur client libraries provide this.
+
+          Note that machine roles (Hosts) do not have passwords and do not need to
+          use this endpoint."
+        operationId: "getAPIKey"
+        parameters:
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/ApiKey'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - basicAuth: []
+
+
+    K8sInjectClientCert:
+      post:
+        tags:
+        - "authentication"
+        summary: "For applications running in Kubernetes; sends Conjur a certificate
+          signing request (CSR) and requests a client certificate injected into
+          the application's Kubernetes pod."
+        description: "This request sends a Certificate Signing Request to Conjur,
+          which uses the Kubernetes API to inject a client certificate into the
+          application pod.
+
+          This endpoint requires a properly configured Conjur Certificate Authority
+          service alongside a properly configured and enabled Kubernetes authenticator.
+          For detailed instructions, see [the documentation](https://docs.conjur.org/Latest/en/Content/Integrations/kubernetes.htm)."
+        operationId: "k8sInjectClientCert"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          description: "URL-encoded service ID of the K8s authenticator"
+          required: true
+          schema:
+            type: string
+        - name: "Host-Id-Prefix"
+          in: header
+          description: "Dot-separated policy tree, prefixed by `host.`, where the application identity is defined"
+          schema:
+            type: string
+          example: "host/conjur/authn-k8s/my-authenticator-id/apps"
+        requestBody:
+          description: "Valid certificate signing request that includes the host
+            identity suffix as the CSR common name"
+          required: true
+          content:
+            text/plain:
+              schema:
+                type: string
+
+        responses:
+          "202":
+            $ref: 'openapi.yml#/components/responses/Accepted'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+
+    LDAPLogin:
+      get:
+        tags:
+        - "authentication"
+        summary: "Gets the Conjur API key of a user given the LDAP username and
+          password via HTTP Basic Authentication."
+        description: "Exchange your LDAP credentials for a Conjur API key. Once the
+          API key is obtained, it may be used to inexpensively obtain access
+          tokens by calling the Authenticate method. An access token
+          is required to use most other parts of the Conjur API.
+
+          The Basic authentication-compliant header is formed by:
+          1. Concatenating the LDAP username, a literal colon character ':',
+             and the password to create the authentication string.
+          2. Base64-encoding the authentication string.
+          3. Prefixing the authentication string with the scheme: `Basic `
+             (note the required space).
+          4. Providing the result as the value of the `Authorization` HTTP header:
+             `Authorization: Basic <authentication string>`.
+
+          Your HTTP/REST client probably provides HTTP basic authentication support."
+        operationId: "getAPIKeyViaLDAP"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded service ID of the authenticator"
+          schema:
+            type: string
+          example: "authn"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/ApiKey'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - basicAuth: []
+
+    DefaultAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token, which is required in the header
+          of most subsequent API requests."
+        description: "A client can obtain an access token by presenting a valid
+          login name and API key.
+
+          The access token is used to communicate to the REST API that the bearer
+          of the token has been authorized to access the API and perform specific
+          actions specified by the scope that was granted during authorization.
+
+          The `login` must be URL encoded. For example, `alice@devops` must be
+          encoded as `alice%40devops`.
+
+          The `service_id`, if given, must be URL encoded. For example,
+          `prod/gke` must be encoded as `prod%2Fgke`.
+
+          For host authentication, the `login` is the host ID with the prefix
+          `host/`. For example, the host webserver would login as `host/webserver`,
+          and would be encoded as `host%2Fwebserver`.
+
+          For API usage, the base64-encoded access token is ordinarily passed as an HTTP
+          Authorization header as `Authorization: Token token=<base64-encoded token>`.
+
+          This is the default authentication endpoint only. See other endpoints for
+          details on authenticating to Conjur using another method, e.g. for
+          applications running in Azure or Kubernetes."
+        operationId: "getAccessToken"
+        parameters:
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "login"
+          in: "path"
+          required: true
+          description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
+          schema:
+            $ref: '#/components/schemas/LoginName'
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: "string"
+            enum:
+              - "application/json"
+              - "base64"
+            default: "application/json"
+        requestBody:
+          description: "API Key"
+          required: true
+          content:
+            text/plain:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/ApiKey'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+    AWSAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Get a short-lived access token for applications running in AWS."
+        description: "The access token is used to communicate to the REST API that
+          the bearer of the token has been authorized to access the API and perform
+          specific actions specified by the scope that was granted during authorization.
+
+          For API usage, the base64-encoded access token is ordinarily passed as an HTTP
+          Authorization header as `Authorization: Token token=<base64-encoded token>`.
+
+          The `login` must be URL encoded and the host ID must have the prefix
+          `host/`. For example, the host webserver would login as `host/webserver`,
+          and would be encoded as `host%2Fwebserver`.
+
+          The `service_id`, if given, must be URL encoded. For example,
+          `prod/gke` must be encoded as `prod%2Fgke`.
+
+          For detailed instructions on authenticating to Conjur using this endpoint,
+          reference the documentation:
+          [AWS IAM Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/AWS_IAM_Authenticator.htm) (`authn-iam`)."
+        operationId: "getAccessTokenViaAWS"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded authenticator service ID"
+          schema:
+            type: string
+          example: "prod/okta"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "login"
+          in: "path"
+          required: true
+          description: "URL-encoded login name. For hosts, the login name is `host/<host-id>`"
+          schema:
+            $ref: '#/components/schemas/LoginName'
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: "string"
+            enum:
+              - "application/json"
+              - "base64"
+            default: "application/json"
+        requestBody:
+          description: "AWS Signature header"
+          required: true
+          content:
+            text/plain:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/AWSSignatureHeader'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+    AzureAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token for applications running in Azure."
+        description: "The access token is used to communicate to the REST API that
+          the bearer of the token has been authorized to access the API and perform
+          specific actions specified by the scope that was granted during authorization.
+
+          For API usage, the base64-encoded access token is ordinarily passed as an HTTP
+          Authorization header as `Authorization: Token token=<base64-encoded token>`.
+
+          The `login` must be URL encoded and the host ID must have the prefix
+          `host/`. For example, the host webserver would login as `host/webserver`,
+          and would be encoded as `host%2Fwebserver`.
+
+          The `service_id`, if given, must be URL encoded. For example,
+          `prod/gke` must be encoded as `prod%2Fgke`.
+
+          To authenticate to Conjur using this endpoint, reference the detailed
+          documentation: [Azure Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/azure_authn.htm) (`authn-azure`)."
+        operationId: "getAccessTokenViaAzure"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded authenticator service ID"
+          schema:
+            type: string
+          example: "prod/okta"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "login"
+          in: "path"
+          required: true
+          description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
+          schema:
+            $ref: '#/components/schemas/LoginName'
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: "string"
+            enum:
+              - "application/json"
+              - "base64"
+            default: "application/json"
+        requestBody:
+          description: "Azure identity token"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/AzureIdentityToken'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+
+    GCPAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token for applications running in
+          Google Cloud Platform."
+        description: "Use the GCP Authenticator API to send an authentication
+          request from a Google Cloud service to Conjur.
+
+          For more information, see [the documentation](https://docs.conjur.org/Latest/en/Content/Operations/Services/cjr-gcp-authn.htm)."
+        operationId: "getAccessTokenViaGCP"
+        parameters:
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            type: string
+          example: "dev"
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: string
+            enum: [ "base64" ]
+        requestBody:
+          description: "Google JWT identity token for the Google Cloud service"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/GoogleIdentityToken'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/ApiKey'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+
+    KubernetesAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token for applications running in Kubernetes."
+        description: "The access token is used to communicate to the REST API that
+          the bearer of the token has been authorized to access the API and perform
+          specific actions specified by the scope that was granted during authorization.
+
+          For API usage, the base64-encoded access token is ordinarily passed as an HTTP
+          Authorization header as `Authorization: Token token=<base64-encoded token>`.
+
+          The `login` must be URL encoded and the host ID must have the prefix
+          `host/`. For example, the host webserver would login as `host/webserver`,
+          and would be encoded as `host%2Fwebserver`.
+
+          The `service_id`, if given, must be URL encoded. For example,
+          `prod/gke` must be encoded as `prod%2Fgke`.
+
+          To authenticate to Conjur using this endpoint, reference the detailed
+          documentation: [Kubernetes Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/k8s_auth.htm) (`authn-k8s`)."
+        operationId: "getAccessTokenViaKubernetes"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded authenticator service ID"
+          schema:
+            type: string
+          example: "prod/okta"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "login"
+          in: "path"
+          required: true
+          description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
+          schema:
+            $ref: '#/components/schemas/LoginName'
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: "string"
+            enum:
+              - "application/json"
+              - "base64"
+            default: "application/json"
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurKubernetesMutualTls: []
+
+
+    LDAPAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token for users and hosts using their
+          LDAP identity to access the Conjur API."
+        description: "The access token is used to communicate to the REST API that
+          the bearer of the token has been authorized to access the API and perform
+          specific actions specified by the scope that was granted during authorization.
+
+          For API usage, the base64-encoded access token is ordinarily passed as an HTTP
+          Authorization header as `Authorization: Token token=<base64-encoded token>`.
+
+          The `login` must be URL encoded. For example, `alice@devops` must be
+          encoded as `alice%40devops`.
+
+          The `service_id`, if given, must be URL encoded. For example,
+          `prod/gke` must be encoded as `prod%2Fgke`.
+
+          For host authentication, the `login` is the host ID with the prefix
+          `host/`. For example, the host webserver would login as `host/webserver`,
+          and would be encoded as `host%2Fwebserver`.
+
+          To authenticate to Conjur using a LDAP, reference the detailed documentation:
+          [LDAP Authenticator](https://docs.conjur.org/Latest/en/Content/Integrations/ldap/ldap_authenticator.html) (`authn-ldap`)."
+        operationId: "getAccessTokenViaLDAP"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded authenticator service ID"
+          schema:
+            type: string
+          example: "prod/okta"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "login"
+          in: "path"
+          required: true
+          description: "URL-encoded login name. For users, it’s the user ID. For hosts, the login name is `host/<host-id>`"
+          schema:
+            $ref: '#/components/schemas/LoginName'
+        - name: "Accept-Encoding"
+          in: "header"
+          description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
+          schema:
+            type: "string"
+            enum:
+              - "application/json"
+              - "base64"
+            default: "application/json"
+        requestBody:
+          description: "API key"
+          required: false
+          content:
+            text/plain:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/ApiKey'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+
+    OIDCAuthenticate:
+      post:
+        tags:
+        - "authentication"
+        summary: "Gets a short-lived access token for applications using OpenID
+          Connect (OIDC) to access the Conjur API."
+        description: "Use the OIDC Authenticator to leverage the identity layer
+          provided by OIDC to authenticate with Conjur.
+
+          For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm)."
+        operationId: "getAccessTokenViaOIDC"
+        parameters:
+        - name: "service_id"
+          in: "path"
+          required: true
+          description: "URL-encoded service ID"
+          schema:
+            type: string
+          example: "keycloak"
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        requestBody:
+          description: "ID token"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: 'openapi.yml#/components/schemas/OIDCToken'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "502":
+            description: "Error connecting conjur to the OIDC provider"
+
+
+    ChangePassword:
+      put:
+        tags:
+        - "authentication"
+        summary: "Changes a user’s password."
+        description: "You must provide the login name and current password or
+          API key of the user whose password is to be updated in an HTTP Basic
+          Authentication header. Also replaces the user’s API key with a new
+          securely generated random value. You can fetch the new API key using
+          the Login method.
+
+          The Basic authentication-compliant header is formed by:
+          1. Concatenating the role's name, a literal colon character ':',
+             and the password or API key to create the authentication string.
+          2. Base64-encoding the authentication string.
+          3. Prefixing the authentication string with the scheme: `Basic `
+             (note the required space).
+          4. Providing the result as the value of the `Authorization` HTTP header:
+             `Authorization: Basic <authentication string>`.
+
+          Your HTTP/REST client probably provides HTTP basic authentication
+          support. For example, `curl` and all of the Conjur client libraries
+          provide this.
+
+          Note that machine roles (Hosts) do not have passwords. They authenticate
+          using their API keys, while passwords are only used by human users."
+        operationId: "changePassword"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        requestBody:
+          description: "New password"
+          required: true
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: password
+                minLength: 1
+
+        responses:
+          "204":
+            description: "The password has been changed"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - basicAuth: []
+
+    RotateApiKey:
+      put:
+        tags:
+        - "authentication"
+        summary: "Rotates a role's API key."
+        description: "Any role can rotate its own API key. The name and password
+          (for users) or current API key (for hosts and users) of the role must
+          be provided via HTTP Basic Authorization.
+
+          To rotate another role's API key, you may provide your name and password
+          (for users) or current API key (for hosts and users) via HTTP Basic
+          Authorization with the request. Alternatively, you may provide your
+          Conjur access token via the standard Conjur `Authorization` header.
+
+          The Basic authentication-compliant header is formed by:
+          1. Concatenating the role's name, a literal colon character ':',
+             and the password or API key to create the authentication string.
+          2. Base64-encoding the authentication string.
+          3. Prefixing the authentication string with the scheme: `Basic `
+             (note the required space).
+          4. Providing the result as the value of the `Authorization` HTTP header:
+             `Authorization: Basic <authentication string>`.
+
+          Your HTTP/REST client probably provides HTTP basic authentication support.
+          For example, `curl` and all of the Conjur client libraries provide this.
+
+          If using the Conjur `Authorization` header, its value should be set to
+          `Token token=<base64-encoded access token>`.
+
+          Note that the body of the request must be the empty string."
+        operationId: "rotateApiKey"
+        parameters:
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "role"
+          in: "query"
+          description: "(**Optional**) role specifier in `{kind}:{identifier}` format
+
+            ##### Permissions required
+
+            `update` privilege on the role whose API key is being rotated."
+          schema:
+            $ref: 'openapi.yml#/components/schemas/Role'
+
+        responses:
+          "200":
+            $ref: 'openapi.yml#/components/responses/ApiKey'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - basicAuth: []
+            conjurAuth: []
+
+    EnableAuthenticatorInstance:
+      patch:
+        tags:
+        - "authentication"
+        summary: "Enables or disables authenticator service instances."
+        description: "Allows you to either enable or disable a given authenticator
+          service instance.
+
+          When you enable or disable an authenticator service instance via this
+          endpoint, the status of the authenticator service instance is stored
+          in the Conjur database. The enablement status of the authenticator
+          service instance may be overridden by setting the `CONJUR_AUTHENTICATORS`
+          environment variable on the Conjur server; in the case where this
+          environment variable is set, the database record of whether the
+          authenticator service instance is enabled will be ignored.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**"
+        operationId: "enableAuthenticatorInstance"
+        parameters:
+        - name: "authenticator"
+          in: "path"
+          description: "The authenticator to update"
+          required: true
+          schema:
+            $ref: '#/components/schemas/ServiceAuthenticators'
+          example: "authn-oidc"
+        - name: "service_id"
+          in: "path"
+          description: "URL-encoded service id of the authenticator"
+          required: true
+          schema:
+            type: string
+          example: "prod/gke"
+        - name: "account"
+          in: "path"
+          description: "Organization account name"
+          required: true
+          schema:
+            type: string
+          example: "dev"
+        requestBody:
+          description: "Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+
+        responses:
+          "204":
+            description: "The config was updated properly"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []

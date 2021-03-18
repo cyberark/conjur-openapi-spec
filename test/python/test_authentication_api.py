@@ -46,24 +46,23 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.password = self.api_key
 
         self.client = openapi_client.ApiClient(self.config)
-        self.api = openapi_client.api.authn_api.AuthnApi(self.client)
+        self.api = openapi_client.api.AuthenticationApi(self.client)
 
-        self.bad_auth_api = openapi_client.api.authn_api.AuthnApi(self.bad_auth_client)
+        self.bad_auth_api = openapi_client.api.AuthenticationApi(self.bad_auth_client)
 
     def tearDown(self):
         self.client.close()
 
-    def test_authenticate_200(self):
-        """Test case for authenticate
+    def test_get_access_token_200(self):
+        """Test case for get_access_token 200 response
 
         Gets a short-lived access token, which can be used to authenticate requests
         to (most of) the rest of the Conjur API.
         """
-        response, status, _ = self.api.authenticate_with_http_info(
-            'authn',
+        response, status, _ = self.api.get_access_token_with_http_info(
             self.account,
             self.config.username,
-            self.api_key
+            body=self.api_key
         )
         response_json = json.loads(response.replace("\'","\""))
         response_keys = response_json.keys()
@@ -73,53 +72,51 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.assertIn("payload", response_keys)
         self.assertIn("signature", response_keys)
 
-    def test_authenticate_400(self):
+    def test_get_access_token_400(self):
         """Test case for 400 status response when authenticating a user with Conjur
         400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.authenticate(
-                'authn',
+            self.api.get_access_token(
                 self.account,
                 '\00',
-                self.api_key
+                body=self.api_key
             )
 
         self.assertEqual(context.exception.status, 400)
 
-    def test_authenticate_401(self):
+    def test_get_access_token_401(self):
         """Test case for 401 status response when authenticating a user with Conjur
         401 - the request lacks valid authenticate credentials
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.authenticate(
-                'authn',
+            self.api.get_access_token(
                 self.account,
                 self.config.username,
-                'bad_api_key'
+                body='bad_api_key'
             )
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_login_200(self):
+    def test_get_api_key_200(self):
         """Test case for 200 status response when logging in
         Gets the API key of a user given the username and password via HTTP Basic Authentication.
         """
-        api_key, status, _ = self.api.login_with_http_info('authn', self.account)
+        api_key, status, _ = self.api.get_api_key_with_http_info(self.account)
 
         self.assertEqual(status, 200)
         self.assertEqual(api_key, self.api_key)
 
-    def test_login_400(self):
+    def test_get_api_key_400(self):
         """Test case for 400 status response when logging in
         400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.login('authn', '\00')
+            self.api.get_api_key('\00')
 
         self.assertEqual(context.exception.status, 400)
 
-    def test_login_401(self):
+    def test_get_api_key_401(self):
         """Test case for 401 status response when loggin in
         401 - the request lacks valid authentication credentials
         """
@@ -127,11 +124,11 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.password = "FakePassword123"
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.login('authn', self.account)
+            self.api.get_api_key(self.account)
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_login_422(self):
+    def test_get_api_key_422(self):
         """Test case for 422 status response when logging in
         This test uses HTTP instead of HTTPS, letting Conjur reject malformed parameters
         that would otherwise be rejected by the NGINX proxy
@@ -139,7 +136,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.host = 'http://conjur'
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.login('authn', '\00')
+            self.api.get_api_key('\00')
 
         self.assertEqual(context.exception.status, 422)
 
@@ -149,13 +146,12 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """
         # Rotate the key and attempt to login with it
         new_key, status, _ = self.api.rotate_api_key_with_http_info(
-            'authn',
             self.account
         )
         self.assertEqual(status, 200)
 
         self.config.password = new_key
-        self.api.login('authn', self.account)
+        self.api.get_api_key(self.account)
 
         # We rotated the API key so we have to update the class variable
         self.__class__.api_key = new_key
@@ -166,14 +162,13 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """
         # Rotate the key and attempt to login with it
         new_key, status, _ = self.api.rotate_api_key_with_http_info(
-            'authn',
             self.account,
             role=f'user:{self.config.username}'
         )
         self.assertEqual(status, 200)
 
         self.config.password = new_key
-        self.api.login('authn', self.account)
+        self.api.get_api_key(self.account)
 
         # We rotated the API key so we have to update the class variable
         self.__class__.api_key = new_key
@@ -182,10 +177,9 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """Test case for 200 status response when rotating a foreign role's API key
         Rotates the specified role's own API key. The new key is in the response body.
         """
-        authenticated_api = openapi_client.AuthnApi(api_config.get_api_client())
+        authenticated_api = openapi_client.api.AuthenticationApi(api_config.get_api_client())
 
         new_key_alice, status, _ = authenticated_api.rotate_api_key_with_http_info(
-            'authn',
             self.account,
             role='user:alice'
         )
@@ -193,7 +187,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.config.username = 'alice'
         self.config.password = new_key_alice
-        self.api.login('authn', self.account)
+        self.api.get_api_key(self.account)
 
         # reset api config
         self.config.username = 'admin'
@@ -206,7 +200,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         400 - request rejected by NGINX proxy
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', '\00')
+            self.api.rotate_api_key('\00')
 
         self.assertEqual(context.exception.status, 400)
 
@@ -217,7 +211,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.password = "FakePassword123"
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', self.account)
+            self.api.rotate_api_key(self.account)
 
         self.assertEqual(context.exception.status, 401)
 
@@ -228,19 +222,19 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.config.host = 'http://conjur'
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.rotate_api_key('authn', self.account, role='\00')
+            self.api.rotate_api_key(self.account, role='\00')
 
         self.assertEqual(context.exception.status, 422)
 
-    def test_set_password_204(self):
-        """Test case for set_password
+    def test_change_password_204(self):
+        """Test case for changing password
 
         Changes a user’s password.
         """
         # Set a new password and try to authenticate with it
         test_password = "PAssword!234"
 
-        _, status, _ = self.api.set_password_with_http_info(
+        _, status, _ = self.api.change_password_with_http_info(
             self.account,
             test_password
         )
@@ -248,17 +242,17 @@ class TestAuthnApi(api_config.ConfiguredTest):
         self.assertEqual(status, 204)
 
         self.config.password = test_password
-        self.api.login('authn', self.account)
+        self.api.get_api_key(self.account)
 
-    def test_set_password_400(self):
+    def test_change_password_400(self):
         """Test case for 400 status response when setting password
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.set_password('\00', 'PAssword!234')
+            self.api.change_password('\00', 'PAssword!234')
 
         self.assertEqual(context.exception.status, 400)
 
-    def test_set_password_401(self):
+    def test_change_password_401(self):
         """Test case for 401 status response when setting password
         401 - the request lacks valid authentication credentials
         """
@@ -266,7 +260,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         test_password = "PAssword!234"
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.bad_auth_api.set_password(self.account, test_password)
+            self.bad_auth_api.change_password(self.account, test_password)
 
         self.assertEqual(context.exception.status, 401)
 
@@ -274,14 +268,14 @@ class TestAuthnApi(api_config.ConfiguredTest):
         invalid_pass = 'SomethingInvalid'
 
         with self.assertRaises(openapi_client.exceptions.ApiException):
-            self.api.set_password(self.account, body=invalid_pass)
+            self.api.change_password(self.account, body=invalid_pass)
 
-    def test_set_password_422(self):
+    def test_change_password_422(self):
         """Test case for 422 status response when setting password
         422 - Conjur received a malformed parameter, password does not fit minimum requirements
         """
         with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.set_password(self.account, 'bad-pass')
+            self.api.change_password(self.account, 'bad-pass')
 
         self.assertEqual(context.exception.status, 422)
 
@@ -291,15 +285,15 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
     Separate from the Authn tests to avoid issues with changing api keys/paswords
     """
     def setUp(self):
-        self.api = openapi_client.api.authn_api.AuthnApi(self.client)
-        self.bad_auth_api = openapi_client.api.authn_api.AuthnApi(self.bad_auth_client)
+        self.api = openapi_client.api.AuthenticationApi(self.client)
+        self.bad_auth_api = openapi_client.api.AuthenticationApi(self.bad_auth_client)
 
-    def test_update_authenticator_config_204(self):
-        """Test case for update_authenticator_config 204 response
+    def test_enable_authenticator_instance_204(self):
+        """Test case for enable_authenticator_instance 204 response
 
         Updates the authenticators configuration
         """
-        _, status, _ = self.api.update_authenticator_config_with_http_info(
+        _, status, _ = self.api.enable_authenticator_instance_with_http_info(
             'authn-ldap',
             'test',
             self.account,
@@ -308,10 +302,10 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 204)
 
-    def test_update_authenticator_config_401(self):
-        """Test case for update_authenticator_config 401 response"""
+    def test_enable_authenticator_instance_401(self):
+        """Test case for enable_authenticator_instance 401 response"""
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.update_authenticator_config(
+            self.bad_auth_api.enable_authenticator_instance(
                 'oidc',
                 'okta',
                 self.account,
@@ -320,10 +314,10 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_update_authenticator_config_404(self):
-        """Test case for update_authenticator_config 404 response"""
+    def test_enable_authenticator_instance_404(self):
+        """Test case for enable_authenticator_instance 404 response"""
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.update_authenticator_config(
+            self.api.enable_authenticator_instance(
                 'oidc',
                 'okta',
                 self.account,
@@ -340,67 +334,72 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         alice_config = api_config.get_api_config(username='alice')
         alice_config.password = 'alice'
         alice_client = openapi_client.ApiClient(alice_config)
-        alice_api = openapi_client.api.authn_api.AuthnApi(alice_client)
+        alice_api = openapi_client.api.AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.service_login_with_http_info('authn-ldap', 'test', self.account)
+        _, status, _ = alice_api.get_api_key_via_ldap_with_http_info('test', self.account)
 
         self.assertEqual(status, 200)
 
     def test_service_login_401(self):
         """Test case for service_login 401 response"""
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.service_login('iam', 'aws', self.account)
+            self.bad_auth_api.get_api_key_via_ldap('aws', self.account)
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_authenticate_service_200(self):
-        """Test case for service_login 200 response
+    def test_get_access_token_service_200(self):
+        """Test case for get_access_token_service 200 response
 
         Login with the given authenticator
         """
         alice_config = api_config.get_api_config(username='alice')
         alice_client = openapi_client.ApiClient(alice_config)
-        alice_api = openapi_client.api.authn_api.AuthnApi(alice_client)
+        alice_api = openapi_client.api.AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.authenticate_service_with_http_info(
-            'authn-ldap',
+        _, status, _ = alice_api.get_access_token_via_ldap_with_http_info(
             'test',
             self.account,
             'alice',
-            'alice'
+            body='alice'
         )
 
         self.assertEqual(status, 200)
 
-    def test_authenticate_service_401(self):
-        """Test case for authenticate_service 401 response
+    def test_get_access_token_service_401(self):
+        """Test case for get_access_token_service 401 response
 
         Login with the given authenticator
         """
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticate_service(
-                'authn-ldap',
+            self.api.get_access_token_via_ldap(
                 'test',
                 self.account,
                 'admin',
-                'test'
+                body='test'
             )
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_authenticate_service_404(self):
-        """Test case for authenticate_service 404 response"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticate_service('nonexist', 'nonexist', self.account, 'admin', 'badpass')
-
-        self.assertEqual(context.exception.status, 404)
+# we should write one of these for each service; commenting out for now
+#    def test_get_access_token_service_404(self):
+#        """Test case for authenticate_service 404 response"""
+#        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
+#            self.api.get_access_token_via_authenticator(
+#                'nonexist',
+#                'nonexist',
+#                self.account,
+#                'admin',
+#                body='badpass'
+#            )
+#
+#        self.assertEqual(context.exception.status, 404)
 
     def test_oidc_authenticate_200(self):
         """Test case for oidc_authenticate 200 response"""
         api_config.setup_oidc_webservice()
         id_token = get_oidc_id_token()
 
-        _, status, _ = self.api.oidc_authenticate_with_http_info(
+        _, status, _ = self.api.get_access_token_via_oidc_with_http_info(
             'test',
             self.account,
             id_token=id_token
@@ -412,7 +411,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         api_config.setup_oidc_webservice()
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.oidc_authenticate('test', self.account, id_token='bad-token')
+            self.api.get_access_token_via_oidc('test', self.account, id_token='bad-token')
 
         self.assertEqual(context.exception.status, 401)
 
@@ -420,9 +419,9 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         """Test case for gcp_authenticate 200 response"""
         jwt_token = 'bad token'
 
-        with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
+        with patch.object(openapi_client.ApiClient, 'call_api', return_value=None) \
                 as mock:
-            self.api.gcp_authenticate(self.account, jwt=jwt_token)
+            self.api.get_access_token_via_gcp(self.account, jwt=jwt_token)
 
         mock.assert_called_once_with(
             '/authn-gcp/{account}/authenticate',
@@ -434,7 +433,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             post_params=[('jwt', jwt_token)],
             files={},
             response_type='str',
-            auth_settings=['basicAuth','conjurAuth'],
+            auth_settings=['basicAuth','conjurAuth','conjurKubernetesMutualTls'],
             async_req=None,
             _return_http_data_only=True,
             _preload_content=True,
@@ -445,14 +444,14 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
     def test_gcp_authenticate_400(self):
         """Test case for gcp_authenticate 400 response"""
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.gcp_authenticate('\00', jwt='bad token')
+            self.api.get_access_token_via_gcp('\00', jwt='bad token')
 
         self.assertEqual(context.exception.status, 400)
 
     def test_gcp_authenticate_401(self):
         """Test case for gcp_authenticate 401 response"""
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.gcp_authenticate(self.account, jwt='bad token')
+            self.api.get_access_token_via_gcp(self.account, jwt='bad token')
 
         self.assertEqual(context.exception.status, 401)
 

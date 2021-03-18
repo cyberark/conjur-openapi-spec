@@ -57,8 +57,12 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
             self.assertIn(member, new_host)
 
         # Make sure the new host can authenticate
-        authn = openapi_client.api.authn_api.AuthnApi(self.client)
-        authn.authenticate('authn', self.account, f'host/{TEST_HOST}', new_host['api_key'])
+        authn = openapi_client.api.AuthenticationApi(self.client)
+        authn.get_access_token(
+            self.account,
+            f'host/{TEST_HOST}',
+            body=new_host['api_key']
+        )
 
     def test_create_host_token(self):
         """Test case for create_host_token

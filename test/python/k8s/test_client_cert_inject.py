@@ -61,7 +61,7 @@ class TestClientCertInject(unittest.TestCase):
         config.api_key = {'Authorization': 'Token token="{}"'.format(encoded_token)}
 
         self.client = openapi_client.ApiClient(config)
-        self.api = openapi_client.api.authn_api.AuthnApi(self.client)
+        self.api = openapi_client.api.AuthenticationApi(self.client)
 
         key = generateKey(crypto.TYPE_RSA, 2048)
         self.csr = generateCSR('app-test/*/*', key)
