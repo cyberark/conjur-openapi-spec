@@ -84,7 +84,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
 
         old_key = dict(self.client.configuration.api_key)
 
-        self.api.revoke_host_token(token, body='')
+        self.api.revoke_host_token(token)
 
         self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
 
