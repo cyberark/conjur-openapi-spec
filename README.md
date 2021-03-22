@@ -57,9 +57,19 @@ If you are new to OpenAPI you may want to visit the
 wiki page, which will give you a brief overview of how to interpret and make changes to the spec file.
 
 To view the Conjur OpenAPI Specification directly, please see the [spec/](./spec/) directory.
-Please note that this version of the spec is not meant to be used itself, you should generate
-either the conjur, or enterprise version for actual use by calling the `bin/transform` script
-with either the `--oss` or `--enterprise` flags.
+
+Note: The OpenAPI source includes a [custom property](https://swagger.io/specification/#specification-extensions)
+`x-conjur-settings` to differentiate Enterprise-only endpoints from the rest of the specification.
+In the sections below, we review many common ways that you can use the Conjur OpenAPI definition.
+We recommend using a Conjur OpenAPI definition from an [official release](https://github.com/cyberark/conjur-openapi-spec/releases)
+that's compatible with your specific Conjur server version. If you're interested in building from
+source, you can run the following script to parse the custom `x-conjur-settings` parameters and
+generate an OpenAPI spec for the specific edition of Conjur that you're using:
+
+```shell
+./bin/transform --oss # Creates a spec definition for Conjur OSS in out/oss/
+./bin/transform --enterprise # Creates a spec definition for Conjur Enterprise in out/enterprise/
+```
 
 In the sections below, we review some of the ways you can leverage the spec in your own workflows.
 Need help with something that's not yet documented here? Please

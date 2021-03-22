@@ -35,7 +35,7 @@ def __find_annotations(obj, object_path=[]):
     for i in obj:
         if i == 'x-conjur-settings':
             annotations.append(Annotation({i: obj[i]}, object_path))
-        annotations += find_annotations(obj[i], object_path + [i])
+        annotations += __find_annotations(obj[i], object_path + [i])
     return annotations
 
 def find_annotations(obj):

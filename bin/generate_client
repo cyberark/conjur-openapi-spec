@@ -11,7 +11,7 @@ print_help(){
     echo -e "\tThe -n option will prevent the creation of a client language directory"
     echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
     echo
-    echo -e "\tThe --enterprise option will generate the spec with included Conjur Enterprise endpoints"
+    echo -e "\tThe --enterprise option will generate the spec with included Conjur Enterprise-only endpoints"
 }
 
 generator_version="v4.3.1"

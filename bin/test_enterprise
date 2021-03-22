@@ -3,7 +3,7 @@
 source ./bin/util
 
 stop_dap(){
-    # This can error in CI so unset fail on error for DAP shutdown
+    # This can error in CI so unset fail on error for Conjur Enterprise shutdown
     set +e
     pushd ./test/dap-intro
     ./bin/dap --stop
@@ -22,20 +22,20 @@ chmod -R 777 test/dap-intro
 # Set this after stopping containers because that can throw errors sometimes
 set -e
 
-announce Starting DAP
+announce Starting Conjur Enterprise
 params=""
 pushd  ./test/dap-intro
 
 ./bin/dap --provision-master
 ./bin/dap --wait-for-master
 api_key=$(curl --insecure --user admin:MySecretP@ss1 https://localhost/authn/demo/login)
-echo DAP API key: $api_key
+echo Conjur Enterprise API key: $api_key
 
-announce Setting up DAP Certificates
+announce Setting up Conjur Enterprise Certificates
 ./bin/dap --import-custom-certificates
 
 
-# Create the parameter to import volumes from the DAP container so we have its certificates
+# Create the parameter to import volumes from the Enterprise container so we have its certificates
 for name in $(docker-compose ps -q)
 do
     params+="--volumes-from $name "
