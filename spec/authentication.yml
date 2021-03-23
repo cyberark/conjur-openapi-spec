@@ -142,8 +142,9 @@ components:
             type: string
           example: "host/conjur/authn-k8s/my-authenticator-id/apps"
         requestBody:
-          description: "Valid certificate signing request that includes the host
-            identity suffix as the CSR common name"
+          description: |
+            Valid certificate signing request that includes the host
+            identity suffix as the CSR common name
           required: true
           content:
             text/plain:
@@ -615,12 +616,14 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for applications using OpenID
-          Connect (OIDC) to access the Conjur API."
-        description: "Use the OIDC Authenticator to leverage the identity layer
+        summary: |
+          Gets a short-lived access token for applications using OpenID
+          Connect (OIDC) to access the Conjur API.
+        description: |
+          Use the OIDC Authenticator to leverage the identity layer
           provided by OIDC to authenticate with Conjur.
 
-          For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm)."
+          For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm).
         operationId: "getAccessTokenViaOIDC"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -752,11 +755,12 @@ components:
             $ref: 'openapi.yml#/components/schemas/AccountName'
         - name: "role"
           in: "query"
-          description: "(**Optional**) role specifier in `{kind}:{identifier}` format
+          description: |
+            (**Optional**) role specifier in `{kind}:{identifier}` format
 
             ##### Permissions required
 
-            `update` privilege on the role whose API key is being rotated."
+            `update` privilege on the role whose API key is being rotated.
           schema:
             $ref: 'openapi.yml#/components/schemas/Role'
 
@@ -818,8 +822,9 @@ components:
           example: "dev"
 
         requestBody:
-          description: "Contains either `enabled=true` or `enabled=false` to
-            enable or disable an authenticator"
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
           required: true
           content:
             application/x-www-form-urlencoded:

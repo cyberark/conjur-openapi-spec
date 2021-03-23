@@ -102,19 +102,16 @@ components:
       type: string
       minLength: 1
       example: "prod%2Faws%2Fdb-password"
-      description: "Resource identifier. Requires to be encoded when in path.
+      description: |
+        Resource identifier. Requires to be encoded when in path.
 
         ##### Examples:
 
         - `myapp-01` -> `myapp-01` (unchanged)
-
         - `alice@devops` -> `alice%40devops`
-
         - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
-
         - `research+development` -> `research%2Bdevelopment`
-
-        - `sales&marketing` -> `sales%26marketing`"
+        - `sales&marketing` -> `sales%26marketing`
 
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
@@ -123,32 +120,24 @@ components:
     Role:
       type: string
       minLength: 1
-      description: "##### Kinds of roles:
+      description: |
+        ##### Kinds of roles:
 
         - User: one unique wonderful human
-
         - Host: a single logical machine (in the broad sense, not just physical)
-
         - Layer: a collection of hosts that have the same privileges
-
         - Group: a collection of users and groups that have the same privileges
-
         - Policy: a role which owns of a set of related object
-
 
         Any identifier included in the URL must be URL-encoded to be recognized by the Conjur API.
 
         ##### Resource Identifiers:
 
         - `myapp-01` -> `myapp-01` (unchanged)
-
         - `alice@devops` -> `alice%40devops`
-
         - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
-
         - `research+development` -> `research%2Bdevelopment`
-
-        - `sales&marketing` -> `sales%26marketing`"
+        - `sales&marketing` -> `sales%26marketing`
 
   parameters:
     ServiceID:
@@ -199,8 +188,9 @@ components:
 
   securitySchemes:
     basicAuth:
-      description: "Basic authentication with Conjur username and password (users only)
-        or API key (hosts and users)."
+      description: |
+        Basic authentication with Conjur username and password (users only)
+        or API key (hosts and users).
       type: http
       scheme: basic
     conjurAuth:
@@ -209,9 +199,10 @@ components:
       in: header
       name: Authorization
     conjurKubernetesMutualTls:
-      description: "Conjur Kubernetes authenticator mutual TLS authentication.
+      description: |
+        Conjur Kubernetes authenticator mutual TLS authentication.
         To authenticate using this method, you must provide a trusted client
-        certificate"
+        certificate
       type: http
       scheme: mutual
 
