@@ -1,10 +1,27 @@
 components:
   schemas:
-    LoginName:
-      type: string
-      minLength: 1
-      example: "admin"
+    AccessToken:
+      type: object
+      properties:
+        protected:
+          type: string
+        payload:
+          type: string
+        signature:
+          type: string
+      example:
+        {
+          "protected": "eyJhbGciOiJjb25qdXIub3.....g0In0=", 
+          "payload": "eyJzdWIiOiJhZG1pbiIsImlhdCI6MTU5ODc2OTU0MH0=",
+          "signature": "NrknEA762z0x-FVdQjFGeTT.....AFjHc0"
+        }
 
+    ApiKey:
+      type: string
+      minLength: 55
+      description: "Example of a Conjur API key"
+      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
+        
     Authenticators:
       type: string
       enum:
@@ -16,6 +33,54 @@ components:
       - authn-gcp
       - authn-azure
 
+    AWSSignatureHeader:
+      description: "AWS Signature Version 4 header"
+      type: string
+
+    AzureIdentityToken:
+      description: "Azure instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
+    EnableAuthenticatorSetting:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+
+    GoogleIdentityToken:
+      description: "Google Cloud instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
+    LoginName:
+      type: string
+      minLength: 1
+      example: "admin"
+
+    OIDCToken:
+      description: "OpenID Connect ID token"
+      type: object
+      properties:
+        id_token:
+          type: string
+      example:
+        {
+          "id_token": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
     ServiceAuthenticators:
       type: string
       enum:
@@ -25,22 +90,6 @@ components:
       - authn-k8s
       - authn-gcp
       - authn-azure
-
-    ApiKey:
-      type: string
-      minLength: 55
-      description: "Example of a Conjur API key"
-      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
-
-    AccessToken:
-      type: object
-      properties:
-        protected:
-          type: string
-        payload:
-          type: string
-        signature:
-          type: string
 
   responses:
     ApiKey:
@@ -65,8 +114,9 @@ components:
       get:
         tags:
         - "authentication"
-        summary: "Gets the API key of a user given the username and password
-          via HTTP Basic Authentication."
+        summary: |
+          Gets the API key of a user given the username and password
+          via HTTP Basic Authentication.
         description: |
           Passwords are stored in the Conjur database using `bcrypt`
           with a work factor of 12. Therefore, login is a fairly expensive operation.
@@ -119,9 +169,10 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "For applications running in Kubernetes; sends Conjur a certificate
+        summary: |
+          For applications running in Kubernetes; sends Conjur a certificate
           signing request (CSR) and requests a client certificate injected into
-          the application's Kubernetes pod."
+          the application's Kubernetes pod.
         description: |
           This request sends a Certificate Signing Request to Conjur,
           which uses the Kubernetes API to inject a client certificate into the
@@ -165,8 +216,9 @@ components:
       get:
         tags:
         - "authentication"
-        summary: "Gets the Conjur API key of a user given the LDAP username and
-          password via HTTP Basic Authentication."
+        summary: |
+          Gets the Conjur API key of a user given the LDAP username and
+          password via HTTP Basic Authentication.
         description: |
           Exchange your LDAP credentials for a Conjur API key. Once the
           API key is obtained, it may be used to inexpensively obtain access
@@ -215,8 +267,9 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token, which is required in the header
-          of most subsequent API requests."
+        summary: |
+          Gets a short-lived access token, which is required in the header
+          of most subsequent API requests.
         description: |
           A client can obtain an access token by presenting a valid
           login name and API key.
@@ -341,7 +394,7 @@ components:
           content:
             text/plain:
               schema:
-                $ref: 'openapi.yml#/components/schemas/AWSSignatureHeader'
+                $ref: '#/components/schemas/AWSSignatureHeader'
 
         responses:
           "200":
@@ -411,7 +464,7 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/AzureIdentityToken'
+                $ref: '#/components/schemas/AzureIdentityToken'
 
         responses:
           "200":
@@ -430,8 +483,9 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for applications running in
-          Google Cloud Platform."
+        summary: |
+          Gets a short-lived access token for applications running in
+          Google Cloud Platform.
         description: |
           Use the GCP Authenticator API to send an authentication
           request from a Google Cloud service to Conjur.
@@ -458,7 +512,7 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/GoogleIdentityToken'
+                $ref: '#/components/schemas/GoogleIdentityToken'
 
         responses:
           "200":
@@ -541,8 +595,9 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for users and hosts using their
-          LDAP identity to access the Conjur API."
+        summary: |
+          Gets a short-lived access token for users and hosts using their
+          LDAP identity to access the Conjur API.
         description: |
           The access token is used to communicate to the REST API that
           the bearer of the token has been authorized to access the API and perform
@@ -641,7 +696,7 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/OIDCToken'
+                $ref: '#/components/schemas/OIDCToken'
 
         responses:
           "200":
@@ -762,7 +817,7 @@ components:
 
             `update` privilege on the role whose API key is being rotated.
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
@@ -829,10 +884,7 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
 
         responses:
           "204":

@@ -1,15 +1,4 @@
 components:
-  schemas:
-    RolesGraph:
-      type: array
-      items:
-        type: object
-        properties:
-          parent:
-            $ref: 'openapi.yml#/components/schemas/ResourceID'
-          child:
-            $ref: 'openapi.yml#/components/schemas/ResourceID'
-
   responses:
     Roles:
       description: "The response body contains the requested role(s)/member(s)"
@@ -195,7 +184,7 @@ components:
           description: "The identifier of the Role to be added as a member."
           required: true
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
 
         responses:
@@ -262,7 +251,7 @@ components:
           description: "The identifier of the Role to be added as a member."
           required: true
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
 
         responses:

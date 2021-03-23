@@ -37,7 +37,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         self.assertEqual(status, 200)
         self.assertIsInstance(resp, list)
         for resource in resp:
-            self.assertIsInstance(resource, conjur.models.SingleResource)
+            self.assertIsInstance(resource, conjur.models.Resource)
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -192,7 +192,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(status, 200)
-        self.assertIsInstance(resp, conjur.models.SingleResource)
+        self.assertIsInstance(resp, conjur.models.Resource)
         for i in RESOURCE_MEMBERS:
             self.assertIsNotNone(getattr(resp, i))
 

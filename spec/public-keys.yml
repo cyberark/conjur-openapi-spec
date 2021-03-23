@@ -6,6 +6,10 @@ components:
         text/plain:
           schema:
             type: string
+          example: |
+            ssh-rsa AAAAB3Nzabc2 admin@alice.com
+
+            ssh-rsa AAAAB3Nza3nx alice@example.com
 
   paths:
     PublicKeys:

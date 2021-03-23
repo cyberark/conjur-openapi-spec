@@ -48,6 +48,10 @@ components:
       properties:
         jwt:
           type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
 
     CheckPrivilege:
       description: "Checks whether a role has a privilege on a resource."
@@ -65,6 +69,16 @@ components:
       properties:
         jwt:
           type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
+    Identifier:
+      description: "Long identifying string for a specific resource in Conjur"
+      type: string
+      example: "dev:user:admin"
+      pattern: '\w+:\w+:\w+'
 
     Kind:
       type: string
@@ -87,6 +101,10 @@ components:
       properties:
         id_token:
           type: string
+      example:
+        {
+          "id_token": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
 
     PermittedRoles:
       type: boolean
@@ -116,8 +134,9 @@ components:
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
       type: integer
+      example: 1
 
-    Role:
+    RoleType:
       type: string
       minLength: 1
       description: |
@@ -272,7 +291,7 @@ paths:
 # ========== SECRETS ==================
 
   '/secrets/{account}/{kind}/{identifier}':
-    $ref: 'secrets.yml#/components/paths/SingleSecret'
+    $ref: 'secrets.yml#/components/paths/Secret'
 
   '/secrets':
     $ref: 'secrets.yml#/components/paths/BatchSecrets'

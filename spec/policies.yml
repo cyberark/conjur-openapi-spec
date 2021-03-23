@@ -13,7 +13,7 @@ components:
             id: db-password
             owner: !host db-host
 
-    LoadPolicy:
+    LoadedPolicy:
       type: object
       properties:
         created_roles:
@@ -37,7 +37,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/LoadPolicy"
+            $ref: "#/components/schemas/LoadedPolicy"
 
   paths:
     Policies:

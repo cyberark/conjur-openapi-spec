@@ -27,9 +27,19 @@ components:
         - owner
         - permissions
         - annotations
+      example:
+        {
+          "created_at": "2017-08-07T22:30:00.145+00:00",
+          "id": "myorg:host:brand-new-host",
+          "owner": "myorg:host_factory:hf-db",
+          "permissions": [],
+          "annotations": [],
+          "api_key": "rq5bk73nwjnm52zdj87993ezmvx3m75k3whwxszekvmnwdqek0r"
+        }
 
     TokenValue:
       type: string
+      example: "2c0vfj61pmah3efbgpcz2x9vzcy1ycskfkyqy0kgk1fv014880f4"
 
     CreateHostTokenForm:
       type: object
@@ -61,6 +71,12 @@ components:
         - expiration
         - host_factory
 
+      example:
+        {
+          "expiration": "2017-08-04T22:27:20+00:00",
+          "host_factory": "myorg:hosty_factory:hf-db"
+        }
+
     CreateHostForm:
       type: object
       properties:
@@ -76,6 +92,10 @@ components:
 
       required:
         - id
+      example:
+        {
+          "id": "new-host"
+        }
 
     CreateHostToken:
       type: array
@@ -94,6 +114,25 @@ components:
           - expiration
           - cidr
           - token
+      example:
+        [
+          {
+            "expiration": "2017-08-04T22:27:20+00:00",
+            "cidr": [
+              "127.0.0.1/32",
+              "127.0.0.2/32"
+            ],
+            "token": "281s2ag1g8s7gd2ezf6td3d619b52t9gaak3w8rj0p38124n384sq7x"
+          },
+          {
+            "expiration": "2017-08-04T22:27:20+00:00",
+            "cidr": [
+              "127.0.0.1/32",
+              "127.0.0.2/32"
+            ],
+            "token": "2c0vfj61pmah3efbgpcz2x9vzcy1ycskfkyqy0kgk1fv014880f4"
+          }
+        ]
 
   responses:
     CreateHost:
@@ -102,12 +141,14 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/CreateHost"
+
     CreateHostToken:
       description: "Zero or more tokens were created and delivered in the response body"
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateHostToken'
+
   paths:
     CreateHostToken:
       post:

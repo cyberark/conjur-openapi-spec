@@ -4,6 +4,7 @@ components:
       type: string
       minLength: 1
       description: "Only returns results that contain this string value"
+      example: "password"
 
     PrivilegeLevel:
       type: string
@@ -39,8 +40,20 @@ components:
           type: string
         role:
           type: string
+      example:
+        {
+          "client_ip": "172.19.0.6",
+          "created_at": "2021-03-23T16:37:09.250+00:00",
+          "finished_at": "2021-03-23T16:37:09.435+00:00",
+          "id": "dev:policy:root",
+          "policy_sha256": "73d7b43ab17d69d163dedfaac88ec02a9c18ed8675abe4fe5643cd33470baf86",
+          "policy_text": "- !variable one/password\n- !variable testSecret\n",
+          "role": "dev:user:admin",
+          "version": 15.0
+        }
 
-    SingleResource:
+
+    Resource:
       type: object
       properties:
         created_at:
@@ -78,19 +91,41 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyVersion'
+      example:
+        {
+          "annotations": [],
+          "created_at": "2021-03-23T16:37:14.455+00:00",
+          "id": "dev:policy:conjur/authn-ldap/test",
+          "owner": "dev:user:admin",
+          "permissions": [],
+          "policy": "dev:policy:root",
+          "policy_versions": [],
+        } 
 
     Resources:
       type: array
       items:
-        $ref: '#/components/schemas/SingleResource'
+        $ref: '#/components/schemas/Resource'
+      example:
+        [
+          {
+            "annotations": [],
+            "created_at": "2021-03-23T16:37:14.455+00:00",
+            "id": "dev:policy:conjur/authn-ldap/test",
+            "owner": "dev:user:admin",
+            "permissions": [],
+            "policy": "dev:policy:root",
+            "policy_versions": [],
+          } 
+        ]
 
   responses:
-    SingleResource:
+    Resource:
       description: "The response body contains the list of role memberships or permitted roles"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SingleResource'
+            $ref: '#/components/schemas/Resource'
 
     Resources:
       description: "The response body contains a list of resources"
@@ -167,13 +202,13 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
@@ -251,13 +286,13 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
@@ -338,13 +373,13 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
@@ -421,11 +456,11 @@ components:
           example: myorg:host:host1
           description: "Role to check privilege on. Can only be used in combination with `check` parameter."
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            $ref: '#/components/responses/SingleResource'
+            $ref: '#/components/responses/Resource'
           "204":
             description: "Permissions check was successful"
           "400":
