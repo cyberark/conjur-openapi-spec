@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import unittest
 
 import openapi_client
+import openapi_client.apis
 
 from . import api_config
 
@@ -17,13 +18,13 @@ def authenticated_client_without_privilege():
     """
     alice_client = api_config.get_api_client(username='alice')
 
-    return openapi_client.ResourcesApi(alice_client)
+    return openapi_client.apis.ResourcesApi(alice_client)
 
 class TestResourcesApi(api_config.ConfiguredTest):
     """ResourcesApi unit test stubs"""
     def setUp(self):
-        self.api = openapi_client.api.resources_api.ResourcesApi(self.client)
-        self.bad_auth_api = openapi_client.api.resources_api.ResourcesApi(self.bad_auth_client)
+        self.api = openapi_client.apis.ResourcesApi(self.client)
+        self.bad_auth_api = openapi_client.apis.ResourcesApi(self.bad_auth_client)
 
     # Test cases for /resources endpoint
 
@@ -31,7 +32,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources endpoint
         200 - successful, resources returned as JSON
         """
-        response = self.api.get_resources_with_http_info()
+        response = self.api.get_resources(_return_http_data_only=False)
 
         self.assertEqual(response[1], 200)
         self.assertIsInstance(response[0], list)
@@ -72,7 +73,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account} endpoint
         200 - successful request, resources returned as JSON
         """
-        response = self.api.get_resources_on_account_with_http_info(self.account)
+        response = self.api.get_resources_on_account(self.account, _return_http_data_only=False)
 
         self.assertEqual(response[1], 200)
         self.assertIsInstance(response[0], list)
@@ -124,9 +125,10 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}
         200 - successful request, resources returned as JSON
         """
-        response = self.api.get_similar_resources_on_account_with_http_info(
+        response = self.api.get_similar_resources_on_account(
             self.account,
-            "variable"
+            "variable",
+            _return_http_data_only=False
         )
 
         self.assertEqual(response[1], 200)
@@ -183,10 +185,11 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}/{identifier}
         200 - successful, role memberships returned as JSON
         """
-        response = self.api.get_resource_with_http_info(
+        response = self.api.get_resource(
             self.account,
             'variable',
-            'testSecret'
+            'testSecret',
+            _return_http_data_only=False
         )
 
         self.assertEqual(response[1], 200)
@@ -198,12 +201,13 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 204 status response on /resources/{account}/{kind}/{identifier}
         204 - permission check successful
         """
-        response = self.api.get_resource_with_http_info(
+        response = self.api.get_resource(
             self.account,
             'variable',
             'testSecret',
             privilege="update",
-            check=True
+            check='',
+            _return_http_data_only=False,
         )
         self.assertEqual(response[1], 204)
         self.assertEqual(response[0], "")
@@ -261,7 +265,12 @@ class TestResourcesApi(api_config.ConfiguredTest):
         alice_resource_api = authenticated_client_without_privilege()
 
         with self.assertRaises(openapi_client.ApiException) as context:
-            alice_resource_api.get_resource_with_http_info(self.account, 'variable', 'testSecret')
+            alice_resource_api.get_resource(
+                self.account,
+                'variable',
+                'testSecret',
+                _return_http_data_only=False
+            )
 
         self.assertEqual(context.exception.status, 404)
 
@@ -280,13 +289,14 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for using both `permitted_roles` and `check` query parameters
         When both parameters are used, Conjur responds to the `check` call only
         """
-        response, status, _ = self.api.get_resource_with_http_info(
+        response, status, _ = self.api.get_resource(
             self.account,
             'variable',
             'testSecret',
             permitted_roles='',
             check='',
-            privilege='read'
+            privilege='read',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 204)

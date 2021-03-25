@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import unittest
 
 import openapi_client
+import openapi_client.apis
 
 from . import api_config
 
@@ -29,18 +30,23 @@ class TestPoliciesApi(api_config.ConfiguredTest):
     def setUpClass(cls):
         super().setUpClass()
         alice_client = api_config.get_api_client(username='alice')
-        cls.alice_api = openapi_client.api.policies_api.PoliciesApi(alice_client)
+        cls.alice_api = openapi_client.apis.PoliciesApi(alice_client)
 
     def setUp(self):
-        self.api = openapi_client.api.policies_api.PoliciesApi(self.client)
-        self.bad_auth_api = openapi_client.api.policies_api.PoliciesApi(self.bad_auth_client)
+        self.api = openapi_client.apis.PoliciesApi(self.client)
+        self.bad_auth_api = openapi_client.apis.PoliciesApi(self.bad_auth_client)
 
     def test_load_policy_201(self):
         """Test case for load_policy 201 response
 
         Loads or replaces a Conjur policy document.
         """
-        _, status, _ = self.api.load_policy_with_http_info(self.account, 'root', TEST_POLICY)
+        _, status, _ = self.api.load_policy(
+            self.account,
+            'root',
+            TEST_POLICY,
+            _return_http_data_only=False
+        )
 
         self.assertEqual(status, 201)
 
@@ -84,7 +90,12 @@ class TestPoliciesApi(api_config.ConfiguredTest):
 
         Modifies an existing Conjur policy.
         """
-        _, status, _ = self.api.modify_policy_with_http_info(self.account, 'root', MODIFY_POLICY)
+        _, status, _ = self.api.modify_policy(
+            self.account,
+            'root',
+            MODIFY_POLICY,
+            _return_http_data_only=False
+        )
 
         self.assertEqual(status, 201)
 
@@ -128,7 +139,12 @@ class TestPoliciesApi(api_config.ConfiguredTest):
 
         Adds data to the existing Conjur policy.
         """
-        _, status, _ = self.api.update_policy_with_http_info(self.account, 'root', UPDATE_POLICY)
+        _, status, _ = self.api.update_policy(
+            self.account,
+            'root',
+            UPDATE_POLICY,
+            _return_http_data_only=False
+        )
 
         self.assertEqual(status, 201)
 

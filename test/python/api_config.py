@@ -4,6 +4,7 @@ import os
 import unittest
 
 import openapi_client
+import openapi_client.apis
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
@@ -46,13 +47,14 @@ def get_api_config(username='admin'):
     config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
     config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
     config.username = username
+    config.discard_unknown_keys = True
     return config
 
 def get_api_key(username, role):
     """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
-    auth_api = openapi_client.api.AuthenticationApi(get_api_client())
+    auth_api = openapi_client.apis.AuthenticationApi(get_api_client())
     api_key = auth_api.rotate_api_key(
         os.environ[CONJUR_ACCOUNT],
         role=f'{role}:{username}'
@@ -75,26 +77,26 @@ def get_api_client(username='admin', role='user'):
     config = get_api_config()
 
     client = openapi_client.ApiClient(config)
-    auth = openapi_client.api.AuthenticationApi(client)
+    auth = openapi_client.apis.AuthenticationApi(client)
     api_token = auth.get_access_token(
             account,
             username,
             body=api_key,
             accept_encoding='base64'
         )
-    client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
+    client.configuration.api_key = {'conjurAuth': f'Token token="{api_token}"'}
     return client
 
 def setup_oidc_webservice():
     """Loads a policy for the oidc webservice into conjur"""
     client = get_api_client()
     account = os.environ[CONJUR_ACCOUNT]
-    policy_api = openapi_client.api.PoliciesApi(client)
+    policy_api = openapi_client.apis.PoliciesApi(client)
     with open(OIDC_POLICY_FILE, 'r') as policy_file:
         policy = policy_file.read()
     policy_api.modify_policy(account, 'root', policy)
 
-    secrets_api = openapi_client.api.SecretsApi(client)
+    secrets_api = openapi_client.apis.SecretsApi(client)
     secrets_api.create_variable(
         account,
         'variable',
@@ -131,5 +133,5 @@ class ConfiguredTest(unittest.TestCase):
         Compartmentalizes test cases by replacing any loaded policy
         """
         default_policy = get_default_policy()
-        policy_api = openapi_client.api.PoliciesApi(cls.client)
+        policy_api = openapi_client.apis.PoliciesApi(cls.client)
         policy_api.load_policy(cls.account, 'root', default_policy)

@@ -2,7 +2,6 @@ components:
   schemas:
     LoginName:
       type: string
-      minLength: 1
       example: "admin"
 
     Authenticators:
@@ -610,6 +609,14 @@ components:
           description: "Organization account name"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
+        - name: "Accept-Encoding"
+          in: "header"
+          required: false
+          description: "Tell the server to return a base64 encoded response"
+          schema:
+            type: string
+            enum:
+              - base64
         requestBody:
           description: "ID token"
           required: true
@@ -671,7 +678,6 @@ components:
               schema:
                 type: string
                 format: password
-                minLength: 1
 
         responses:
           "204":

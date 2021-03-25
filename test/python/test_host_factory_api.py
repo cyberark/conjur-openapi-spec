@@ -4,6 +4,7 @@ import unittest
 import datetime
 
 import openapi_client
+import openapi_client.apis
 
 from . import api_config
 
@@ -27,11 +28,11 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        policy_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
+        policy_api = openapi_client.apis.PoliciesApi(cls.client)
         policy_api.update_policy(cls.account, 'root', FACTORY_POLICY)
 
     def setUp(self):
-        self.api = openapi_client.api.host_factory_api.HostFactoryApi(self.client)
+        self.api = openapi_client.apis.HostFactoryApi(self.client)
 
     def get_host_token(self):
         """Gets a token used for creating new hosts"""
@@ -47,7 +48,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         token = self.get_host_token()['token']
 
         old_key = dict(self.client.configuration.api_key)
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'Token token="{token}"'}
         new_host = self.api.create_host(TEST_HOST)
         self.client.configuration.api_key = old_key
 
@@ -57,11 +58,12 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
             self.assertIn(member, new_host)
 
         # Make sure the new host can authenticate
-        authn = openapi_client.api.AuthenticationApi(self.client)
+        authn = openapi_client.apis.AuthenticationApi(self.client)
         authn.get_access_token(
             self.account,
             f'host/{TEST_HOST}',
-            body=new_host['api_key']
+            body=new_host['api_key'],
+            accept_encoding='base64',
         )
 
     def test_create_host_token(self):
@@ -86,7 +88,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
 
         self.api.revoke_host_token(token)
 
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'Token token="{token}"'}
 
         with self.assertRaises(openapi_client.exceptions.ApiException):
             self.api.create_host(TEST_HOST)

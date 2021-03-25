@@ -4,6 +4,7 @@ import unittest
 import base64
 
 import openapi_client
+import openapi_client.apis
 
 from . import api_config
 
@@ -19,13 +20,13 @@ GRANT_POLICY = f"""
 class TestSecretsApi(api_config.ConfiguredTest):
     """SecretsApi unit test stubs"""
     def setUp(self):
-        self.api = openapi_client.api.secrets_api.SecretsApi(self.client)
-        self.bad_auth_api = openapi_client.api.secrets_api.SecretsApi(self.bad_auth_client)
+        self.api = openapi_client.apis.SecretsApi(self.client)
+        self.bad_auth_api = openapi_client.apis.SecretsApi(self.bad_auth_client)
 
     def grant_insufficient_permissions(self):
         """Loads a policy with incorrect permissions on a secret so we can retrieve
         a 403 error when we try to manipulate it"""
-        policy_api = openapi_client.api.PoliciesApi(self.client)
+        policy_api = openapi_client.apis.PoliciesApi(self.client)
 
         policy_api.modify_policy(self.account, 'root', GRANT_POLICY)
 
@@ -36,11 +37,12 @@ class TestSecretsApi(api_config.ConfiguredTest):
         """
         secret_val = "this is a secret"
 
-        resp = self.api.create_variable_with_http_info(
+        resp = self.api.create_variable(
             self.account,
             "variable",
             TEST_VARIABLES[0],
-            body=secret_val
+            body=secret_val,
+            _return_http_data_only=False,
         )
         self.assertEqual(resp[1], 201)
 
@@ -59,7 +61,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
     def test_create_variable_403(self):
         """Test case for create_variable response 403"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = openapi_client.apis.SecretsApi(alice_client)
         secret_val = "this is a secret"
         self.grant_insufficient_permissions()
 
@@ -77,11 +79,12 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
     def test_create_variable_expirations_201(self):
         """Test case for create_variable with expirations query parameter 201 response code"""
-        _, status, _ = self.api.create_variable_with_http_info(
+        _, status, _ = self.api.create_variable(
             self.account,
             "variable",
             TEST_VARIABLES[0],
             expirations="",
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 201)
@@ -101,7 +104,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
     def test_create_variable_expirations_403(self):
         """Test case for create_variable with expirations query parameter 403 response code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = openapi_client.apis.SecretsApi(alice_client)
         self.grant_insufficient_permissions()
 
         with self.assertRaises(openapi_client.ApiException) as context:
@@ -134,11 +137,12 @@ class TestSecretsApi(api_config.ConfiguredTest):
         secret_val = "secret data"
         self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        response = self.api.get_variable_with_http_info(
+        response = self.api.get_variable(
             self.account,
             "variable",
             TEST_VARIABLES[0],
-            version='2'
+            version='2',
+            _return_http_data_only=False
         )
         self.assertEqual(secret_val, response[0])
         self.assertEqual(response[1], 200)
@@ -151,7 +155,12 @@ class TestSecretsApi(api_config.ConfiguredTest):
         secret_val = "secret data"
         self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        response = self.api.get_variable_with_http_info(self.account, "variable", TEST_VARIABLES[0])
+        response = self.api.get_variable(
+            self.account,
+            "variable",
+            TEST_VARIABLES[0],
+            _return_http_data_only=False
+        )
         self.assertEqual(secret_val, response[0])
         self.assertEqual(response[1], 200)
 
@@ -181,7 +190,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
     def test_get_variable_403(self):
         """Test case for get_variable 403 response"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = openapi_client.apis.SecretsApi(alice_client)
         self.grant_insufficient_permissions()
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
@@ -218,8 +227,9 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
-        response, status, _ = self.api.get_variables_with_http_info(
-            ",".join(secret_list)
+        response, status, _ = self.api.get_variables(
+            ",".join(secret_list),
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 200)
@@ -240,7 +250,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
         """Test case for get_variables 403 response"""
         self.grant_insufficient_permissions()
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = openapi_client.apis.SecretsApi(alice_client)
         secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
@@ -273,9 +283,10 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
-        response, status, headers = self.api.get_variables_with_http_info(
+        response, status, headers = self.api.get_variables(
             ",".join(secret_list),
-            accept_encoding="base64"
+            accept_encoding="base64",
+            _return_http_data_only=False
         )
 
         for secret, value in zip(secret_list, secret_values):

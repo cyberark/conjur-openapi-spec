@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import unittest
 
 import openapi_client
+import openapi_client.apis
 
 from . import api_config
 
@@ -39,12 +40,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         cls.ROOT_ID = f'{cls.account}:policy:root'
 
     def setUp(self):
-        self.api = openapi_client.RolesApi(self.client)
-        self.bad_auth_api = openapi_client.RolesApi(self.bad_auth_client)
+        self.api = openapi_client.apis.RolesApi(self.client)
+        self.bad_auth_api = openapi_client.apis.RolesApi(self.bad_auth_client)
 
         # set a new root policy including a new group and users Alice and Bob
         # these will be used to test member addition/deletion
-        policy_api = openapi_client.PoliciesApi(self.client)
+        policy_api = openapi_client.apis.PoliciesApi(self.client)
         policy_api.load_policy(self.account, 'root', ROLES_POLICY)
 
     def tearDown(self):
@@ -54,12 +55,13 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Adds a given user to the group defined in ROLES_POLICY
         """
         role_id = f'{self.account}:user:{identifier}'
-        response = self.api.add_member_with_http_info(
+        response = self.api.add_member(
             self.account,
             'group',
             'userGroup',
             members='',
-            member=role_id
+            member=role_id,
+            _return_http_data_only=False
         )
         return response
 
@@ -69,7 +71,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 200 status response when getting role data
         Gets information on the specified role
         """
-        role_details, status, _ = self.api.get_role_with_http_info(self.account, 'user', 'admin')
+        role_details, status, _ = self.api.get_role(
+            self.account,
+            'user',
+            'admin',
+            _return_http_data_only=False
+        )
 
         self.assertEqual(status, 200)
         self.assertIsInstance(role_details, dict)
@@ -149,11 +156,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         )
 
         # testLayer will be listed in all memberships of bob
-        bob_membership_data, status, _ = self.api.get_role_with_http_info(
+        bob_membership_data, status, _ = self.api.get_role(
             self.account,
             'user',
             'bob',
-            all=''
+            all='',
+            _return_http_data_only=False
         )
 
         target_membership_data = [
@@ -239,11 +247,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         )
 
         # testLayer will not be listed in direct memberships of bob
-        bob_membership_data, status, _ = self.api.get_role_with_http_info(
+        bob_membership_data, status, _ = self.api.get_role(
             self.account,
             'user',
             'bob',
-            memberships=''
+            memberships='',
+            _return_http_data_only=False
         )
 
         memberships = [f'{self.account}:group:userGroup', f'{self.account}:group:anotherGroup']
@@ -317,11 +326,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 200 status response for GET requests using 'members' query parameter
         Queries group:userGroup role for its members, which should only be dev:user:admin
         """
-        group_member_data, status, _ = self.api.get_role_with_http_info(
+        group_member_data, status, _ = self.api.get_role(
             self.account,
             'group',
             'userGroup',
-            members=''
+            members='',
+            _return_http_data_only=False
         )
 
         target_response = [
@@ -560,7 +570,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """
         # establish a new api client as user Bob
         bob_client = api_config.get_api_client(username='bob')
-        bob_roles_api = openapi_client.RolesApi(bob_client)
+        bob_roles_api = openapi_client.apis.RolesApi(bob_client)
 
         # attempt to add Alice as a member of userGroup as Bob
         with self.assertRaises(openapi_client.ApiException) as context:
@@ -617,12 +627,13 @@ class TestRolesApi(api_config.ConfiguredTest):
         self.assertEqual(group_members[1]['member'], self.BOB_ID)
 
         # remove Bob as member of userGroup
-        _, delete_status, _ = self.api.delete_member_with_http_info(
+        _, delete_status, _ = self.api.delete_member(
             self.account,
             'group',
             'userGroup',
             members='',
-            member=self.BOB_ID
+            member=self.BOB_ID,
+            _return_http_data_only=False
         )
         self.assertEqual(delete_status, 204)
 
@@ -675,7 +686,7 @@ class TestRolesApi(api_config.ConfiguredTest):
 
         # establish a new api client as user Bob
         bob_client = api_config.get_api_client(username='bob')
-        bob_roles_api = openapi_client.RolesApi(bob_client)
+        bob_roles_api = openapi_client.apis.RolesApi(bob_client)
 
         # attempt to delete Alice as member of userGroup as Bob
         with self.assertRaises(openapi_client.ApiException) as context:
@@ -721,11 +732,12 @@ class TestRolesApi(api_config.ConfiguredTest):
 
     def test_get_role_graph_200(self):
         """Test case for get_role 200 response with graph query param"""
-        details, status, _ = self.api.get_role_with_http_info(
+        details, status, _ = self.api.get_role(
             self.account,
             'user',
             'admin',
-            graph=''
+            graph='',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 200)
@@ -761,14 +773,15 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test Conjur's response to being given all optional parameters in a single request
         Conjur responds with `graph` results ONLY
         """
-        details, status, _ = self.api.get_role_with_http_info(
+        details, status, _ = self.api.get_role(
             self.account,
             'user',
             'admin',
             all='',
             memberships='',
             members='',
-            graph=''
+            graph='',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 200)
@@ -781,13 +794,14 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test Conjur's response to being given all optional parameters besides `graph`
         Conjur responses with `all` results ONLY
         """
-        details, status, _ = self.api.get_role_with_http_info(
+        details, status, _ = self.api.get_role(
             self.account,
             'user',
             'admin',
             all='',
             memberships='',
-            members=''
+            members='',
+            _return_http_data_only=False
         )
 
         target_details = [
@@ -814,11 +828,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         """
         self.add_user_to_group('bob')
 
-        details, status, _ = self.api.get_role_with_http_info(
+        details, status, _ = self.api.get_role(
             self.account,
             'user',
             'bob',
             memberships='',
+            _return_http_data_only=False,
             members=''
         )
 

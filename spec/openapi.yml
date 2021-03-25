@@ -35,13 +35,11 @@ components:
     AccountName:
       description: "Conjur account name"
       type: string
-      minLength: 1
       example: "default"
 
     ApiKey:
       description: "Example of a Conjur API key"
       type: string
-      minLength: 55
       example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
 
     AWSSignatureHeader:
@@ -74,7 +72,6 @@ components:
 
     Kind:
       type: string
-      minLength: 1
       example: "variable"
 
     Limit:
@@ -100,13 +97,11 @@ components:
 
     PrivilegeLevel:
       type: string
-      minLength: 1
       example: "execute"
       description: "Denotes a type of permission allowed on a resource"
 
     ResourceID:
       type: string
-      minLength: 1
       example: "prod%2Faws%2Fdb-password"
       description: "Resource identifier. Requires to be encoded when in path.
 
@@ -128,7 +123,6 @@ components:
 
     Role:
       type: string
-      minLength: 1
       description: "##### Kinds of roles:
 
         - User: one unique wonderful human
@@ -168,6 +162,9 @@ components:
         text/plain:
           schema:
             type: string
+        application/json:
+          schema:
+            type: object
     AddMemberSuccess:
       description: "Member was added to role successfully"
     ApiKey:

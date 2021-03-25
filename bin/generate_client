@@ -12,7 +12,7 @@ print_help(){
     echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
 }
 
-generator_version="v4.3.1"
+generator_version="v5.1.0"
 GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
 client_lang="python"

@@ -12,12 +12,12 @@ components:
       description: "Denotes a type of permission allowed on a resource"
 
     PermittedRoles:
-      type: boolean
-      example: true
+      type: string
+      example: ''
 
     CheckPrivilege:
-      type: boolean
-      example: true
+      type: string
+      example: ''
       description: "Checks whether a role has a privilege on a resource."
 
 
@@ -96,7 +96,9 @@ components:
             content:
               application/json:
                 schema:
-                  type: object
+                  type: array
+                  items:
+                    type: object
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
@@ -177,7 +179,9 @@ components:
             content:
               application/json:
                 schema:
-                  type: object
+                  type: array
+                  items:
+                    type: object
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -261,7 +265,9 @@ components:
             content:
               application/json:
                 schema:
-                  type: object
+                  type: array
+                  items:
+                    type: object
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":

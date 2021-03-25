@@ -2,7 +2,6 @@ components:
   schemas:
     Policy:
       type: string
-      minLength: 1
       example: |
         - !policy
           id: database

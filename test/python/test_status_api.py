@@ -4,6 +4,8 @@ import unittest
 from unittest.mock import patch
 
 import openapi_client
+import openapi_client.apis
+import openapi_client.models
 
 from . import api_config
 
@@ -26,8 +28,8 @@ class TestStatusApi(api_config.ConfiguredTest):
     @classmethod
     def setup_webservice(cls):
         """loads the webservice policy into conjur and gets it setup"""
-        policies_api = openapi_client.api.policies_api.PoliciesApi(cls.client)
-        secrets_api = openapi_client.api.secrets_api.SecretsApi(cls.client)
+        policies_api = openapi_client.apis.PoliciesApi(cls.client)
+        secrets_api = openapi_client.apis.SecretsApi(cls.client)
         policies_api.modify_policy(cls.account, 'root', api_config.get_webservice_policy())
         secrets_api.create_variable(
             cls.account,
@@ -48,14 +50,14 @@ class TestStatusApi(api_config.ConfiguredTest):
         cls.setup_webservice()
 
     def setUp(self):
-        self.api = openapi_client.api.status_api.StatusApi(self.client)
-        self.bad_auth_api = openapi_client.api.status_api.StatusApi(self.bad_auth_client)
+        self.api = openapi_client.apis.StatusApi(self.client)
+        self.bad_auth_api = openapi_client.apis.StatusApi(self.bad_auth_client)
 
     def test_who_am_i_200(self):
         """Test case for who_am_i 200 response"""
         result = self.api.who_am_i()
 
-        self.assertIsInstance(result, openapi_client.models.who_am_i.WhoAmI)
+        self.assertIsInstance(result, openapi_client.models.WhoAmI)
 
         for i in WHOAMI_FIELDS:
             value = getattr(result, i)
@@ -72,10 +74,11 @@ class TestStatusApi(api_config.ConfiguredTest):
     def test_authenticator_service_status_200(self):
         """Test case for authenticator_service_status 200 return code"""
         api_config.setup_oidc_webservice()
-        resp, status, _ = self.api.authenticator_service_status_with_http_info(
+        resp, status, _ = self.api.authenticator_service_status(
             'oidc',
             'test',
-            self.account
+            self.account,
+            _return_http_data_only=False
         )
         self.assertEqual(resp.status, 'ok')
         self.assertEqual(status, 200)
@@ -93,19 +96,21 @@ class TestStatusApi(api_config.ConfiguredTest):
             body=None,
             files={},
             post_params=[],
-            response_type='AuthenticatorStatus',
+            response_type=(openapi_client.models.AuthenticatorStatus,),
             auth_settings=['conjurAuth'],
-            async_req=None,
+            async_req=False,
             _return_http_data_only=True,
             _preload_content=True,
             _request_timeout=None,
-            collection_formats={}
+            collection_formats={},
+            _host='https://conjur-https',
+            _check_type=True
         )
 
     def test_authenticator_service_status_403(self):
         """Test case for authenticator_service_status 403 return code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.status_api.StatusApi(alice_client)
+        alice_api = openapi_client.apis.StatusApi(alice_client)
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
             alice_api.authenticator_service_status('oidc', 'okta', self.account)
@@ -137,42 +142,37 @@ class TestStatusApi(api_config.ConfiguredTest):
         """Test case for authenticator_status 200 return code"""
         with patch.object(openapi_client.api_client.ApiClient, 'call_api', return_value=None) \
                 as mock:
-            self.api.authenticator_status('gcp', self.account)
+            self.api.authenticator_status('oidc', self.account)
 
         mock.assert_called_once_with(
             '/authn-{authenticator}/{account}/status',
             'GET',
-            {'account': self.account, 'authenticator': 'gcp'},
+            {'account': self.account, 'authenticator': 'oidc'},
             [],
             {'Accept': 'application/json'},
             body=None,
             files={},
             post_params=[],
-            response_type='AuthenticatorStatus',
+            response_type=(openapi_client.models.AuthenticatorStatus,),
             auth_settings=['conjurAuth'],
-            async_req=None,
+            async_req=False,
             _return_http_data_only=True,
             _preload_content=True,
             _request_timeout=None,
-            collection_formats={}
+            collection_formats={},
+            _host='https://conjur-https',
+            _check_type=True
         )
 
     def test_authenticator_status_403(self):
         """Test case for authenticator_status 403 return code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.status_api.StatusApi(alice_client)
+        alice_api = openapi_client.apis.StatusApi(alice_client)
 
         with self.assertRaises(openapi_client.exceptions.ApiException) as context:
             alice_api.authenticator_status('azure', self.account)
 
         self.assertEqual(context.exception.status, 403)
-
-    def test_authenticator_status_404(self):
-        """Test case for authenticator_status 404 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_status('nonexist', self.account)
-
-        self.assertEqual(context.exception.status, 404)
 
     def test_authenticator_status_500(self):
         """Test case for authenticator_status 500 return code"""
@@ -181,21 +181,23 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 500)
 
-    def test_authenticator_status_501(self):
-        """Test case for authenticator_status 501 return code"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.authenticator_status('ldap', self.account)
+    def test_authenticator_status_bad_authenticator(self):
+        """Test case for authenticator_status with bad authenticator parameter"""
+        with self.assertRaises(openapi_client.exceptions.ApiValueError) as context:
+            self.api.authenticator_status('iam', self.account)
 
-        self.assertEqual(context.exception.status, 501)
+        self.assertIn("Invalid value for `authenticator`", str(context.exception))
 
     def test_authenticators_index_200(self):
         """Test case for authenticators 200 response"""
-        authenticators, status, _ = self.api.authenticators_index_with_http_info()
+        authenticators, status, _ = self.api.authenticators_index(
+            _return_http_data_only=False
+        )
 
         self.assertEqual(status, 200)
         self.assertIsInstance(
             authenticators,
-            openapi_client.models.authenticators_response.AuthenticatorsResponse
+            openapi_client.models.AuthenticatorsResponse
         )
 
         for i in AUTHENTICATOR_FIELDS:

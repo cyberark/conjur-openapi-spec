@@ -4,6 +4,8 @@ import pathlib
 import unittest
 
 import openapi_client
+import openapi_client.apis
+import openapi_client.models
 
 from . import api_config
 
@@ -41,7 +43,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         # a group with sign privilege on the service,
         # and host clients with varying privilege
         ca_policy = read_file(CA_POLICY)
-        policy_api = openapi_client.PoliciesApi(self.client)
+        policy_api = openapi_client.apis.PoliciesApi(self.client)
         policy_api.load_policy(
             self.account,
             'root',
@@ -53,14 +55,14 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/test-client',
             'host'
         )
-        self.api = openapi_client.CertificateAuthorityApi(client)
-        self.bad_auth_api = openapi_client.CertificateAuthorityApi(self.bad_auth_client)
+        self.api = openapi_client.apis.CertificateAuthorityApi(client)
+        self.bad_auth_api = openapi_client.apis.CertificateAuthorityApi(self.bad_auth_client)
 
         # assign intermediate CA private key and CA chain to Conjur variables
         ca_chain = read_file(CERT_CHAIN_PATH)
         private_key = read_file(UNENCRYPTED_KEY_PATH)
 
-        self.secrets_api = openapi_client.SecretsApi(self.client)
+        self.secrets_api = openapi_client.apis.SecretsApi(self.client)
         self.update_ca_chain(ca_chain)
         self.update_ca_private_key(private_key)
 
@@ -101,15 +103,16 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         The default response to a successful request is a JSON response body
         with a `certificate` field including the signed certificate
         """
-        response, status, _ = self.api.sign_with_http_info(
+        response, status, _ = self.api.sign(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
-            'P1D'
+            'P1D',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 201)
-        self.assertIsInstance(response, openapi_client.models.certificate_json.CertificateJson)
+        self.assertIsInstance(response, openapi_client.models.CertificateJson)
 
         self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
@@ -122,12 +125,13 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         This test case fails due to an issue in the OpenAPI Generator
         with passing an `Accept` header. The generator overwrites any assignment to `Accept`.
         """
-        response, status, _ = self.api.sign_with_http_info(
+        response, status, _ = self.api.sign(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
             'P1D',
-            accept='application/x-pem-file'
+            accept='application/x-pem-file',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 201)
@@ -143,15 +147,16 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         self.update_ca_private_key(encrypted_key)
         self.update_ca_key_password(key_password)
 
-        response, status, _ = self.api.sign_with_http_info(
+        response, status, _ = self.api.sign(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
-            'P1D'
+            'P1D',
+            _return_http_data_only=False
         )
 
         self.assertEqual(status, 201)
-        self.assertIsInstance(response, openapi_client.models.certificate_json.CertificateJson)
+        self.assertIsInstance(response, openapi_client.models.CertificateJson)
 
         self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
@@ -209,7 +214,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         """Test case A for 403 response when requesting a signed certificate
         Conjur responds with 403 status when the authenticated role is not a Host
         """
-        user_api = openapi_client.CertificateAuthorityApi(self.client)
+        user_api = openapi_client.apis.CertificateAuthorityApi(self.client)
 
         with self.assertRaises(openapi_client.ApiException) as context:
             user_api.sign(
@@ -230,7 +235,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/no-sign-client',
             'host'
         )
-        no_sign_api = openapi_client.CertificateAuthorityApi(no_sign_client)
+        no_sign_api = openapi_client.apis.CertificateAuthorityApi(no_sign_client)
 
         with self.assertRaises(openapi_client.ApiException) as context:
             no_sign_api.sign(
@@ -252,7 +257,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/cn-test-client',
             'host'
         )
-        cn_test_api = openapi_client.CertificateAuthorityApi(cn_test_client)
+        cn_test_api = openapi_client.apis.CertificateAuthorityApi(cn_test_client)
 
         with self.assertRaises(openapi_client.ApiException) as context:
             cn_test_api.sign(

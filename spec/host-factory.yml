@@ -10,7 +10,8 @@ components:
         expiration:
           description: "`ISO 8601 datetime` denoting a requested expiration time."
           type: string
-          example: "2017-08-04T22:27:20+00:00"
+          format: date
+          example: "2017-08-04"
 
         host_factory:
           description: "Fully qualified host factory ID"
@@ -81,7 +82,9 @@ components:
             content:
               application/json:
                 schema:
-                  type: object
+                  type: array
+                  items:
+                    type: object
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
