@@ -55,3 +55,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#52](https://github.com/cyberark/conjur-openapi-spec/issues/52)
 - Workaround for request body issue on createSecret operation is now removed and tests have been updated.
   [cyberark/conjur-openapi-spec#105](https://github.com/cyberark/conjur-openapi-spec/issues/105)
+
+### Changed
+- Operation names have been updated to match better with existing integrations and documentation.
+  [cyberark/conjur-openapi-spec#36](https://github.com/cyberark/conjur-openapi-spec/issues/36)
+  [cyberark/conjur-openapi-spec#129](https://github.com/cyberark/conjur-openapi-spec/issues/129)
