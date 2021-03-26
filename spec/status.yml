@@ -96,11 +96,24 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorServiceStatus"
+        operationId: "getServiceAuthenticatorStatus"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the
-                      users in those groups can check the status of the authenticator."
+                      users in those groups can check the status of the authenticator.
+
+                      Supported Authenticators:
+                        - Azure
+                        - OIDC
+
+                      Not Supported:
+                        - AWS IAM
+                        - Kubernetes
+                        - LDAP
+
+                      See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
+                      for details on setting up the authenticator status webservice.
+                      "
         parameters:
           - name: authenticator
             in: path
@@ -110,13 +123,7 @@ components:
             description: "The type of authenticator"
             example: "authn-oidc"
             
-          - name: service_id
-            in: path
-            schema:
-              type: string
-            required: true
-            description: "The ID of the authenticator provider"
-            example: "okta"
+          - $ref: 'openapi.yml#/components/parameters/ServiceID'
             
           - name: account
             in: path
@@ -135,6 +142,8 @@ components:
                   $ref: '#/components/schemas/AuthenticatorStatus'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
@@ -159,23 +168,18 @@ components:
       get:
         tags:
         - 'status'
-        operationId: "authenticatorStatus"
+        operationId: "getGCPAuthenticatorStatus"
         summary: "Details whether an authentication service has been configured properly"
         description: "Once the status webservice has been properly configured and the relevant user
                       groups have been given permissions to access the status webservice, the
-                      users in those groups can check the status of the authenticator."
+                      users in those groups can check the status of the authenticator.
+
+                      This operation only supports the GCP authenticator
+
+                      See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
+                      for details on setting up the authenticator status webservice.
+                      "
         parameters:
-          - name: authenticator
-            in: path
-            schema:
-              type: string
-              enum:
-              - oidc
-              - azure
-            required: true
-            description: "The type of authenticator"
-            example: "oidc"
-            
           - name: account
             in: path
             schema:
@@ -225,7 +229,7 @@ components:
           configured: The authenticator has a webservice in the DB that was loaded by policy
           enabled: The authenticator is enabled (in the DB or in the ENV) and is ready for authentication
           "
-        operationId: "authenticatorsIndex"
+        operationId: "getAuthenticators"
         responses:
           "200":
             description: "Details about authenticators for this Conjur server"

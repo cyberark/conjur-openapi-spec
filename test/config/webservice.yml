@@ -37,7 +37,7 @@
     resource: !webservice
 
 - !policy
-  id: conjur/authn-azure
+  id: conjur/authn-gcp
   body:
   - !webservice
     id: status
@@ -79,5 +79,5 @@
   member: !user admin
 
 - !grant
-  role: !group conjur/authn-azure/users
+  role: !group conjur/authn-gcp/users
   member: !user admin

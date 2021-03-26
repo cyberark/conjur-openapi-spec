@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import unittest
 import base64
 
-import openapi_client
+import conjur
 
 from . import api_config
 
@@ -19,24 +19,24 @@ GRANT_POLICY = f"""
 class TestSecretsApi(api_config.ConfiguredTest):
     """SecretsApi unit test stubs"""
     def setUp(self):
-        self.api = openapi_client.api.secrets_api.SecretsApi(self.client)
-        self.bad_auth_api = openapi_client.api.secrets_api.SecretsApi(self.bad_auth_client)
+        self.api = conjur.api.secrets_api.SecretsApi(self.client)
+        self.bad_auth_api = conjur.api.secrets_api.SecretsApi(self.bad_auth_client)
 
     def grant_insufficient_permissions(self):
         """Loads a policy with incorrect permissions on a secret so we can retrieve
         a 403 error when we try to manipulate it"""
-        policy_api = openapi_client.api.PoliciesApi(self.client)
+        policy_api = conjur.api.PoliciesApi(self.client)
 
-        policy_api.modify_policy(self.account, 'root', GRANT_POLICY)
+        policy_api.update_policy(self.account, 'root', GRANT_POLICY)
 
-    def test_create_variable_201(self):
-        """Test case for create_variable response 201
+    def test_create_secret_201(self):
+        """Test case for create_secret response 201
 
         Creates a secret value within the specified variable.
         """
         secret_val = "this is a secret"
 
-        resp = self.api.create_variable_with_http_info(
+        resp = self.api.create_secret_with_http_info(
             self.account,
             "variable",
             TEST_VARIABLES[0],
@@ -44,10 +44,10 @@ class TestSecretsApi(api_config.ConfiguredTest):
         )
         self.assertEqual(resp[1], 201)
 
-    def test_create_variable_401(self):
-        """Test case for create_variable response 401"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.create_variable(
+    def test_create_secret_401(self):
+        """Test case for create_secret response 401"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.bad_auth_api.create_secret(
                 self.account,
                 "variable",
                 TEST_VARIABLES[0],
@@ -56,28 +56,28 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_create_variable_403(self):
-        """Test case for create_variable response 403"""
+    def test_create_secret_403(self):
+        """Test case for create_secret response 403"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = conjur.api.SecretsApi(alice_client)
         secret_val = "this is a secret"
         self.grant_insufficient_permissions()
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            alice_api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            alice_api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_create_variable_422(self):
-        """Test case for create_variable response 422"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body="")
+    def test_create_secret_422(self):
+        """Test case for create_secret response 422"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body="")
 
         self.assertEqual(context.exception.status, 422)
 
-    def test_create_variable_expirations_201(self):
-        """Test case for create_variable with expirations query parameter 201 response code"""
-        _, status, _ = self.api.create_variable_with_http_info(
+    def test_create_secret_expirations_201(self):
+        """Test case for create_secret with expirations query parameter 201 response code"""
+        _, status, _ = self.api.create_secret_with_http_info(
             self.account,
             "variable",
             TEST_VARIABLES[0],
@@ -86,10 +86,10 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 201)
 
-    def test_create_variable_expirations_401(self):
-        """Test case for create_variable with expirations query parameter 401 response code"""
-        with self.assertRaises(openapi_client.ApiException) as context:
-            self.bad_auth_api.create_variable(
+    def test_create_secret_expirations_401(self):
+        """Test case for create_secret with expirations query parameter 401 response code"""
+        with self.assertRaises(conjur.ApiException) as context:
+            self.bad_auth_api.create_secret(
                 self.account,
                 "variable",
                 TEST_VARIABLES[0],
@@ -98,14 +98,14 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_create_variable_expirations_403(self):
-        """Test case for create_variable with expirations query parameter 403 response code"""
+    def test_create_secret_expirations_403(self):
+        """Test case for create_secret with expirations query parameter 403 response code"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = conjur.api.SecretsApi(alice_client)
         self.grant_insufficient_permissions()
 
-        with self.assertRaises(openapi_client.ApiException) as context:
-            alice_api.create_variable(
+        with self.assertRaises(conjur.ApiException) as context:
+            alice_api.create_secret(
                 self.account,
                 "variable",
                 TEST_VARIABLES[0],
@@ -114,10 +114,10 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_create_variable_expirations_404(self):
-        """Test case for create_variable with expirations query parameter 404 response code"""
-        with self.assertRaises(openapi_client.ApiException) as context:
-            self.api.create_variable(
+    def test_create_secret_expirations_404(self):
+        """Test case for create_secret with expirations query parameter 404 response code"""
+        with self.assertRaises(conjur.ApiException) as context:
+            self.api.create_secret(
                 self.account,
                 "variable",
                 'nonexist',
@@ -126,15 +126,15 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_get_variable_version_200(self):
-        """Test case for get_variable 200 response with version parameter
+    def test_get_secret_version_200(self):
+        """Test case for get_secret 200 response with version parameter
 
         Fetches the value of a secret from the specified Variable.
         """
         secret_val = "secret data"
-        self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        response = self.api.get_variable_with_http_info(
+        response = self.api.get_secret_with_http_info(
             self.account,
             "variable",
             TEST_VARIABLES[0],
@@ -143,73 +143,73 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.assertEqual(secret_val, response[0])
         self.assertEqual(response[1], 200)
 
-    def test_get_variable_200(self):
-        """Test case for get_variable 200 response
+    def test_get_secret_200(self):
+        """Test case for get_secret 200 response
 
         Fetches the value of a secret from the specified Variable.
         """
         secret_val = "secret data"
-        self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        response = self.api.get_variable_with_http_info(self.account, "variable", TEST_VARIABLES[0])
+        response = self.api.get_secret_with_http_info(self.account, "variable", TEST_VARIABLES[0])
         self.assertEqual(secret_val, response[0])
         self.assertEqual(response[1], 200)
 
-    def test_get_variable_401(self):
-        """Test case for get_variable 401 response with version parameter
+    def test_get_secret_401(self):
+        """Test case for get_secret 401 response with version parameter
 
         Fetches the value of a secret from the specified Variable.
         """
         secret_val = "secret data"
-        self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.get_variable(self.account, "variable", TEST_VARIABLES[0], version=1)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.bad_auth_api.get_secret(self.account, "variable", TEST_VARIABLES[0], version=1)
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_get_variable_version_401(self):
-        """Test case for get_variable 401 response"""
+    def test_get_secret_version_401(self):
+        """Test case for get_secret 401 response"""
         secret_val = "secret data"
-        self.api.create_variable(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.get_variable(self.account, "variable", TEST_VARIABLES[0])
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.bad_auth_api.get_secret(self.account, "variable", TEST_VARIABLES[0])
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_get_variable_403(self):
-        """Test case for get_variable 403 response"""
+    def test_get_secret_403(self):
+        """Test case for get_secret 403 response"""
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = conjur.api.SecretsApi(alice_client)
         self.grant_insufficient_permissions()
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            alice_api.get_variable(self.account, "variable", TEST_VARIABLES[0])
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            alice_api.get_secret(self.account, "variable", TEST_VARIABLES[0])
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_get_variable_404(self):
-        """Test case for get_variable 404 response"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_variable(self.account, "variable", "badname")
+    def test_get_secret_404(self):
+        """Test case for get_secret 404 response"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_secret(self.account, "variable", "badname")
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_get_variable_422(self):
-        """Test case for get_variable 422 response"""
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_variable(self.account, "variable", TEST_VARIABLES[0], version='')
+    def test_get_secret_422(self):
+        """Test case for get_secret 422 response"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_secret(self.account, "variable", TEST_VARIABLES[0], version='')
 
         self.assertEqual(context.exception.status, 422)
 
     def set_variables(self, variables, values):
         """Sets the values of an array of variables"""
         for secret, value in zip(variables, values):
-            self.api.create_variable(self.account, "variable", secret, body=value)
+            self.api.create_secret(self.account, "variable", secret, body=value)
 
-    def test_get_variables_200(self):
-        """Test case for get_variables 200 response
+    def test_get_secrets_200(self):
+        """Test case for get_secrets 200 response
 
         Fetch multiple secrets
         """
@@ -218,7 +218,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
-        response, status, _ = self.api.get_variables_with_http_info(
+        response, status, _ = self.api.get_secrets_with_http_info(
             ",".join(secret_list)
         )
 
@@ -227,53 +227,53 @@ class TestSecretsApi(api_config.ConfiguredTest):
             self.assertIn(secret, response)
             self.assertEqual(response[secret], value)
 
-    def test_get_variables_401(self):
-        """Test case for get_variables 401 response"""
+    def test_get_secrets_401(self):
+        """Test case for get_secrets 401 response"""
         secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.bad_auth_api.get_variables(secret_list)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.bad_auth_api.get_secrets(secret_list)
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_get_variables_403(self):
-        """Test case for get_variables 403 response"""
+    def test_get_secrets_403(self):
+        """Test case for get_secrets 403 response"""
         self.grant_insufficient_permissions()
         alice_client = api_config.get_api_client(username='alice')
-        alice_api = openapi_client.api.SecretsApi(alice_client)
+        alice_api = conjur.api.SecretsApi(alice_client)
         secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            alice_api.get_variables(secret_list)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            alice_api.get_secrets(secret_list)
 
         self.assertEqual(context.exception.status, 403)
 
-    def test_get_variables_404(self):
-        """Test case for get_variables 404 response"""
+    def test_get_secrets_404(self):
+        """Test case for get_secrets 404 response"""
         secret_list = f'{self.account}:variable:nonexist'
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_variables(secret_list)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_secrets(secret_list)
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_get_variables_422(self):
-        """Test case for get_variables 422 response"""
+    def test_get_secrets_422(self):
+        """Test case for get_secrets 422 response"""
         secret_list = "\00"
 
-        with self.assertRaises(openapi_client.exceptions.ApiException) as context:
-            self.api.get_variables(secret_list)
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_secrets(secret_list)
 
         self.assertEqual(context.exception.status, 422)
 
-    def test_get_variables_encoded(self):
+    def test_get_secrets_encoded(self):
         """Test case for get_variables 200 response with base64 encoded binary secrets"""
         secret_values = [b'one\xffbinary', b'two']
         self.set_variables(TEST_VARIABLES, secret_values)
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
-        response, status, headers = self.api.get_variables_with_http_info(
+        response, status, headers = self.api.get_secrets_with_http_info(
             ",".join(secret_list),
             accept_encoding="base64"
         )

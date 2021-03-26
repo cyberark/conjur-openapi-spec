@@ -69,11 +69,19 @@ docker pull "$GENERATOR_IMAGE"
 echo "Removing old client dir..."
 rm -rf "$(pwd)/out/$client_lang"
 
+# Check if there is a configuration file available for this language
+if [ -e "./spec/config/$client_lang.yml" ]; then
+    client_config="-c /local/spec/config/$client_lang.yml"
+else
+    client_config=""
+fi
+
 echo "Generating $client_lang client..."
 docker run --rm -v ${PWD}:/local -v $output_volume:/out "$GENERATOR_IMAGE" generate \
     -i "/local/spec/openapi.yml" \
     -g "$client_lang" \
     -o "$output_dir" \
+    $client_config \
     $template_arg
 
 echo "Done! Client is in $(pwd)/out folder!"

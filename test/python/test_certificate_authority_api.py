@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import pathlib
 import unittest
 
-import openapi_client
+import conjur
 
 from . import api_config
 
@@ -41,8 +41,8 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         # a group with sign privilege on the service,
         # and host clients with varying privilege
         ca_policy = read_file(CA_POLICY)
-        policy_api = openapi_client.PoliciesApi(self.client)
-        policy_api.load_policy(
+        policy_api = conjur.PoliciesApi(self.client)
+        policy_api.replace_policy(
             self.account,
             'root',
             ca_policy
@@ -53,20 +53,20 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/test-client',
             'host'
         )
-        self.api = openapi_client.CertificateAuthorityApi(client)
-        self.bad_auth_api = openapi_client.CertificateAuthorityApi(self.bad_auth_client)
+        self.api = conjur.CertificateAuthorityApi(client)
+        self.bad_auth_api = conjur.CertificateAuthorityApi(self.bad_auth_client)
 
         # assign intermediate CA private key and CA chain to Conjur variables
         ca_chain = read_file(CERT_CHAIN_PATH)
         private_key = read_file(UNENCRYPTED_KEY_PATH)
 
-        self.secrets_api = openapi_client.SecretsApi(self.client)
+        self.secrets_api = conjur.SecretsApi(self.client)
         self.update_ca_chain(ca_chain)
         self.update_ca_private_key(private_key)
 
     def update_ca_chain(self, ca_chain):
         """Configure a Conjur CA with a new certificate chain"""
-        self.secrets_api.create_variable(
+        self.secrets_api.create_secret(
             self.account,
             'variable',
             f'conjur/{self.CA_SERVICE_ID}/ca/cert-chain',
@@ -77,7 +77,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         """Configures a Conjur CA with a new private key
         Encrypted private keys must be PKCS#8 encoded
         """
-        self.secrets_api.create_variable(
+        self.secrets_api.create_secret(
             self.account,
             'variable',
             f'conjur/{self.CA_SERVICE_ID}/ca/private-key',
@@ -86,7 +86,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
 
     def update_ca_key_password(self, key_password):
         """Configures a Conjur CA with a new private key password"""
-        self.secrets_api.create_variable(
+        self.secrets_api.create_secret(
             self.account,
             'variable',
             f'conjur/{self.CA_SERVICE_ID}/ca/private-key-password',
@@ -109,7 +109,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(status, 201)
-        self.assertIsInstance(response, openapi_client.models.certificate_json.CertificateJson)
+        self.assertIsInstance(response, conjur.models.certificate_json.CertificateJson)
 
         self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
@@ -151,7 +151,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(status, 201)
-        self.assertIsInstance(response, openapi_client.models.certificate_json.CertificateJson)
+        self.assertIsInstance(response, conjur.models.certificate_json.CertificateJson)
 
         self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
@@ -165,7 +165,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         self.update_ca_private_key(encrypted_key)
         self.update_ca_key_password('wrong_pass')
 
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.sign(
                 self.account,
                 self.CA_SERVICE_ID,
@@ -181,7 +181,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.sign(
                 self.account,
                 '\00',
@@ -195,7 +195,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         """Test case for 401 response when requesting a signed certificate
         401 - unauthorized request
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.bad_auth_api.sign(
                 self.account,
                 self.CA_SERVICE_ID,
@@ -209,9 +209,9 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         """Test case A for 403 response when requesting a signed certificate
         Conjur responds with 403 status when the authenticated role is not a Host
         """
-        user_api = openapi_client.CertificateAuthorityApi(self.client)
+        user_api = conjur.CertificateAuthorityApi(self.client)
 
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             user_api.sign(
                 self.account,
                 self.CA_SERVICE_ID,
@@ -230,9 +230,9 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/no-sign-client',
             'host'
         )
-        no_sign_api = openapi_client.CertificateAuthorityApi(no_sign_client)
+        no_sign_api = conjur.CertificateAuthorityApi(no_sign_client)
 
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             no_sign_api.sign(
                 self.account,
                 self.CA_SERVICE_ID,
@@ -252,9 +252,9 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             'signing-service/cn-test-client',
             'host'
         )
-        cn_test_api = openapi_client.CertificateAuthorityApi(cn_test_client)
+        cn_test_api = conjur.CertificateAuthorityApi(cn_test_client)
 
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             cn_test_api.sign(
                 self.account,
                 self.CA_SERVICE_ID,
@@ -268,7 +268,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         """Test case for 404 response when requesting a signed certificate
         404 - the requested CA service was not found
         """
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.sign(
                 self.account,
                 'fakeService',
@@ -283,7 +283,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         422 - Conjur received a malformed parameter
         """
         self.api.api_client.configuration.host = 'http://conjur'
-        with self.assertRaises(openapi_client.ApiException) as context:
+        with self.assertRaises(conjur.ApiException) as context:
             self.api.sign(
                 self.account,
                 '\00',

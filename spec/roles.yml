@@ -57,7 +57,7 @@ components:
           3. `memberships`
           4. `members`
           "
-        operationId: "getRole"
+        operationId: "showRole"
         parameters:
         - name: "account"
           in: "path"
@@ -152,7 +152,7 @@ components:
 
           When the `members` and `member` query parameters are provided, the role specfified by `member` will be added as a member of the role specified in the endpoint URI.
           "
-        operationId: "addMember"
+        operationId: "addMemberToRole"
         parameters:
         - name: "account"
           in: "path"
@@ -217,7 +217,7 @@ components:
 
           When the `members` and `member` query parameters are provided, the role specfified by `member` will be removed as a member of the role specified in the endpoint URI.
           "
-        operationId: "deleteMember"
+        operationId: "removeMemberFromRole"
         parameters:
         - name: "account"
           in: "path"
