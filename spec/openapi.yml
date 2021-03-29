@@ -38,23 +38,6 @@ components:
       minLength: 1
       example: "default"
 
-    ApiKey:
-      description: "Example of a Conjur API key"
-      type: string
-      minLength: 55
-      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
-
-    AWSSignatureHeader:
-      description: "AWS Signature Version 4 header"
-      type: string
-
-    AzureIdentityToken:
-      description: "Azure instance identity token"
-      type: object
-      properties:
-        jwt:
-          type: string
-
     CheckPrivilege:
       description: "Checks whether a role has a privilege on a resource."
       type: boolean
@@ -65,12 +48,11 @@ components:
       type: boolean
       example: true
 
-    GoogleIdentityToken:
-      description: "Google Cloud instance identity token"
-      type: object
-      properties:
-        jwt:
-          type: string
+    Identifier:
+      description: "Long identifying string for a specific resource in Conjur"
+      type: string
+      example: "dev:user:admin"
+      pattern: '\w+:\w+:\w+'
 
     Kind:
       type: string
@@ -87,13 +69,6 @@ components:
       type: integer
       example: 20
 
-    OIDCToken:
-      description: "OpenID Connect ID token"
-      type: object
-      properties:
-        id_token:
-          type: string
-
     PermittedRoles:
       type: boolean
       example: true
@@ -108,53 +83,43 @@ components:
       type: string
       minLength: 1
       example: "prod%2Faws%2Fdb-password"
-      description: "Resource identifier. Requires to be encoded when in path.
+      description: |
+        Resource identifier. Requires to be encoded when in path.
 
         ##### Examples:
 
         - `myapp-01` -> `myapp-01` (unchanged)
-
         - `alice@devops` -> `alice%40devops`
-
         - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
-
         - `research+development` -> `research%2Bdevelopment`
-
-        - `sales&marketing` -> `sales%26marketing`"
+        - `sales&marketing` -> `sales%26marketing`
 
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
       type: integer
+      example: 1
 
-    Role:
+    RoleType:
       type: string
       minLength: 1
-      description: "##### Kinds of roles:
+      description: |
+        ##### Kinds of roles:
 
         - User: one unique wonderful human
-
         - Host: a single logical machine (in the broad sense, not just physical)
-
         - Layer: a collection of hosts that have the same privileges
-
         - Group: a collection of users and groups that have the same privileges
-
         - Policy: a role which owns of a set of related object
-
 
         Any identifier included in the URL must be URL-encoded to be recognized by the Conjur API.
 
         ##### Resource Identifiers:
 
         - `myapp-01` -> `myapp-01` (unchanged)
-
         - `alice@devops` -> `alice%40devops`
-
         - `prod/aws/db-password` -> `prod%2Faws%2Fdb-password`
-
         - `research+development` -> `research%2Bdevelopment`
-
-        - `sales&marketing` -> `sales%26marketing`"
+        - `sales&marketing` -> `sales%26marketing`
 
   parameters:
     ServiceID:
@@ -167,61 +132,18 @@ components:
         type: string
 
   responses:
-    Accepted:
-      description: "The injected certificate was accepted."
-    AccessTokenGeneric:
-      description: |
-        This response schema is a generic string as opposed to the AccessToken component schema.
-        This is to allow users to use the "Accept-Encoding: base64" header in order to
-        receive a pre-encoded token instead of a JSON object.
-      content:
-        text/plain:
-          schema:
-            type: string
-    AddMemberSuccess:
-      description: "Member was added to role successfully"
-    ApiKey:
-      description: "The response body is the API key"
-      content:
-        text/plain:
-          schema:
-            type: string
-            example: '14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc'
     BadRequest:
       description: "The server cannot process the request due to malformed request syntax"
     Busy:
       description: "Similar operation already in progress, retry after a delay"
-    DeleteMemberSuccess:
-      description: "Member was deleted from role successfully"
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
     InternalServerError:
       description: "Malfromed request, rejected by the server"
-    PermissionCheckSuccess:
-      description: "Permissions check was successful"
     ResourceNotFound:
       description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
-    SecretValue:
-      description: "The secret value was added successfully"
-      content:
-        text/plain:
-          schema:
-            type: string
-            example: 'supersecret'
-    # There might be a better way to display the schema of SecretBatchValue however the json keys are dynamic depending on the secrets you fetched in the 'secrets_id' query param.
-    SecretBatchValue:
-      description: "The batch secret values"
-      content:
-        application/json:
-          schema:
-            type: object
-            example:
-              {
-                 "myorg:variable:secret1": "secret1Value",
-                 "myorg:variable:secret2": "secret2Value"
-              }
     UnauthorizedError:
       description: "Authentication information is missing or invalid"
     UnprocessableEntity:
@@ -229,8 +151,9 @@ components:
 
   securitySchemes:
     basicAuth:
-      description: "Basic authentication with Conjur username and password (users only)
-        or API key (hosts and users)."
+      description: |
+        Basic authentication with Conjur username and password (users only)
+        or API key (hosts and users).
       type: http
       scheme: basic
     conjurAuth:
@@ -239,9 +162,10 @@ components:
       in: header
       name: Authorization
     conjurKubernetesMutualTls:
-      description: "Conjur Kubernetes authenticator mutual TLS authentication.
+      description: |
+        Conjur Kubernetes authenticator mutual TLS authentication.
         To authenticate using this method, you must provide a trusted client
-        certificate"
+        certificate
       type: http
       scheme: mutual
 
@@ -311,7 +235,7 @@ paths:
 # ========== SECRETS ==================
 
   '/secrets/{account}/{kind}/{identifier}':
-    $ref: 'secrets.yml#/components/paths/SingleSecret'
+    $ref: 'secrets.yml#/components/paths/Secret'
 
   '/secrets':
     $ref: 'secrets.yml#/components/paths/BatchSecrets'

@@ -1,10 +1,47 @@
 components:
   schemas:
-    HostFactoryToken:
-      type: string
-      minLength: 1
+    CreateHost:
+      description: Contains information about a created host
+      type: object
+      properties:
+        created_at:
+          type: string
+        id:
+          type: string
+        owner:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        annotations:
+          type: array
+          items:
+            type: string
+        api_key:
+          type: string
+      required:
+        - created_at
+        - id
+        - api_key
+        - owner
+        - permissions
+        - annotations
+      example:
+        {
+          "created_at": "2017-08-07T22:30:00.145+00:00",
+          "id": "myorg:host:brand-new-host",
+          "owner": "myorg:host_factory:hf-db",
+          "permissions": [],
+          "annotations": [],
+          "api_key": "rq5bk73nwjnm52zdj87993ezmvx3m75k3whwxszekvmnwdqek0r"
+        }
 
-    HostFactoryTokenRequest:
+    TokenValue:
+      type: string
+      example: "2c0vfj61pmah3efbgpcz2x9vzcy1ycskfkyqy0kgk1fv014880f4"
+
+    CreateHostTokenForm:
       type: object
       properties:
         expiration:
@@ -34,7 +71,13 @@ components:
         - expiration
         - host_factory
 
-    CreateHostRequest:
+      example:
+        {
+          "expiration": "2017-08-04T22:27:20+00:00",
+          "host_factory": "myorg:hosty_factory:hf-db"
+        }
+
+    CreateHostForm:
       type: object
       properties:
         id:
@@ -49,6 +92,62 @@ components:
 
       required:
         - id
+      example:
+        {
+          "id": "new-host"
+        }
+
+    CreateHostToken:
+      type: array
+      items:
+        type: object
+        properties:
+          expiration:
+            type: string
+          cidr:
+            type: array
+            items:
+              type: string
+          token:
+            type: string
+        required:
+          - expiration
+          - cidr
+          - token
+      example:
+        [
+          {
+            "expiration": "2017-08-04T22:27:20+00:00",
+            "cidr": [
+              "127.0.0.1/32",
+              "127.0.0.2/32"
+            ],
+            "token": "281s2ag1g8s7gd2ezf6td3d619b52t9gaak3w8rj0p38124n384sq7x"
+          },
+          {
+            "expiration": "2017-08-04T22:27:20+00:00",
+            "cidr": [
+              "127.0.0.1/32",
+              "127.0.0.2/32"
+            ],
+            "token": "2c0vfj61pmah3efbgpcz2x9vzcy1ycskfkyqy0kgk1fv014880f4"
+          }
+        ]
+
+  responses:
+    CreateHost:
+      description: "The response body contains the newly-created host"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateHost"
+
+    CreateHostToken:
+      description: "Zero or more tokens were created and delivered in the response body"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateHostToken'
 
   paths:
     CreateHostToken:
@@ -56,15 +155,13 @@ components:
         tags:
         - "host factory"
         summary: "Creates one or more host identity tokens."
-        description: "Creates one or more tokens which can be used to bootstrap host identity. Responds with a JSON document containing the tokens and their restrictions.
-
+        description: |
+          Creates one or more tokens which can be used to bootstrap host identity. Responds with a JSON document containing the tokens and their restrictions.
 
           If the tokens are created with a CIDR restriction, Conjur will only accept them from the whitelisted IP ranges.
 
-
           ##### Permissions required
-
-
+          #
           `execute` privilege on the Host Factory."
         operationId: "createToken"
         requestBody:
@@ -73,15 +170,11 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: '#/components/schemas/HostFactoryTokenRequest'
+                $ref: '#/components/schemas/CreateHostTokenForm'
 
         responses:
           "200":
-            description: "Zero or more tokens were created and delivered in the response body"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/CreateHostToken'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
@@ -101,11 +194,10 @@ components:
         tags:
         - "host factory"
         summary: "Revokes a token, immediately disabling it."
-        description: "Revokes a token, immediately disabling it.
-
+        description: |
+          Revokes a token, immediately disabling it.
 
           ##### Permissions required
-
 
           `update` privilege on the host factory."
         operationId: "revokeToken"
@@ -115,7 +207,7 @@ components:
           description: "The host factory token to revoke"
           required: true
           schema:
-            $ref: '#/components/schemas/HostFactoryToken'
+            $ref: '#/components/schemas/TokenValue'
 
         responses:
           "204":
@@ -137,13 +229,14 @@ components:
         tags:
         - "host factory"
         summary: "Creates a Host using the Host Factory."
-        description: "Creates a Host using the Host Factory and returns a JSON description of it.
+        description: |
+          Creates a Host using the Host Factory and returns a JSON description of it.
 
+          Requires a host factory token, which can be created using the create tokens API.
+          In practice, this token is usually provided automatically as part of Conjur integration with your
+          host provisioning infrastructure.
 
-          Requires a host factory token, which can be created using the create tokens API. In practice, this token is usually provided automatically as part of Conjur integration with your host provisioning infrastructure.
-
-
-          Note: If the token was created with a CIDR restriction, you must make this API request from a whitelisted address."
+          Note: If the token was created with a CIDR restriction, you must make this API request from a whitelisted address.
         operationId: "createHost"
         requestBody:
           description: "Parameters"
@@ -151,15 +244,11 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: '#/components/schemas/CreateHostRequest'
+                $ref: '#/components/schemas/CreateHostForm'
 
         responses:
           "201":
-            description: "The response body contains the newly-created host"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/CreateHost'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "422":

@@ -6,6 +6,10 @@ components:
         text/plain:
           schema:
             type: string
+          example: |
+            ssh-rsa AAAAB3Nzabc2 admin@alice.com
+
+            ssh-rsa AAAAB3Nza3nx alice@example.com
 
   paths:
     PublicKeys:
@@ -13,10 +17,9 @@ components:
         tags:
         - "public keys"
         summary: "Shows all public keys for a resource."
-        description: "Shows all public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format.
-
-
-          Returns an empty string if the resource does not exist, to prevent attackers from determining whether a resource exists."
+        description: |
+          Shows all public keys for a resource as newline delimited string for compatibility with the authorized_keys SSH format.
+          Returns an empty string if the resource does not exist, to prevent attackers from determining whether a resource exists.
         operationId: "showPublicKeys"
         parameters:
         - name: "account"

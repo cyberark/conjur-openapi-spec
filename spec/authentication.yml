@@ -1,10 +1,27 @@
 components:
   schemas:
-    LoginName:
-      type: string
-      minLength: 1
-      example: "admin"
+    AccessToken:
+      type: object
+      properties:
+        protected:
+          type: string
+        payload:
+          type: string
+        signature:
+          type: string
+      example:
+        {
+          "protected": "eyJhbGciOiJjb25qdXIub3.....g0In0=", 
+          "payload": "eyJzdWIiOiJhZG1pbiIsImlhdCI6MTU5ODc2OTU0MH0=",
+          "signature": "NrknEA762z0x-FVdQjFGeTT.....AFjHc0"
+        }
 
+    ApiKey:
+      type: string
+      minLength: 55
+      description: "Example of a Conjur API key"
+      example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
+        
     Authenticators:
       type: string
       enum:
@@ -16,6 +33,54 @@ components:
       - authn-gcp
       - authn-azure
 
+    AWSSignatureHeader:
+      description: "AWS Signature Version 4 header"
+      type: string
+
+    AzureIdentityToken:
+      description: "Azure instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
+    EnableAuthenticatorSetting:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+
+    GoogleIdentityToken:
+      description: "Google Cloud instance identity token"
+      type: object
+      properties:
+        jwt:
+          type: string
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
+    LoginName:
+      type: string
+      minLength: 1
+      example: "admin"
+
+    OIDCToken:
+      description: "OpenID Connect ID token"
+      type: object
+      properties:
+        id_token:
+          type: string
+      example:
+        {
+          "id_token": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
+
     ServiceAuthenticators:
       type: string
       enum:
@@ -26,14 +91,34 @@ components:
       - authn-gcp
       - authn-azure
 
+  responses:
+    ApiKey:
+      description: "The response body is the API key"
+      content:
+        text/plain:
+          schema:
+            $ref: '#/components/schemas/ApiKey'
+
+    AccessToken:
+      description: "The response is an access token for conjur"
+      content:
+        text/plain:
+          schema:
+            type: string
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessToken'
+
   paths:
     DefaultLogin:
       get:
         tags:
         - "authentication"
-        summary: "Gets the API key of a user given the username and password
-          via HTTP Basic Authentication."
-        description: "Passwords are stored in the Conjur database using `bcrypt`
+        summary: |
+          Gets the API key of a user given the username and password
+          via HTTP Basic Authentication.
+        description: |
+          Passwords are stored in the Conjur database using `bcrypt`
           with a work factor of 12. Therefore, login is a fairly expensive operation.
           However, once the API key is obtained, it may be used to inexpensively
           obtain access tokens by calling the Authenticate method. An access token
@@ -52,7 +137,7 @@ components:
           For example, `curl` and all of the Conjur client libraries provide this.
 
           Note that machine roles (Hosts) do not have passwords and do not need to
-          use this endpoint."
+          use this endpoint.
         operationId: "getAPIKey"
         parameters:
         - name: "account"
@@ -64,7 +149,7 @@ components:
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/ApiKey'
+            $ref: '#/components/responses/ApiKey'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -84,16 +169,19 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "For applications running in Kubernetes; sends Conjur a certificate
+        summary: |
+          For applications running in Kubernetes; sends Conjur a certificate
           signing request (CSR) and requests a client certificate injected into
-          the application's Kubernetes pod."
-        description: "This request sends a Certificate Signing Request to Conjur,
+          the application's Kubernetes pod.
+        description: |
+          This request sends a Certificate Signing Request to Conjur,
           which uses the Kubernetes API to inject a client certificate into the
           application pod.
 
           This endpoint requires a properly configured Conjur Certificate Authority
           service alongside a properly configured and enabled Kubernetes authenticator.
-          For detailed instructions, see [the documentation](https://docs.conjur.org/Latest/en/Content/Integrations/kubernetes.htm)."
+          For detailed instructions,
+          see [the documentation](https://docs.conjur.org/Latest/en/Content/Integrations/kubernetes.htm).
         operationId: "k8sInjectClientCert"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -105,8 +193,9 @@ components:
             type: string
           example: "host/conjur/authn-k8s/my-authenticator-id/apps"
         requestBody:
-          description: "Valid certificate signing request that includes the host
-            identity suffix as the CSR common name"
+          description: |
+            Valid certificate signing request that includes the host
+            identity suffix as the CSR common name
           required: true
           content:
             text/plain:
@@ -115,7 +204,7 @@ components:
 
         responses:
           "202":
-            $ref: 'openapi.yml#/components/responses/Accepted'
+            description: "The injected certificate was accepted."
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -127,9 +216,11 @@ components:
       get:
         tags:
         - "authentication"
-        summary: "Gets the Conjur API key of a user given the LDAP username and
-          password via HTTP Basic Authentication."
-        description: "Exchange your LDAP credentials for a Conjur API key. Once the
+        summary: |
+          Gets the Conjur API key of a user given the LDAP username and
+          password via HTTP Basic Authentication.
+        description: |
+          Exchange your LDAP credentials for a Conjur API key. Once the
           API key is obtained, it may be used to inexpensively obtain access
           tokens by calling the Authenticate method. An access token
           is required to use most other parts of the Conjur API.
@@ -143,7 +234,7 @@ components:
           4. Providing the result as the value of the `Authorization` HTTP header:
              `Authorization: Basic <authentication string>`.
 
-          Your HTTP/REST client probably provides HTTP basic authentication support."
+          Your HTTP/REST client probably provides HTTP basic authentication support.
         operationId: "getAPIKeyViaLDAP"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -157,7 +248,7 @@ components:
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/ApiKey'
+            $ref: '#/components/responses/ApiKey'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -176,9 +267,11 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token, which is required in the header
-          of most subsequent API requests."
-        description: "A client can obtain an access token by presenting a valid
+        summary: |
+          Gets a short-lived access token, which is required in the header
+          of most subsequent API requests.
+        description: |
+          A client can obtain an access token by presenting a valid
           login name and API key.
 
           The access token is used to communicate to the REST API that the bearer
@@ -200,7 +293,7 @@ components:
 
           This is the default authentication endpoint only. See other endpoints for
           details on authenticating to Conjur using another method, e.g. for
-          applications running in Azure or Kubernetes."
+          applications running in Azure or Kubernetes.
         operationId: "getAccessToken"
         parameters:
         - name: "account"
@@ -230,11 +323,11 @@ components:
           content:
             text/plain:
               schema:
-                $ref: 'openapi.yml#/components/schemas/ApiKey'
+                $ref: '#/components/schemas/ApiKey'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -249,7 +342,8 @@ components:
         tags:
         - "authentication"
         summary: "Get a short-lived access token for applications running in AWS."
-        description: "The access token is used to communicate to the REST API that
+        description: |
+          The access token is used to communicate to the REST API that
           the bearer of the token has been authorized to access the API and perform
           specific actions specified by the scope that was granted during authorization.
 
@@ -265,7 +359,7 @@ components:
 
           For detailed instructions on authenticating to Conjur using this endpoint,
           reference the documentation:
-          [AWS IAM Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/AWS_IAM_Authenticator.htm) (`authn-iam`)."
+          [AWS IAM Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/AWS_IAM_Authenticator.htm) (`authn-iam`).
         operationId: "getAccessTokenViaAWS"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -300,11 +394,11 @@ components:
           content:
             text/plain:
               schema:
-                $ref: 'openapi.yml#/components/schemas/AWSSignatureHeader'
+                $ref: '#/components/schemas/AWSSignatureHeader'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -319,7 +413,8 @@ components:
         tags:
         - "authentication"
         summary: "Gets a short-lived access token for applications running in Azure."
-        description: "The access token is used to communicate to the REST API that
+        description: |
+          The access token is used to communicate to the REST API that
           the bearer of the token has been authorized to access the API and perform
           specific actions specified by the scope that was granted during authorization.
 
@@ -334,7 +429,7 @@ components:
           `prod/gke` must be encoded as `prod%2Fgke`.
 
           To authenticate to Conjur using this endpoint, reference the detailed
-          documentation: [Azure Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/azure_authn.htm) (`authn-azure`)."
+          documentation: [Azure Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/azure_authn.htm) (`authn-azure`).
         operationId: "getAccessTokenViaAzure"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -369,11 +464,11 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/AzureIdentityToken'
+                $ref: '#/components/schemas/AzureIdentityToken'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -388,12 +483,14 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for applications running in
-          Google Cloud Platform."
-        description: "Use the GCP Authenticator API to send an authentication
+        summary: |
+          Gets a short-lived access token for applications running in
+          Google Cloud Platform.
+        description: |
+          Use the GCP Authenticator API to send an authentication
           request from a Google Cloud service to Conjur.
 
-          For more information, see [the documentation](https://docs.conjur.org/Latest/en/Content/Operations/Services/cjr-gcp-authn.htm)."
+          For more information, see [the documentation](https://docs.conjur.org/Latest/en/Content/Operations/Services/cjr-gcp-authn.htm).
         operationId: "getAccessTokenViaGCP"
         parameters:
         - name: "account"
@@ -415,11 +512,11 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/GoogleIdentityToken'
+                $ref: '#/components/schemas/GoogleIdentityToken'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/ApiKey'
+            $ref: '#/components/responses/ApiKey'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -433,7 +530,8 @@ components:
         tags:
         - "authentication"
         summary: "Gets a short-lived access token for applications running in Kubernetes."
-        description: "The access token is used to communicate to the REST API that
+        description: |
+          The access token is used to communicate to the REST API that
           the bearer of the token has been authorized to access the API and perform
           specific actions specified by the scope that was granted during authorization.
 
@@ -448,7 +546,7 @@ components:
           `prod/gke` must be encoded as `prod%2Fgke`.
 
           To authenticate to Conjur using this endpoint, reference the detailed
-          documentation: [Kubernetes Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/k8s_auth.htm) (`authn-k8s`)."
+          documentation: [Kubernetes Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/k8s_auth.htm) (`authn-k8s`).
         operationId: "getAccessTokenViaKubernetes"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -479,7 +577,7 @@ components:
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -497,9 +595,11 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for users and hosts using their
-          LDAP identity to access the Conjur API."
-        description: "The access token is used to communicate to the REST API that
+        summary: |
+          Gets a short-lived access token for users and hosts using their
+          LDAP identity to access the Conjur API.
+        description: |
+          The access token is used to communicate to the REST API that
           the bearer of the token has been authorized to access the API and perform
           specific actions specified by the scope that was granted during authorization.
 
@@ -517,7 +617,7 @@ components:
           and would be encoded as `host%2Fwebserver`.
 
           To authenticate to Conjur using a LDAP, reference the detailed documentation:
-          [LDAP Authenticator](https://docs.conjur.org/Latest/en/Content/Integrations/ldap/ldap_authenticator.html) (`authn-ldap`)."
+          [LDAP Authenticator](https://docs.conjur.org/Latest/en/Content/Integrations/ldap/ldap_authenticator.html) (`authn-ldap`).
         operationId: "getAccessTokenViaLDAP"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -552,11 +652,11 @@ components:
           content:
             text/plain:
               schema:
-                $ref: 'openapi.yml#/components/schemas/ApiKey'
+                $ref: '#/components/schemas/ApiKey'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -571,12 +671,14 @@ components:
       post:
         tags:
         - "authentication"
-        summary: "Gets a short-lived access token for applications using OpenID
-          Connect (OIDC) to access the Conjur API."
-        description: "Use the OIDC Authenticator to leverage the identity layer
+        summary: |
+          Gets a short-lived access token for applications using OpenID
+          Connect (OIDC) to access the Conjur API.
+        description: |
+          Use the OIDC Authenticator to leverage the identity layer
           provided by OIDC to authenticate with Conjur.
 
-          For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm)."
+          For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm).
         operationId: "getAccessTokenViaOIDC"
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
@@ -594,11 +696,11 @@ components:
           content:
             application/x-www-form-urlencoded:
               schema:
-                $ref: 'openapi.yml#/components/schemas/OIDCToken'
+                $ref: '#/components/schemas/OIDCToken'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/AccessTokenGeneric'
+            $ref: '#/components/responses/AccessToken'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -612,7 +714,8 @@ components:
         tags:
         - "authentication"
         summary: "Changes a user’s password."
-        description: "You must provide the login name and current password or
+        description: |
+          You must provide the login name and current password or
           API key of the user whose password is to be updated in an HTTP Basic
           Authentication header. Also replaces the user’s API key with a new
           securely generated random value. You can fetch the new API key using
@@ -632,7 +735,7 @@ components:
           provide this.
 
           Note that machine roles (Hosts) do not have passwords. They authenticate
-          using their API keys, while passwords are only used by human users."
+          using their API keys, while passwords are only used by human users.
         operationId: "changePassword"
         parameters:
         - name: "account"
@@ -671,7 +774,8 @@ components:
         tags:
         - "authentication"
         summary: "Rotates a role's API key."
-        description: "Any role can rotate its own API key. The name and password
+        description: |
+          Any role can rotate its own API key. The name and password
           (for users) or current API key (for hosts and users) of the role must
           be provided via HTTP Basic Authorization.
 
@@ -695,7 +799,7 @@ components:
           If using the Conjur `Authorization` header, its value should be set to
           `Token token=<base64-encoded access token>`.
 
-          Note that the body of the request must be the empty string."
+          Note that the body of the request must be the empty string.
         operationId: "rotateApiKey"
         parameters:
         - name: "account"
@@ -706,17 +810,18 @@ components:
             $ref: 'openapi.yml#/components/schemas/AccountName'
         - name: "role"
           in: "query"
-          description: "(**Optional**) role specifier in `{kind}:{identifier}` format
+          description: |
+            (**Optional**) role specifier in `{kind}:{identifier}` format
 
             ##### Permissions required
 
-            `update` privilege on the role whose API key is being rotated."
+            `update` privilege on the role whose API key is being rotated.
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            $ref: 'openapi.yml#/components/responses/ApiKey'
+            $ref: '#/components/responses/ApiKey'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -735,7 +840,8 @@ components:
         tags:
         - "authentication"
         summary: "Enables or disables authenticator service instances."
-        description: "Allows you to either enable or disable a given authenticator
+        description: |
+          Allows you to either enable or disable a given authenticator
           service instance.
 
           When you enable or disable an authenticator service instance via this
@@ -749,7 +855,7 @@ components:
           **This endpoint is part of an early implementation of support for enabling Conjur
           authenticators via the API, and is currently available at the Community
           (or early alpha) level. This endpoint is still subject to breaking
-          changes in the future.**"
+          changes in the future.**
         operationId: "enableAuthenticatorInstance"
         parameters:
         - name: "authenticator"
@@ -771,16 +877,14 @@ components:
           example: "dev"
 
         requestBody:
-          description: "Contains either `enabled=true` or `enabled=false` to
-            enable or disable an authenticator"
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
           required: true
           content:
             application/x-www-form-urlencoded:
               schema:
-                type: object
-                properties:
-                  enabled:
-                    type: boolean
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
 
         responses:
           "204":

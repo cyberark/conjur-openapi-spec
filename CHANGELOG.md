@@ -60,3 +60,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Operation names have been updated to match better with existing integrations and documentation.
   [cyberark/conjur-openapi-spec#36](https://github.com/cyberark/conjur-openapi-spec/issues/36)
   [cyberark/conjur-openapi-spec#129](https://github.com/cyberark/conjur-openapi-spec/issues/129)
+- Response schemas are now more fully defined and methods will now return pre-defined objects.
+  [cyberark/conjur-openapi-spec#43](https://github.com/cyberark/conjur-openapi-spec/issues/43)

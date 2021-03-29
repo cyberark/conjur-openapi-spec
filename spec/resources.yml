@@ -4,6 +4,7 @@ components:
       type: string
       minLength: 1
       description: "Only returns results that contain this string value"
+      example: "password"
 
     PrivilegeLevel:
       type: string
@@ -20,6 +21,118 @@ components:
       example: true
       description: "Checks whether a role has a privilege on a resource."
 
+    PolicyVersion:
+      type: object
+      properties:
+        version:
+          type: number
+        created_at:
+          type: string
+        policy_text:
+          type: string
+        policy_sha256:
+          type: string
+        finished_at:
+          type: string
+        client_ip:
+          type: string
+        id:
+          type: string
+        role:
+          type: string
+      example:
+        {
+          "client_ip": "172.19.0.6",
+          "created_at": "2021-03-23T16:37:09.250+00:00",
+          "finished_at": "2021-03-23T16:37:09.435+00:00",
+          "id": "dev:policy:root",
+          "policy_sha256": "73d7b43ab17d69d163dedfaac88ec02a9c18ed8675abe4fe5643cd33470baf86",
+          "policy_text": "- !variable one/password\n- !variable testSecret\n",
+          "role": "dev:user:admin",
+          "version": 15.0
+        }
+
+
+    Resource:
+      type: object
+      properties:
+        created_at:
+          type: string
+        id:
+          type: string
+        owner:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: object
+            properties:
+              privilege:
+                type: string
+              role:
+                type: string
+              policy:
+                type: string
+        policy:
+          type: string
+        annotations:
+          type: array
+          items:
+            type: string
+        secrets:
+          type: array
+          items:
+            type: string
+        restricted_to:
+          type: array
+          items:
+            type: string
+        policy_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyVersion'
+      example:
+        {
+          "annotations": [],
+          "created_at": "2021-03-23T16:37:14.455+00:00",
+          "id": "dev:policy:conjur/authn-ldap/test",
+          "owner": "dev:user:admin",
+          "permissions": [],
+          "policy": "dev:policy:root",
+          "policy_versions": [],
+        } 
+
+    Resources:
+      type: array
+      items:
+        $ref: '#/components/schemas/Resource'
+      example:
+        [
+          {
+            "annotations": [],
+            "created_at": "2021-03-23T16:37:14.455+00:00",
+            "id": "dev:policy:conjur/authn-ldap/test",
+            "owner": "dev:user:admin",
+            "permissions": [],
+            "policy": "dev:policy:root",
+            "policy_versions": [],
+          } 
+        ]
+
+  responses:
+    Resource:
+      description: "The response body contains the list of role memberships or permitted roles"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Resource'
+
+    Resources:
+      description: "The response body contains a list of resources"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Resources'
 
   paths:
     ListResources:
@@ -27,21 +140,28 @@ components:
         tags:
         - "resources"
         summary: "Lists resources within an organization account."
-        description: "Lists resources within an organization account.
+        description: |
+          Lists resources within an organization account.
       
-        In the absence of an `account` query parameter, shows results for the account of the authorization token user.
+          In the absence of an `account` query parameter, shows results for the account of the authorization token user.
 
-        If an `account` query parameter is given, shows results for the specified account.
+          If an `account` query parameter is given, shows results for the specified account.
 
-        If a `kind` query parameter is given, narrows results to only resources of that kind.
+          If a `kind` query parameter is given, narrows results to only resources of that kind.
 
-        If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+          If a `limit` is given, returns no more than that number of results. Providing an `offset`
+          skips a number of resources before returning the rest. In addition, providing an `offset`
+          will give `limit` a default value of 10 if none other is provided. These two parameters can
+          be combined to page through results.
 
-        If the parameter `count` is `true`, returns only the number of items in the list.
+          If the parameter `count` is `true`, returns only the number of items in the list.
 
-        ##### Text search
+          ##### Text search
 
-        If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
+          If the `search` parameter is provided, narrows results to those pertaining to the search query.
+          Search works across resource IDs and the values of annotations. It weighs results so that those
+          with matching id or a matching value of an annotation called `name` appear first, then those with
+          another matching annotation value, and finally those with a matching  `kind`."
         operationId: "showResourcesForAllAccounts"
         parameters:
         - name: "account"
@@ -82,21 +202,17 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            description: "The response body contains the list of matching resources"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/Resources'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
@@ -112,17 +228,24 @@ components:
         tags:
         - "resources"
         summary: "Lists resources within an organization account."
-        description: "Lists resources within an organization account.
+        description: |
+          Lists resources within an organization account.
 
-        If a `kind` query parameter is given, narrows results to only resources of that kind.
+          If a `kind` query parameter is given, narrows results to only resources of that kind.
 
-        If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+          If a `limit` is given, returns no more than that number of results. Providing an `offset`
+          skips a number of resources before returning the rest. In addition, providing an `offset`
+          will give `limit` a default value of 10 if none other is provided. These two parameters
+          can be combined to page through results.
 
-        If the parameter `count` is `true`, returns only the number of items in the list.
+          If the parameter `count` is `true`, returns only the number of items in the list.
 
-        ##### Text search
+          ##### Text search
 
-        If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
+          If the `search` parameter is provided, narrows results to those pertaining to the search query.
+          Search works across resource IDs and the values of annotations. It weighs results so that those
+          with matching id or a matching value of an annotation called `name` appear first, then those with
+          another matching annotation value, and finally those with a matching  `kind`.
         operationId: "showResourcesForAccount"
         parameters:
         - name: "account"
@@ -163,21 +286,17 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            description: "The response body contains the list of matching resources"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/Resources'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -195,17 +314,24 @@ components:
         tags:
         - "resources"
         summary: "Lists resources of the same kind within an organization account."
-        description: "Lists resources of the same kind within an organization account.
+        description: |
+          Lists resources of the same kind within an organization account.
 
-        Kinds of resources include: policy, user, host, group, layer, or variable
+          Kinds of resources include: policy, user, host, group, layer, or variable
 
-        If a `limit` is given, returns no more than that number of results. Providing an `offset` skips a number of resources before returning the rest. In addition, providing an `offset` will give `limit` a default value of 10 if none other is provided. These two parameters can be combined to page through results.
+          If a `limit` is given, returns no more than that number of results.
+          Providing an `offset` skips a number of resources before returning the rest.
+          In addition, providing an `offset` will give `limit` a default value of 10 if
+          none other is provided. These two parameters can be combined to page through results.
 
-        If the parameter `count` is `true`, returns only the number of items in the list.
+          If the parameter `count` is `true`, returns only the number of items in the list.
 
-        ##### Text search
+          ##### Text search
 
-        If the `search` parameter is provided, narrows results to those pertaining to the search query. Search works across resource IDs and the values of annotations. It weighs results so that those with matching id or a matching value of an annotation called `name` appear first, then those with another matching annotation value, and finally those with a matching  `kind`."
+          If the `search` parameter is provided, narrows results to those pertaining to the search query.
+          Search works across resource IDs and the values of annotations. It weighs results so that those
+          with matching id or a matching value of an annotation called `name` appear first, then those with
+          another matching annotation value, and finally those with a matching  `kind`.
         operationId: "showResourcesForKind"
         parameters:
         - name: "account"
@@ -247,21 +373,17 @@ components:
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
           example: myorg:host:host1
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            description: "The response body contains the list of matching resources"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/Resources'
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
@@ -279,17 +401,19 @@ components:
         tags:
         - "resources"
         summary: "Shows a description of a single resource."
-        description: "Details about a single resource.
+        description: |
+          Details about a single resource.
 
-        If `permitted_roles` and `privilege` are given, Conjur lists the roles with the specified privilege on the resource.
+          If `permitted_roles` and `privilege` are given, Conjur lists the
+          roles with the specified privilege on the resource.
 
-        If `check`, `privilege` and `role` are given, Conjur checks if the specified role has the privilege on the resource.
+          If `check`, `privilege` and `role` are given, Conjur checks if the
+          specified role has the privilege on the resource.
 
-        If `permitted_roles` and `check` are both given, Conjur responds to the `check` call ONLY.
+          If `permitted_roles` and `check` are both given, Conjur responds to the `check` call ONLY.
 
-        ##### Permissions Required
+          ##### Permissions Required
 
-        `read` privilege on the resource."
         operationId: "showResource"
         parameters:
         - name: "account"
@@ -332,17 +456,13 @@ components:
           example: myorg:host:host1
           description: "Role to check privilege on. Can only be used in combination with `check` parameter."
           schema:
-            $ref: 'openapi.yml#/components/schemas/Role'
+            $ref: 'openapi.yml#/components/schemas/RoleType'
 
         responses:
           "200":
-            description: "The response body contains the list of role memberships or permitted roles"
-            content:
-              application/json:
-                schema:
-                  type: object
+            $ref: '#/components/responses/Resource'
           "204":
-            $ref: 'openapi.yml#/components/responses/PermissionCheckSuccess'
+            description: "Permissions check was successful"
           "400":
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
