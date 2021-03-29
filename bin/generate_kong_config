@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 . bin/util
 
 announce "Bundling OpenAPI spec"
@@ -8,10 +9,10 @@ bin/bundle_spec
 # using http://host.docker.interal allows a containerized Kong Gateway to target
 # a local Conjur instance
 echo "servers:
-  - url: http://host.docker.internal:80" >> spec.yml
+  - url: http://host.docker.internal:80" | sudo tee -a spec.yml >/dev/null
 
 announce "Generating Kong declarative configuration yaml"
-docker run --rm -it \
+docker run --rm \
     -v ${PWD}:/opt/openapi \
     node:latest /bin/bash -c "
         npm i -g insomnia-inso \

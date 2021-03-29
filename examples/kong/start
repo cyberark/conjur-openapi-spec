@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 . bin/util
 
 bin/generate_kong_config
@@ -8,7 +9,7 @@ if [[ -z $(docker container ls -q --filter name=kong) ]]; then
     docker run -d --name kong \
         -v $(pwd):/opt/openapi \
         -e "KONG_DATABASE=off" \
-        -e "KONG_DECLARATIVE_CONFIG=/opt/openapi/kong/kong.yml" \
+        -e "KONG_DECLARATIVE_CONFIG=/opt/openapi/out/kong/kong.yml" \
         -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
         -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
         -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
@@ -27,7 +28,7 @@ fi
 announce "Making requests to Conjur through Kong Gateway"
 
 ensure_conjur_up
-admin_api_key="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+admin_api_key="$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 token="$(curl http://localhost:8000/authn/dev/admin/authenticate \
     --header "Accept-Encoding: base64" \
     --data $admin_api_key)"
@@ -45,4 +46,5 @@ if [ "$secret_data" == "$retrieved_secret" ]; then
     announce "Secret stored and retrieved!"
 else
     announce "Unsuccessful secret storage and retrieval."
+    exit 1
 fi
