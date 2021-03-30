@@ -2,14 +2,19 @@
 
 set -euo pipefail
 
+source bin/util
+
 docker pull swaggerapi/swagger-editor
 
-echo "Removing old containers..."
+announce "Removing old containers..."
 docker stop swagger-editor || true
 docker rm swagger-editor || true
 
-echo "Starting Swagger editor on port 9090..."
-docker run -d -p 9090:8080 -v $(pwd):/tmp -e SWAGGER_FILE=/tmp/spec/openapi.yml --name swagger-editor swaggerapi/swagger-editor
+announce "Generating bundled spec file"
+./bin/bundle_spec
+
+announce "Starting Swagger editor on port 9090..."
+docker run -d -p 9090:8080 -v $(pwd):/tmp -e SWAGGER_FILE=/tmp/spec.yml --name swagger-editor swaggerapi/swagger-editor
 
 echo -n "Waiting for editor to start..."
 until [ "$(docker inspect -f {{.State.Running}} swagger-editor)"=="true" ]; do

@@ -52,7 +52,7 @@ Contributing to this repository requires installation of some developer tools.
 
 ### Environment Setup
 
-Setup the development environment using the `start` script. The script starts a Swagger UI  
+Setup the development environment using the `start` script. The script starts a Swagger Editor  
 container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the  
 spec against.
 
@@ -60,14 +60,14 @@ spec against.
 $ ./bin/start
 ```
 
-To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger UI editor with  
-the `start_editor` script.
+To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger Editor editor with  
+the `start_spec_ui` script.
 
 ```shell
-$ ./bin/start_editor
+$ ./bin/start_spec_ui
 ```
 
-In each case, a browser window will be opened to the container running Swagger UI.  
+In each case, a browser window will be opened to the container running Swagger Editor.  
 Import the [`openapi.yml`](openapi.yml) into the UI to view/edit.
 
 The environment can be stopped and removed using the `stop` script.
@@ -129,24 +129,25 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 #### Utility scripts
 
 `bin/generate_client -l <language> [-o <output-directory>]`
-* Generates a client library for the desired `<language>`.  
+* Generates a client library for the desired `<language>`.
 * Running the script with no argument will generate a Python client by default.
 
 `bin/generate_kong_config`
 * Generates a declarative configuration used by Kong Gateway.
 
-`bin/start_editor`
-* Used to start a Swagger Editor container independent of a Conjur instance.  
+`bin/start_spec_ui`
+* Used to start a Swagger Editor container independent of a Conjur instance.
+* Runs the `bin/bundle_spec` script before starting and points the UI at the bundled spec.
 
 `bin/start`
-* Used to set up a new development environment.  
+* Used to set up a new development environment.
 * Stands up a new instance of Conjur, and starts a Swagger Editor container.
 
 `bin/start_conjur`
 * Used to start a new local Conjur instance based on the project's `docker-compose`.
 
 `bin/stop`
-* Used to deconstruct the development environmnet.  
+* Used to deconstruct the development environmnet.
 * Stops and removes the `docker-compose` environment and Swagger Editor.
 
 `bin/bundle_spec`

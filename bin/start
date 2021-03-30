@@ -3,5 +3,5 @@
 # Start Conjur docker-compose environment
 bin/start_conjur
 
-# Start Swagger UI
-bin/start_editor
+# Start Swagger Editor
+bin/start_spec_ui
