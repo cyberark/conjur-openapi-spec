@@ -88,9 +88,11 @@ module {{moduleName}}
 
     attr_accessor :force_ending_format
 
+    attr_accessor :account
+
     def initialize
       @scheme = '{{scheme}}'
-      @host = '{{host}}'
+      @host = ENV.fetch('CONJUR_APPLIANCE_URL', '{{host}}')
       @base_path = '{{contextPath}}'
       @api_key = {}
       @api_key_prefix = {}
@@ -99,8 +101,8 @@ module {{moduleName}}
       {{#isFaraday}}
       @ssl_verify = true
       @ssl_verify_mode = nil
-      @ssl_ca_file = nil
-      @ssl_client_cert = nil
+      @ssl_ca_file = ENV.fetch('CONJUR_CERT_FILE', nil)
+      @ssl_client_cert = ENV.fetch('CONJUR_SSL_CERTIFICATE', nil)
       @ssl_client_key = nil
       {{/isFaraday}}
       {{^isFaraday}}
@@ -114,6 +116,10 @@ module {{moduleName}}
       @inject_format = false
       @force_ending_format = false
       @logger = defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
+      @username = ENV.fetch('CONJUR_AUTHN_LOGIN', nil)
+      @password = ENV.fetch('CONJUR_AUTHN_API_KEY', nil)
+      @account = ENV.fetch('CONJUR_ACCOUNT', nil)
+      @api_key_prefix['Authorization'] = 'Token'
 
       yield(self) if block_given?
     end
@@ -122,6 +128,33 @@ module {{moduleName}}
     def self.default
       @@default ||= Configuration.new
     end
+
+    def get_token_by_authenticator(authenticator)
+      authn_api = ConjurOpenApi::AuthenticationApi.new self
+      args = [@account, @username, @password, {accept_encoding: 'base64'}]
+      case authenticator
+        when 'authn'
+          authn_api.get_access_token(*args)
+        when 'authn-oidc'
+          authn_api.get_access_token_via_oidc(*args)
+        when 'authn-aws'
+          authn_api.get_access_token_via_aws(*args)
+        when 'authn-azure'
+          authn_api.get_access_token_via_azure(*args)
+        when 'authn-gcp'
+          authn_api.get_access_token_via_gcp(*args)
+        when 'authn-k8s'
+          authn_api.get_access_token_via_kubernetes(*args)
+      end
+    end
+
+    # Gets a Config with a preset access token for API Calls
+    def self.authenticated_config(authenticator='authn', username=@username, password=@password)
+      config = self.default
+      config.username = username
+      config.password = password
+      token = config.get_token_by_authenticator(authenticator)
+      end
 
     def configure
       yield(self) if block_given?
