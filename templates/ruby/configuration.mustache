@@ -88,11 +88,8 @@ module {{moduleName}}
 
     attr_accessor :force_ending_format
 
-    attr_accessor :account
-
     def initialize
       @scheme = '{{scheme}}'
-      @host = ENV.fetch('CONJUR_APPLIANCE_URL', '{{host}}')
       @base_path = '{{contextPath}}'
       @api_key = {}
       @api_key_prefix = {}
@@ -116,10 +113,15 @@ module {{moduleName}}
       @inject_format = false
       @force_ending_format = false
       @logger = defined?(Rails) ? Rails.logger : Logger.new(STDOUT)
+
+
+      #### Custom fields
+
       @username = ENV.fetch('CONJUR_AUTHN_LOGIN', nil)
       @password = ENV.fetch('CONJUR_AUTHN_API_KEY', nil)
       @account = ENV.fetch('CONJUR_ACCOUNT', nil)
       @api_key_prefix['Authorization'] = 'Token'
+      @host = ENV.fetch('CONJUR_APPLIANCE_URL', '{{host}}')
 
       yield(self) if block_given?
     end
@@ -129,8 +131,15 @@ module {{moduleName}}
       @@default ||= Configuration.new
     end
 
+
+    ################################
+    #### Custom defined methods ####
+    ################################
+
+    attr_accessor :account
+
     def get_token_by_authenticator(authenticator)
-      authn_api = ConjurOpenApi::AuthenticationApi.new self
+      authn_api = ConjurSDK::AuthenticationApi.new ConjurSDK::ApiClient.new self
       args = [@account, @username, @password, {accept_encoding: 'base64'}]
       case authenticator
         when 'authn'
@@ -148,13 +157,15 @@ module {{moduleName}}
       end
     end
 
-    # Gets a Config with a preset access token for API Calls
-    def self.authenticated_config(authenticator='authn', username=@username, password=@password)
-      config = self.default
-      config.username = username
-      config.password = password
-      token = config.get_token_by_authenticator(authenticator)
-      end
+    def setup_access_token(authenticator='authn')
+      token = get_token_by_authenticator(authenticator)
+      @api_key['Authorization'] = "token=\"#{token}\""
+    end
+
+    ####################################
+    #### End Custom defined methods ####
+    ####################################
+
 
     def configure
       yield(self) if block_given?

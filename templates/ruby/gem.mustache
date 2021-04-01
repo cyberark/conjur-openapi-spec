@@ -36,5 +36,18 @@ module {{moduleName}}
         Configuration.default
       end
     end
+
+    def version
+      version = ENV.fetch('CONJUR_VERSION', '5')
+      if version.empty?
+        5
+      else
+        version.to_i
+      end
+    end
+
+    def v5?
+      version == 5
+    end
   end
 end
