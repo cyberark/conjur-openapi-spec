@@ -4,9 +4,18 @@ set -e
 
 bin/generate_kong_config
 
+host_option=""
+# configure `docker run` --add-host to allow Kong to target other
+# containers on the host network. Docker for Mac/Windows pre-configures
+# host.docker.interal to point to the container host network
+if [ "$(uname -s)" == "Linux" ]; then
+    host_option="--add-host host.docker.internal:host-gateway"
+fi
+
 if [[ -z $(docker container ls -q --filter name=kong) ]]; then
     announce "Starting Kong in Docker"
     docker run -d --name kong \
+        $host_option \
         -v $(pwd):/opt/openapi \
         -e "KONG_DATABASE=off" \
         -e "KONG_DECLARATIVE_CONFIG=/opt/openapi/out/kong/kong.yml" \
@@ -38,6 +47,7 @@ announce "Making requests to Conjur through Kong Gateway"
 
 ensure_conjur_up
 sleep 10
+
 admin_api_key="$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 token="$(curl -s http://localhost:8000/authn/dev/admin/authenticate \
     --header "Accept-Encoding: base64" \
