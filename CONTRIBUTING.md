@@ -1,7 +1,7 @@
 # Contributing
 
-Please see our [Community Repository](https://github.com/cyberark/community) and our [Contribution Guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md).  
-They provide information regarding the process of contributing to Conjur OSS projects,  
+Please see our [Community Repository](https://github.com/cyberark/community) and our [Contribution Guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md).
+They provide information regarding the process of contributing to Conjur OSS projects,
 including issue reporting, pull request workflow and community guidelines.
 
 * [Prerequisites](#prerequisites)
@@ -41,7 +41,7 @@ Contributing to this repository requires installation of some developer tools.
 
 ### OpenAPI
 
-[OpenAPI Specification v3.0.0](https://github.com/OAI/OpenAPI-Specification/tree/3.0.0)  
+[OpenAPI Specification v3.0.0](https://github.com/OAI/OpenAPI-Specification/tree/3.0.0)
 [OpenAPI Generator v4.3.1](https://github.com/OpenAPITools/openapi-generator/tree/v4.3.1)
 
 ### Swagger
@@ -52,22 +52,22 @@ Contributing to this repository requires installation of some developer tools.
 
 ### Environment Setup
 
-Setup the development environment using the `start` script. The script starts a Swagger Editor  
-container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the  
+Setup the development environment using the `start` script. The script starts a Swagger Editor
+container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the
 spec against.
 
 ```shell
 $ ./bin/start
 ```
 
-To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger Editor editor with  
+To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger Editor editor with
 the `start_spec_ui` script.
 
 ```shell
 $ ./bin/start_spec_ui
 ```
 
-In each case, a browser window will be opened to the container running Swagger Editor.  
+In each case, a browser window will be opened to the container running Swagger Editor.
 Import the [`openapi.yml`](openapi.yml) into the UI to view/edit.
 
 The environment can be stopped and removed using the `stop` script.
@@ -104,7 +104,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
 `bin/integration_tests`
-* Used to run the suite of integration tests.  
+* Used to run the suite of integration tests.
 * Stands up a new Conjur `docker-compose` environment, generates a Python client
   library, and runs the integration test suite.
 * Run tests for only one client by specifying a client flag (currently only Python
@@ -158,6 +158,31 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 `bin/parse_changelog`
 * Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards
 
+#### Conjur Enterprise Developers
+
+The Enterprise only endpoints included in the specification all use a specific annotation to indicate that they
+are "enterprise only". When the OSS version of the spec is generated all of these objects will be removed.
+
+```yaml
+someObject:
+  x-conjur-settings:
+    enterprise-only: true
+```
+
+This marks `someObject` as an enterprise only feature.
+
+Note that because all `paths` have to be defined in the `openapi.yml#/paths` object it is
+acceptable to just put the annotation on the `openapi.yml#/paths/somePath` object and leave it
+off the referenced path definition. In this case when the OSS version of the spec is generated
+the path definition will have had its reference removed thereby not technically being
+included in the spec.
+
+Many of the scripts included in the `bin` directory have an optional `--enterprise` flag which
+tells the script to use the Enterprise version of the spec. To generate the Enterprise version
+of a client you would run `./bin/generate_client -l python --enterprise`. The only exception
+to this is the integration tests, which to run against an Enterprise container you must
+run the `./bin/test_dap` script.
+
 ## Manual Testing
 
 You can access a compatible version of the the Conjur (Ruby-based) command line
@@ -203,3 +228,8 @@ version.
 
 1. Create a new release from the tag in the GitHub UI
 1. Add the [CHANGELOG](./CHANGELOG.txt) for the current version to the GitHub release description
+
+### Enterprise Releases
+
+We currently do not have official spec releases for Conjur Enterprise. Versions of the spec can be
+generated using `./bin/transform --enterprise` which outputs a usable version of the spec to `out/enterprise/spec`.
