@@ -103,6 +103,27 @@ Each example performs the following steps:
 
 A step-by-step guide can be found in the [`examples/postman`](examples/postman) directory.
 
+### Using the OpenAPI spec with API Gateways
+
+Because the OpenAPI Specification is a widely accepted standard interface for RESTful APIs, many
+popular API gateways have tools for importing an OpenAPI spec into their service.
+
+Included in this project is an example of using Kong Gateway OSS with Conjur. Importing an
+OpenAPI spec into Kong requires first converting it into a Kong declarative configuration, which
+can be done with script `bin/generate_kong_config`. The example can be run with
+`examples/kong/start`.
+
+Apigee Edge has a convenient and well-documented
+[process](https://docs.apigee.com/api-platform/tutorials/create-api-proxy-openapi-spec)
+for creating an API proxy from an OpenAPI Specification, but requires the spec to define a public
+[target server](https://swagger.io/docs/specification/api-host-and-base-path/).
+
+While AWS API Gateway provides a
+[workflow](https://docs.aws.amazon.com/apigateway/latest/developerguide/import-edge-optimized-api.html)
+for setting up a new API by importing an OpenAPI spec, there are many OpenAPI features that are
+[not supported](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html).
+This precludes this project from being completely compatible.
+
 ## Contributing
 
 We welcome contributions of all kinds to the Conjur OpenAPI Spec. For instructions on how to  

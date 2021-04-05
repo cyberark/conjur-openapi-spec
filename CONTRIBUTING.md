@@ -132,6 +132,9 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Generates a client library for the desired `<language>`.  
 * Running the script with no argument will generate a Python client by default.
 
+`bin/generate_kong_config`
+* Generates a declarative configuration used by Kong Gateway.
+
 `bin/start_editor`
 * Used to start a Swagger Editor container independent of a Conjur instance.  
 
