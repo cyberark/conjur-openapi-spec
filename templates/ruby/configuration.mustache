@@ -89,7 +89,7 @@ module {{moduleName}}
     attr_accessor :force_ending_format
 
     def initialize
-      @scheme = '{{scheme}}'
+      @scheme = 'https'
       @base_path = '{{contextPath}}'
       @api_key = {}
       @api_key_prefix = {}
@@ -121,7 +121,7 @@ module {{moduleName}}
       @password = ENV.fetch('CONJUR_AUTHN_API_KEY', nil)
       @account = ENV.fetch('CONJUR_ACCOUNT', nil)
       @api_key_prefix['Authorization'] = 'Token'
-      @host = ENV.fetch('CONJUR_APPLIANCE_URL', '{{host}}')
+      @host = ENV.fetch('CONJUR_APPLIANCE_URL', nil)
 
       yield(self) if block_given?
     end

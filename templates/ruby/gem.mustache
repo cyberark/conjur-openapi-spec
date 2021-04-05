@@ -7,6 +7,7 @@ require '{{gemName}}/api_client'
 require '{{gemName}}/api_error'
 require '{{gemName}}/version'
 require '{{gemName}}/configuration'
+require 'yaml'
 
 # Models
 {{#models}}
@@ -30,6 +31,29 @@ module {{moduleName}}
     #   end
     # If no block given, return the default Configuration object.
     def configure
+      if block_given?
+        yield(Configuration.default)
+      else
+        Configuration.default
+      end
+    end
+
+    def configure_from_file(filename='~/.conjurrc')
+      filepath = File.expand_path(filename)
+      begin
+        file = File.open(filepath)
+        data = YAML.load(file)
+        file.close
+      rescue Exception => e
+        puts e
+      end
+
+      Configuration.default.configure do |conf|
+        conf.account ||= data.fetch('account', nil)
+        conf.host ||= data.fetch('appliance_url', nil)
+        conf.cert_file ||= data.fetch('cert_file', nil)
+      end
+
       if block_given?
         yield(Configuration.default)
       else
