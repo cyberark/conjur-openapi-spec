@@ -3,13 +3,21 @@ set -e
 . bin/util
 
 announce "Bundling OpenAPI spec"
+
 bin/bundle_spec
+docker run --rm \
+    -v $(pwd):/opt/openapi \
+    python:latest /bin/bash -c "
+        cd /opt/openapi && \\
+        pip3 install pyyaml && \\
+        python3 examples/kong/util.py bump_spec_version
+    "
 
 # a Kong declarative configuration requires a defined target server
 # using http://host.docker.interal allows a containerized Kong Gateway to target
 # a local Conjur instance
 echo "servers:
-  - url: http://host.docker.internal:80" | sudo tee -a spec.yml >/dev/null
+  - url: http://host.docker.internal:80" | sudo tee -a tmp_spec.yml >/dev/null
 
 announce "Generating Kong declarative configuration yaml"
 docker run --rm \
@@ -18,7 +26,7 @@ docker run --rm \
         npm i -g insomnia-inso \
         && cd /opt/openapi \
         && inso --verbose \
-            generate config spec.yml \
+            generate config tmp_spec.yml \
             --type declarative \
             --output out/kong/kong.yml
     "
@@ -30,7 +38,7 @@ docker run --rm \
     python:latest /bin/bash -c "
         cd /opt/openapi && \\
         pip3 install pyyaml && \\
-        python3 examples/kong/strip_plugins.py
+        python3 examples/kong/util.py strip_plugins
     "
 
 echo "Kong configuration written to out/kong/kong.yml"

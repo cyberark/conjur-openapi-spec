@@ -9,6 +9,25 @@ Requests are processed by Kong before being routed to Conjur. This example does 
 any of Kong's many plugins, including authentication, traffic control and analytics. More info on
 Kong plugins can be found at Kong's [Plugin Hub](https://docs.konghq.com/hub/).
 
+Before the Conjur OpenAPI description can be used to generate a Kong configuration, the spec has
+to be edited to abide by recently introduced OAS v3.1 standards for Mutual TLS security scheme
+definition. Spec bundling and other functions only support v3.0 descriptions, so this the changes
+have to be included after the spec is bundled using `bin/bundle_spec`.
+
+```yaml
+# v3.0
+securitySchemes:
+  conjurKubernetesMutualTls:
+    type: http
+    scheme: mutual
+# v3.1
+securitySchemes:
+  conjurKubernetesMutalTls:
+    type: mutualTLS
+```
+
+A function is included in `util.py` to automate this edit.
+
 Converting an OpenAPI description to a Kong configuration requires
 [Inso](https://github.com/Kong/insomnia/tree/develop/packages/insomnia-inso), a CLI for Kong's API
 development tool [Insomnia](https://github.com/Kong/insomnia).
@@ -17,8 +36,6 @@ You can use Inso to generate a declarative Kong configuration from a bundled ver
 OpenAPI spec. Inso requires that the spec defines a server URL for Kong to target.
 
 ```bash
-bin/bundle_spec
-
 echo "servers:
   - url: http://host.docker.internal:80" >> spec.yml
 
