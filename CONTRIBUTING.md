@@ -13,7 +13,17 @@ including issue reporting, pull request workflow and community guidelines.
   + [Environment Setup](#environment-setup)
   + [Editing the OpenAPI Specification](#editing-the-openapi-specification)
   + [Utility Script Reference](#utility-script-reference)
-* [Integration Tests](#integration-tests)
+    - [Automated tests](#automated-tests)
+    - [Linters](#linters)
+    - [Utility scripts](#utility-scripts)
+    - [Conjur Enterprise Developers](#conjur-enterprise-developers)
+* [Manual Testing](#manual-testing)
+* [Releasing](#releasing)
+  + [Verify and update dependencies](#verify-and-update-dependencies)
+  + [Update the version and changelog](#update-the-version-and-changelog)
+  + [Tag the version](#tag-the-version)
+  + [Add a new GitHub release](#add-a-new-github-release)
+  + [Enterprise Releases](#enterprise-releases)
 
 <!--
 Table of contents generated with markdown-toc
@@ -49,6 +59,28 @@ Contributing to this repository requires installation of some developer tools.
 [Swagger Editor v3.14.6](https://github.com/swagger-api/swagger-editor/tree/v3.14.6)
 
 ## Development
+
+### Getting Started
+
+There are two main aspects to this project, the spec itself and the generated clients. Contained in the
+`bin` directory there are many scripts for running various tests and checks against both the spec itself
+and the generated clients. The most important scripts are `integration_tests` and `generate_client`.
+
+The [`generate_client`](#utility-scripts) script will use the [OpenApi Generator](https://openapi-generator.tech/)
+to output a client to the `out` directory. You can specify the generated client's language with the `-l`
+option, e.g. `./bin/generate_client -l go`. This is a good tool if you need to generate a client for a currently
+unreleased version, or need to do some manual testing on the latest version of a client.
+
+The [`integration_tests`](#automated-tests) script will automatically generate a client then run integration tests against
+that client if they are available. Integration tests can be found in the `test` directory, you can
+specify the language of the client to test with a long flag: `--python`, `--csharp`. Both scripts also have other
+options which can be viewed by running them with the `-h` flag.
+
+There is also an included `api_test` script which will run contract tests against an instance of
+Conjur. It is a great tool for finding return codes which are missing from the spec, and for finding
+changes in Conjur which may not yet have been reflected in the spec.
+
+For a full list of all scripts and their purpose see the [utility script reference](#utility-script-reference)
 
 ### Environment Setup
 
@@ -125,12 +157,14 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 
 `./bin/lint_spec`
 * Uses [spectral](https://github.com/stoplightio/spectral) to lint the OpenAPI YAML.
+* Will find broken references, malformed objects, and any other errors in the spec itself.
 
 #### Utility scripts
 
 `bin/generate_client -l <language> [-o <output-directory>]`
 * Generates a client library for the desired `<language>`.
 * Running the script with no argument will generate a Python client by default.
+* Outputs to the `out` directory by default.
 
 `bin/generate_kong_config`
 * Generates a declarative configuration used by Kong Gateway.
@@ -138,16 +172,18 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 `bin/start_spec_ui`
 * Used to start a Swagger Editor container independent of a Conjur instance.
 * Runs the `bin/bundle_spec` script before starting and points the UI at the bundled spec.
+* Editor available at http://localhost:9090 once the container is up.
 
 `bin/start`
 * Used to set up a new development environment.
-* Stands up a new instance of Conjur, and starts a Swagger Editor container.
+* Calls both `start_editor` and `start_conjur` to bring up both Conjur and Editor containers.
 
 `bin/start_conjur`
 * Used to start a new local Conjur instance based on the project's `docker-compose`.
+* Both the http & https ports are exposed so requests can be made to Conjur from outside the docker network.
 
 `bin/stop`
-* Used to deconstruct the development environmnet.
+* Used to deconstruct the development environment.
 * Stops and removes the `docker-compose` environment and Swagger Editor.
 
 `bin/bundle_spec`
