@@ -14,9 +14,9 @@ function get_banner(){
 
 function announce() {
   banner=$(get_banner $@)
-  echo $banner
-  echo "$@"
-  echo $banner
+  echo -e "\e[0;32m$banner"
+  echo -e "$@"
+  echo -e "$banner\e[m"
 }
 
 function ensure_client_is_generated(){

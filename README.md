@@ -62,6 +62,14 @@ Need help with something that's not yet documented here? Please
 [open an issue](https://github.com/cyberark/conjur-openapi-spec/issues/new/choose) - we'd be happy
 to help you get started.
 
+### Swagger Editor
+
+The [Swagger Editor](https://swagger.io/tools/swagger-ui/) is a great tool for viewing and editing
+OpenAPI specifications, although we discourage editing directly in the UI because our spec
+is split over multiple files. In order to view the spec in Swagger run the
+`./bin/start_spec_ui` script, all of the standard spec files will be bundled together and
+an instance of the UI will be opened pointing at the bundled spec.
+
 ### Generating client libraries
 
 To generate a client library using the OpenAPI spec, use the provided script:

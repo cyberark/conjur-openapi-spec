@@ -62,3 +62,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#129](https://github.com/cyberark/conjur-openapi-spec/issues/129)
 - Response schemas are now more fully defined and methods will now return pre-defined objects.
   [cyberark/conjur-openapi-spec#43](https://github.com/cyberark/conjur-openapi-spec/issues/43)
+- Renamed the `start_editor` script to `start_spec_ui` and updated it to open the bundled version of the spec.
+  [cyberark/conjur-openapi-spec#168](https://github.com/cyberark/conjur-openapi-spec/issues/168)
