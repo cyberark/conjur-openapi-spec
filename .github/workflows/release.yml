@@ -1,0 +1,34 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Release the Specification
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Set up version info
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: Get release notes
+        id: release_notes
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Gather release artifacts
+        env:
+          RELEASE_VERSION: ${{ steps.get_version.outputs.version }}
+        run: ./bin/release
+
+      - name: Create release
+        uses: ncipollo/release-action@v1.8.2
+        with:
+          artifacts: dist/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.release_notes.outputs.release_notes }}

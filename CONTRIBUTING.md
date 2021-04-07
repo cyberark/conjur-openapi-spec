@@ -192,7 +192,11 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
   be used directly to generate a client.
 
 `bin/parse_changelog`
-* Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards
+* Parses the changelog and makes sure it is up to date with [keep a changelog](https://keepachangelog.com/en/1.0.0/) standards.
+
+`bin/release`
+* Gathers artifacts to be attached to releases of the specification.
+* Outputs archives to `release_artifacts` in both zip and tarball format.
 
 #### Conjur Enterprise Developers
 
