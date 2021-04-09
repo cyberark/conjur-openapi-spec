@@ -15,6 +15,8 @@ components:
 
   paths:
     Roles:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "roles"

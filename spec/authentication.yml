@@ -111,6 +111,8 @@ components:
 
   paths:
     DefaultLogin:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "authentication"
@@ -166,6 +168,8 @@ components:
 
 
     K8sInjectClientCert:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -213,6 +217,8 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
 
     LDAPLogin:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "authentication"
@@ -264,6 +270,8 @@ components:
           - basicAuth: []
 
     DefaultAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -338,6 +346,8 @@ components:
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
     AWSAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -409,6 +419,8 @@ components:
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
     AzureAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -480,6 +492,8 @@ components:
 
 
     GCPAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -526,6 +540,8 @@ components:
 
 
     KubernetesAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -592,6 +608,8 @@ components:
 
 
     LDAPAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -668,6 +686,8 @@ components:
 
 
     OIDCAuthenticate:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "authentication"
@@ -710,6 +730,8 @@ components:
 
 
     ChangePassword:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       put:
         tags:
         - "authentication"
@@ -770,6 +792,8 @@ components:
           - basicAuth: []
 
     RotateApiKey:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       put:
         tags:
         - "authentication"
@@ -836,6 +860,8 @@ components:
             conjurAuth: []
 
     EnableAuthenticatorInstance:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       patch:
         tags:
         - "authentication"

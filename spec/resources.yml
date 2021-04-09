@@ -136,6 +136,8 @@ components:
 
   paths:
     ListResources:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "resources"
@@ -224,6 +226,8 @@ components:
           - conjurAuth: []
 
     ListResourcesOnAccount:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "resources"
@@ -310,6 +314,8 @@ components:
           - conjurAuth: []
 
     ListSimilarResourcesOnAccount:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "resources"
@@ -397,6 +403,8 @@ components:
           - conjurAuth: []
 
     SingleResource:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "resources"

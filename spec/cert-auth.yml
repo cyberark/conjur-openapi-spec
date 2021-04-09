@@ -34,6 +34,8 @@ components:
 
   paths:
     Sign:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "certificate authority"
