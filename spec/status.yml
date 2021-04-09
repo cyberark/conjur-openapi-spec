@@ -92,6 +92,8 @@ components:
 
   paths:
     WhoAmI:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "status"
@@ -112,6 +114,8 @@ components:
           - conjurAuth: []
 
     ServiceAuthenticatorStatus:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - 'status'
@@ -172,6 +176,8 @@ components:
           - conjurAuth: []
 
     AuthenticatorStatus:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - 'status'
@@ -213,6 +219,8 @@ components:
           - conjurAuth: []
 
     AuthenticatorsIndex:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       get:
         tags:
         - "status"

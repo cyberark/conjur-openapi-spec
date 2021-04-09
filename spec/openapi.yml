@@ -131,6 +131,18 @@ components:
       schema:
         type: string
 
+    RequestID:
+      name: X-Request-Id
+      in: header
+      required: false
+      description: |
+        Add an ID to the request being made so it can be tracked in Conjur.
+        If not provided the server will automatically generate one.
+      example: "test-id"
+      schema:
+        type: string
+        pattern: '^[a-zA-Z\d-]{1,255}$'
+
   responses:
     BadRequest:
       description: "The server cannot process the request due to malformed request syntax"

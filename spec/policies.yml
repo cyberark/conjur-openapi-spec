@@ -41,6 +41,8 @@ components:
 
   paths:
     Policies:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       put:
         tags:
         - "policies"

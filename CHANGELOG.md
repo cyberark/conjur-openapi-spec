@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#145](https://github.com/cyberark/conjur-openapi-spec/issues/145)
 - Instructions and scripts for using the API spec with Postman included.
   [cyberark/conjur-openapi-spec#92](https://github.com/cyberark/conjur-openapi-spec/issues/92)
+- New header parameter allowing user to set reuquest IDs to all endpoints.
+  [cyberark/conjur-openapi-spec#175](https://github.com/cyberark/conjur-openapi-spec/issues/175)
 
 ### Fixed
 - Workaround for request body issue on revokeHostToken operation is now removed and tests have been updated.

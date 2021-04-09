@@ -151,6 +151,8 @@ components:
 
   paths:
     CreateHostToken:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "host factory"
@@ -190,6 +192,8 @@ components:
           - conjurAuth: []
 
     RevokeHostToken:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       delete:
         tags:
         - "host factory"
@@ -225,6 +229,8 @@ components:
           - conjurAuth: []
 
     CreateHost:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
       post:
         tags:
         - "host factory"

@@ -194,5 +194,13 @@ class TestStatusApi(api_config.ConfiguredTest):
                 self.assertIsInstance(value, str)
                 self.assertNotEqual(value, '')
 
+    def test_set_request_id(self):
+        """Test case for setting the request ID on an endpoint"""
+        request_id = 'testing'
+        _, status, headers = self.api.get_authenticators_with_http_info(x_request_id=request_id)
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers['X-Request-Id'], request_id)
+
 if __name__ == '__main__':
     unittest.main()
