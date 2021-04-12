@@ -8,9 +8,9 @@ ensure_conjur_up
 
 # Remove the gem if it is already built so we dont create a gemfile
 # which contains itself when we build
-if [ -e ./out/ruby/conjur-*.gem ]; then
+if [ -e ./out/ruby/conjur-sdk-*.gem ]; then
   announce "Remove old gem file"
-  rm ./out/ruby/conjur-*.gem
+  rm ./out/ruby/conjur-sdk-*.gem
 fi
 
 export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
@@ -26,7 +26,7 @@ docker run --rm \
   -w /src \
   ruby:3 \
   bash -c "
-    gem build ./conjur && \
-    gem install ./conjur-*.gem && \
+    gem build ./conjur-sdk && \
+    gem install ./conjur-sdk-*.gem && \
     ruby /src/ruby_client.rb
   "

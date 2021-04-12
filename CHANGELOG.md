@@ -66,3 +66,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#43](https://github.com/cyberark/conjur-openapi-spec/issues/43)
 - Renamed the `start_editor` script to `start_spec_ui` and updated it to open the bundled version of the spec.
   [cyberark/conjur-openapi-spec#168](https://github.com/cyberark/conjur-openapi-spec/issues/168)
+- Updated naming and added support for environment variables in generated Ruby client.
+  [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)

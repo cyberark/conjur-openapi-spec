@@ -2,7 +2,7 @@
 # confirmed for ruby versions 2.6+
 
 # Load the gem
-require 'conjur'
+require 'conjur-sdk'
 
 CERT_DIR = '/config/https'
 SSL_CERT_FILE = 'ca.crt'
@@ -27,7 +27,7 @@ empty_policy = IO.read("/config/policy/simple.yml")
 policy = IO.read("/config/policy/policy.yml")
 
 # Setup client configuration
-config = Conjur.configure
+config = ConjurSDK.configure
 # config.debugging = true
 config.scheme = "https"
 config.host = "conjur-https"
@@ -41,7 +41,7 @@ config.cert_file = File.join(CERT_DIR, CONJUR_CERT_FILE)
 config.key_file = File.join(CERT_DIR, CONJUR_KEY_FILE)
 
 # Authenticating admin using basicAuth
-authn_instance = Conjur::AuthenticationApi.new
+authn_instance = ConjurSDK::AuthenticationApi.new
 token = nil
 puts "Authenticating admin..."
 token = authn_instance.get_access_token(
@@ -68,8 +68,8 @@ token_body = 'token="%s"' % [token]
 config.api_key['Authorization'] = token_body
 config.api_key_prefix['Authorization'] = 'Token'
 
-policy_instance = Conjur::PoliciesApi.new
-authn_instance = Conjur::AuthenticationApi.new
+policy_instance = ConjurSDK::PoliciesApi.new
+authn_instance = ConjurSDK::AuthenticationApi.new
 
 # Load empty policy, allows the example to be run multiple times sequentially
 # Loading a policy returns data for users CREATED when the policy is loaded. Without loading
@@ -106,7 +106,7 @@ alice_api_key = authn_instance.rotate_api_key(
 puts "New API key: #{alice_api_key}"
 
 # Store a secret, uses conjurAuth
-secrets_instance = Conjur::SecretsApi.new
+secrets_instance = ConjurSDK::SecretsApi.new
 puts
 puts "Storing secret..."
 puts "Secret data: #{secret}"
