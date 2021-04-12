@@ -185,8 +185,6 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -222,8 +220,6 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "404":
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -259,8 +255,6 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
-          "500":
-            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
