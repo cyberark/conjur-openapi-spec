@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.1.0] - 2021-04-12
 ### Added
 - Example use case of spec-generated Ruby client. 
   [cyberark/conjur-openapi-spec#12](https://github.com/cyberark/conjur-openapi-spec/issues/12)
@@ -49,7 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#145](https://github.com/cyberark/conjur-openapi-spec/issues/145)
 - Instructions and scripts for using the API spec with Postman included.
   [cyberark/conjur-openapi-spec#92](https://github.com/cyberark/conjur-openapi-spec/issues/92)
-- New header parameter allowing user to set reuquest IDs to all endpoints.
+- New header parameter allowing user to set request IDs for all endpoints.
   [cyberark/conjur-openapi-spec#175](https://github.com/cyberark/conjur-openapi-spec/issues/175)
 
 ### Fixed
