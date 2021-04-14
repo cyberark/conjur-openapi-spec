@@ -1,0 +1,6 @@
+apiPackage: org.conjur.sdk.api
+modelPackage: org.conjur.sdk.model
+scmUrl: https://github.com/cyberark/conjur-openapi-spec
+invokerPackage: org.conjur.sdk
+artifactId: conjur-sdk-java
+artifactDescription: Java Conjur SDK
