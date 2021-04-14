@@ -60,6 +60,7 @@ docker-compose run --rm --no-deps \
     "schemathesis run \
     --show-errors-tracebacks \
     --request-tls-verify /config/ca.crt \
+    --hypothesis-suppress-health-check=filter_too_much \
     --hypothesis-deadline None ${endpoint_flag}\
     --checks status_code_conformance \
     --checks content_type_conformance \
