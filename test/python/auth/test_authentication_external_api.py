@@ -73,11 +73,8 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_service_login_200(self):
-        """Test case for service_login 200 response
-
-        Login with the given authenticator
-        """
+    def test_get_api_key_via_ldap_200(self):
+        """Test case for get_api_key_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
         alice_config.password = 'alice'
         alice_client = conjur.ApiClient(alice_config)
@@ -87,18 +84,15 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 200)
 
-    def test_service_login_401(self):
-        """Test case for service_login 401 response"""
+    def test_get_api_key_via_ldap_401(self):
+        """Test case for get_api_key_via_ldap 401 response"""
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.bad_auth_api.get_api_key_via_ldap('aws', self.account)
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_get_access_token_service_200(self):
-        """Test case for get_access_token_service 200 response
-
-        Login with the given authenticator
-        """
+    def test_get_access_token_via_ldap_200(self):
+        """Test case for get_access_token_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
         alice_client = conjur.ApiClient(alice_config)
         alice_api = conjur.api.AuthenticationApi(alice_client)
@@ -112,11 +106,8 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 200)
 
-    def test_get_access_token_service_401(self):
-        """Test case for get_access_token_service 401 response
-
-        Login with the given authenticator
-        """
+    def test_get_access_token_via_ldap_401(self):
+        """Test case for get_access_token_via_ldap 401 response"""
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.api.get_access_token_via_ldap(
                 'test',
@@ -141,7 +132,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 #
 #        self.assertEqual(context.exception.status, 404)
 
-    def test_oidc_authenticate_200(self):
+    def test_get_access_token_via_oidc_200(self):
         """Test case for oidc_authenticate 200 response"""
         api_config.setup_oidc_webservice()
         id_token = get_oidc_id_token()
@@ -153,7 +144,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         )
         self.assertEqual(status, 200)
 
-    def test_oidc_authenticate_401(self):
+    def test_get_access_token_via_oidc_401(self):
         """Test case for oidc_authenticate 401 response"""
         api_config.setup_oidc_webservice()
 
@@ -162,7 +153,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_gcp_authenticate_200(self):
+    def test_get_access_token_via_gcp_200(self):
         """Test case for gcp_authenticate 200 response"""
         jwt_token = 'bad token'
 
@@ -188,14 +179,14 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             collection_formats={}
         )
 
-    def test_gcp_authenticate_400(self):
+    def test_get_access_token_via_gcp_400(self):
         """Test case for gcp_authenticate 400 response"""
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.api.get_access_token_via_gcp('\00', jwt='bad token')
 
         self.assertEqual(context.exception.status, 400)
 
-    def test_gcp_authenticate_401(self):
+    def test_get_access_token_via_gcp_401(self):
         """Test case for gcp_authenticate 401 response"""
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.api.get_access_token_via_gcp(self.account, jwt='bad token')
