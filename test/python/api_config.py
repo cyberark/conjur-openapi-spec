@@ -5,10 +5,11 @@ import unittest
 
 import conjur
 
-CERT_DIR = pathlib.Path('config/https')
-SSL_CERT_FILE = 'ca.crt'
-CONJUR_CERT_FILE = 'conjur.crt'
-CONJUR_KEY_FILE = 'conjur.key'
+CONJUR_HOST = os.environ.get('CONJUR_HOST', default='https://conjur-https')
+CERT_DIR = pathlib.Path(os.environ.get('CERT_DIR', default='config/https'))
+SSL_CERT_FILE = os.environ.get('SSL_CERT_FILE', default='ca.crt')
+CONJUR_CERT_FILE = os.environ.get('CONJUR_CERT_FILE', default='conjur.crt')
+CONJUR_KEY_FILE = os.environ.get('CONJUR_KEY_FILE', default='conjur.key')
 
 # Environment Constants
 CONJUR_AUTHN_API_KEY = 'CONJUR_AUTHN_API_KEY'
@@ -17,6 +18,9 @@ CONJUR_ACCOUNT = 'CONJUR_ACCOUNT'
 
 WEBSERVICE_POLICY = pathlib.Path('test/config/webservice.yml')
 OIDC_POLICY_FILE = 'test/config/oidc-webservice.yml'
+
+if (ENTERPRISE_TESTS := os.environ.get('ENTERPRISE_TESTS', default=False)) == '1':
+    ENTERPRISE_TESTS = True
 
 def get_webservice_policy():
     """Gets the text for the webservice testing policy"""
@@ -39,9 +43,8 @@ def get_bad_auth_api_config(username='admin'):
 def get_api_config(username='admin'):
     """Gets a default API config to be used with the testsing setup"""
     config = conjur.Configuration(
-            host='https://conjur-https',
+            host=CONJUR_HOST,
         )
-
     config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
     config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
     config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
@@ -117,6 +120,7 @@ class ConfiguredTest(unittest.TestCase):
 
         cls.client = get_api_client()
         cls.bad_auth_client = conjur.ApiClient(get_api_config())
+        cls.load_default_policy()
 
     @classmethod
     def tearDownClass(cls):

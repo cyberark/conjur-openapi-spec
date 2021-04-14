@@ -150,6 +150,10 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
   $ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
   ```
 
+`bin/test_enterprise`
+* Used to run the integration tests against a Conjur Enterprise instance
+* You will need to have access to the Cyberark Docker registry in order to pull the Conjur Enterprise images
+
 #### Linters
 
 `./bin/lint_tests`
@@ -160,6 +164,10 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Will find broken references, malformed objects, and any other errors in the spec itself.
 
 #### Utility scripts
+
+`bin/transform [--enterprise/--oss]`
+* Generates a usable version of the specification for either Conjur (--oss) or Conjur Enterprise (--enterprise)
+* Generates the Conjur version of the spec by default
 
 `bin/generate_client -l <language> [-o <output-directory>]`
 * Generates a client library for the desired `<language>`.

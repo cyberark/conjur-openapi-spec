@@ -3,14 +3,14 @@ set -e
 
 source ./bin/util
 
-ensure_client_is_generated python
+ensure_client_is_generated python conjur
 ensure_conjur_up
 
 export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
 
 announce "Running Python Example..."
 docker run --rm \
-  -v ${PWD}/out/python:/src \
+  -v ${PWD}/out/oss/python:/src \
   -v ${PWD}/examples/python/python_client.py:/src/python_client.py \
   -v ${PWD}/examples/config:/config/policy \
   -v ${PWD}/config/https:/config/https \

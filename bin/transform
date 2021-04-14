@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if [ "$1" = '' ]; then
+    echo "You must specify either --enterprise or --oss"
+elif [ "$1" = '--oss' ]; then
+    mkdir -p out/oss
+elif [ "$1" = '--enterprise' ]; then
+    mkdir -p out/enterprise
+fi
+
+export VERSION="$1"
+
+docker run --rm \
+    -v ${PWD}:/code \
+    -w /code \
+    --env VERSION \
+    python:3.9 \
+    /bin/bash -c "
+        pip install pyyaml
+
+        # We dont bundle here because generating a client from a bundle
+        # because you lose a lot of object name information. Instead
+        # transform each file individually
+        for name in ./spec/*
+        do
+            if [ -f \$name ]; then
+                echo \$name \$VERSION
+                ./bin/transform.py \$name \$VERSION
+            fi
+        done
+    "

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import unittest
-import base64
+from unittest.mock import patch
 
 import conjur
 
@@ -217,7 +217,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.set_variables(TEST_VARIABLES, secret_values)
 
         # Secrets have to be in the format org:variable:secret_name
-        secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
+        secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
         response, status, _ = self.api.get_secrets_with_http_info(
             ",".join(secret_list)
         )
@@ -229,7 +229,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
     def test_get_secrets_401(self):
         """Test case for get_secrets 401 response"""
-        secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
+        secret_list = ','.join([f"{self.account}:variable:{i}" for i in TEST_VARIABLES])
 
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             self.bad_auth_api.get_secrets(secret_list)
@@ -241,7 +241,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.grant_insufficient_permissions()
         alice_client = api_config.get_api_client(username='alice')
         alice_api = conjur.api.SecretsApi(alice_client)
-        secret_list = ','.join([f"dev:variable:{i}" for i in TEST_VARIABLES])
+        secret_list = ','.join([f"{self.account}:variable:{i}" for i in TEST_VARIABLES])
 
         with self.assertRaises(conjur.exceptions.ApiException) as context:
             alice_api.get_secrets(secret_list)
@@ -267,24 +267,35 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.assertEqual(context.exception.status, 422)
 
     def test_get_secrets_encoded(self):
-        """Test case for get_variables 200 response with base64 encoded binary secrets"""
+        """Test case for get_secrets 200 response with base64 encoded binary secrets"""
         secret_values = [b'one\xffbinary', b'two']
         self.set_variables(TEST_VARIABLES, secret_values)
 
         # Secrets have to be in the format org:variable:secret_name
-        secret_list = [f"dev:variable:{i}" for i in TEST_VARIABLES]
-        response, status, headers = self.api.get_secrets_with_http_info(
-            ",".join(secret_list),
-            accept_encoding="base64"
+        secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
+        with patch.object(conjur.api_client.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.get_secrets(
+                ",".join(secret_list),
+                accept_encoding="base64"
+            )
+        mock.assert_called_once_with(
+            '/secrets',
+            'GET',
+            {},
+            [('variable_ids', ','.join(secret_list))],
+            {'Accept-Encoding': 'base64', 'Accept': 'application/json'},
+            body=None,
+            post_params=[],
+            files={},
+            response_type='object',
+            auth_settings=['conjurAuth'],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
         )
-
-        for secret, value in zip(secret_list, secret_values):
-            self.assertIn(secret, response)
-            decoded = base64.b64decode(response[secret])
-            self.assertEqual(decoded, value)
-
-        self.assertEqual(status, 200)
-        self.assertEqual(headers['Content-Encoding'].lower(), "base64")
 
 if __name__ == '__main__':
     unittest.main()

@@ -105,9 +105,6 @@ components:
         text/plain:
           schema:
             type: string
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AccessToken'
 
   paths:
     DefaultLogin:
@@ -926,3 +923,4 @@ components:
 
         security:
           - conjurAuth: []
+

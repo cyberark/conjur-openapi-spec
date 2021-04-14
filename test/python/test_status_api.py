@@ -69,8 +69,10 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    @unittest.skipIf(api_config.ENTERPRISE_TESTS,
+                     'Dont support testing external authenticators on Enterprise currently')
     def test_get_service_authenticator_status_200(self):
-        """Test case for authenticator 200 return code"""
+        """Test case for get_service_authenticator_status 200 return code"""
         api_config.setup_oidc_webservice()
         resp, status, _ = self.api.get_service_authenticator_status_with_http_info(
             'authn-oidc',
@@ -201,6 +203,46 @@ class TestStatusApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 200)
         self.assertEqual(headers['X-Request-Id'], request_id)
+
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
+    def test_health_200(self):
+        """Test case for Enterprise health 200 response"""
+        resp, status, _ = self.api.health_with_http_info()
+        status_keys = ['services', 'audit', 'database']
+
+        self.assertEqual(status, 200)
+        self.assertTrue(resp['ok'])
+        for i in status_keys:
+            self.assertTrue(resp[i]['ok'])
+
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
+    def test_remote_health_200(self):
+        """Test case for Enterprise remote health 200 response"""
+        resp, status, _ = self.api.remote_health_with_http_info('conjur-master.mycompany.local')
+        status_keys = ['services', 'audit', 'database']
+
+        self.assertEqual(status, 200)
+        self.assertTrue(resp['ok'])
+        for i in status_keys:
+            self.assertTrue(resp[i]['ok'])
+
+    @unittest.skipUnless(api_config.ENTERPRISE_TESTS, "Endpoint not available in Conjur")
+    def test_info_200(self):
+        """Test case for Enterprise info 200 response"""
+        resp, status, _ = self.api.info_with_http_info()
+        keys = [
+            'release',
+            'version',
+            'services',
+            'container',
+            'role',
+            'configuration',
+            'authenticators'
+        ]
+
+        self.assertEqual(status, 200)
+        for i in keys:
+            self.assertIsNotNone(getattr(resp, i))
 
 if __name__ == '__main__':
     unittest.main()

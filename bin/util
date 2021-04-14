@@ -20,13 +20,19 @@ function announce() {
 }
 
 function ensure_client_is_generated(){
-    client_lang=$1
+    client_lang="$1"
+    edition="$2"
     if [ $client_lang = "" ]; then
         echo "ensure_client_is_generated requires the client language as an argument"
         exit 1;
     fi
 
-    if [ ! -d "./out/$client_lang" ]; then
+    if [ $edition = "" ]; then
+        echo "You must specify either enterprise or conjur as the edition"
+        exit 1;
+    fi
+
+    if [ ! -d "./out/$edition/$client_lang" ]; then
         announce "Generating $client_lang client"
         ./bin/generate_client -l $client_lang
     else

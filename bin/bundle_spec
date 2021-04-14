@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+if [ "$1" = '--oss' ] || [ "$1" = '' ]; then
+    ./bin/transform --oss
+    input_file=/code/out/oss/spec/openapi.yml
+elif [ "$1" = '--enterprise' ]; then
+    ./bin/transform --enterprise
+    input_file=/code/out/enterprise/spec/openapi.yml
+fi
+
 docker run --rm \
     -v ${PWD}:/code \
     node:latest \
-    /bin/bash -c "npm i -g @stoplight/spectral && npm i -g swagger-cli && swagger-cli bundle /code/spec/openapi.yml --outfile /code/spec.yml --type yaml"
+    /bin/bash -c "npm i -g @stoplight/spectral && npm i -g swagger-cli && swagger-cli bundle $input_file --outfile /code/spec.yml --type yaml"

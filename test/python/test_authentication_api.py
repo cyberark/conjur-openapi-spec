@@ -128,6 +128,8 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    @unittest.skipIf(api_config.ENTERPRISE_TESTS,
+         "Our Enterprise conf doesn't support bypassing ssl so we cannot evoke this response")
     def test_get_api_key_422(self):
         """Test case for 422 status response when logging in
         This test uses HTTP instead of HTTPS, letting Conjur reject malformed parameters
@@ -219,8 +221,6 @@ class TestAuthnApi(api_config.ConfiguredTest):
         """Test case for 422 status response when logging in
         This test uses HTTP instead of HTTPS, letting Conjur reject malformed parameters
         """
-        self.config.host = 'http://conjur'
-
         with self.assertRaises(conjur.ApiException) as context:
             self.api.rotate_api_key(self.account, role='\00')
 
@@ -279,6 +279,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 422)
 
+@unittest.skipIf(api_config.ENTERPRISE_TESTS, 'No environment available for Enterprise')
 class TestExternalAuthnApi(api_config.ConfiguredTest):
     """Class tests api functions relating to external authenticators
 
