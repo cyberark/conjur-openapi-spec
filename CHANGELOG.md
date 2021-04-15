@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - DAP endpoints and scripts to run tests against a DAP instance.
   [cyberark/conjur-openapi-spec#144](https://github.com/cyberark/conjur-openapi-spec/issues/144)
+- Basic Java client integration tests and configuration.
+  [cyberark/conjur-openapi-spec#181](https://github.com/cyberark/conjur-openapi-spec/pull/181)
 
 ## [5.1.0] - 2021-04-12
 ### Added

@@ -27,3 +27,13 @@ jobs:
 
       - name: run integration test script
         run: ./bin/integration_tests --csharp
+
+  java:
+    runs-on: ubuntu-latest
+    name: Java Integration Tests
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+
+      - name: run integration test script
+        run: ./bin/integration_tests --java
