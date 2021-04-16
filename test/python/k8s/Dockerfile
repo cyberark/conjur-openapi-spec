@@ -22,7 +22,7 @@ RUN pip3 install -r requirements.txt
 
 COPY . $INSTALL_DIR
 
-RUN pip3 install -e out/python/
+RUN pip3 install -e out/oss/python/
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 CMD [ "sleep 9999" ]
