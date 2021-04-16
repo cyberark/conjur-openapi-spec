@@ -118,20 +118,6 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-# we should write one of these for each service; commenting out for now
-#    def test_get_access_token_service_404(self):
-#        """Test case for authenticate_service 404 response"""
-#        with self.assertRaises(conjur.exceptions.ApiException) as context:
-#            self.api.get_access_token_via_authenticator(
-#                'nonexist',
-#                'nonexist',
-#                self.account,
-#                'admin',
-#                body='badpass'
-#            )
-#
-#        self.assertEqual(context.exception.status, 404)
-
     def test_get_access_token_via_oidc_200(self):
         """Test case for oidc_authenticate 200 response"""
         api_config.setup_oidc_webservice()
