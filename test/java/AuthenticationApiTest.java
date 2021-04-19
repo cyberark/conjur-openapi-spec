@@ -22,29 +22,27 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Assert;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.conjur.sdk.api.Utils;
+import com.google.gson.Gson;
 
 /**
  * API tests for AuthenticationApi
  */
-public class AuthenticationApiTest {
-
+public class AuthenticationApiTest extends ConfiguredTest {
     private AuthenticationApi api;
-    private ApiClient client = Configuration.getDefaultApiClient();
-    private String login = System.getenv().get("CONJUR_AUTHN_LOGIN");
-    private String account = System.getenv().get("CONJUR_ACCOUNT");
-    private HttpBasicAuth basicAuth;
 
-
+    @Override
     @Before
     public void setUp() {
+        client = Configuration.getDefaultApiClient();
+        login = System.getenv("CONJUR_AUTHN_LOGIN");
+        account = System.getenv("CONJUR_ACCOUNT");
+        client.setBasePath("http://conjur");
+
         api = new AuthenticationApi();
         client.setBasePath("http://conjur");
         basicAuth = (HttpBasicAuth) client.getAuthentication("basicAuth");
@@ -120,12 +118,13 @@ public class AuthenticationApiTest {
      * @throws ApiException
      *          if the api call fails
      */
+    @Ignore("Causes issues with other tests because Java doesn't allow setting Environment variables")
     @Test
     public void rotateApiKeyTest() throws ApiException {
         String xRequestId = null;
         String role = null;
         
-        String response = api.rotateApiKey(account, role, xRequestId);
-        Utils.setEnv("CONJUR_AUTHN_API_KEY", response);
+        ApiResponse<String> response = api.rotateApiKeyWithHttpInfo(account, role, xRequestId);
+        Assert.assertEquals(200, response.getStatusCode());
     }
 }

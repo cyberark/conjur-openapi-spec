@@ -930,6 +930,8 @@ public class ApiClient {
             return RequestBody.create(MediaType.parse(contentType), content);
         } else if (contentType == "text/plain"){
             return RequestBody.create(MediaType.parse(contentType), (String)obj);
+        } else if (contentType == "application/octet-stream") {
+            return RequestBody.create(MediaType.parse(contentType), ((String)obj));
         } else {
             throw new ApiException("Content type \"" + contentType + "\" is not supported");
         }

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Integration tests for the Secrets API in the Java client.
+  [cyberark/conjur-openapi-spec#185](https://github.com/cyberark/conjur-openapi-spec/pull/185)
 
 ## [5.1.1] - 2021-04-28
 ### Added
