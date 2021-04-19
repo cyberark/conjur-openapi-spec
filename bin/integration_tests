@@ -102,6 +102,7 @@ run_java_tests(){
 
   docker run --rm --network openapi-spec \
     -v ${PWD}/out/oss/java:/src \
+    -v ${PWD}/test/config:/config \
     -e CONJUR_HTTP_APPLIANCE_URL=http://conjur \
     -e CONJUR_HTTPS_APPLIANCE_URL=https://conjur-https \
     -e CONJUR_ACCOUNT=dev \

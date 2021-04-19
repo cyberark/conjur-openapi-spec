@@ -932,6 +932,8 @@ public class ApiClient {
             return RequestBody.create(MediaType.parse(contentType), (String)obj);
         } else if (contentType == "application/octet-stream") {
             return RequestBody.create(MediaType.parse(contentType), ((String)obj));
+        } else if (contentType == "application/x-yaml") {
+            return RequestBody.create(MediaType.parse(contentType), ((String)obj));
         } else {
             throw new ApiException("Content type \"" + contentType + "\" is not supported");
         }
