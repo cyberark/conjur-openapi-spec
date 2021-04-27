@@ -16,24 +16,31 @@ public class ConfiguredTest {
     protected HttpBasicAuth basicAuth;
     protected ApiKeyAuth conjurAuth;
 
-    private void setupAccessToken(String apiKey) throws ApiException {
+    private static final String OIDC_POLICY_FILE = "/config/oidc-webservice.yml";
+    private static final String DEFAULT_POLICY_FILE = "/config/policy.yaml";
+
+    private static void setupAccessToken(String apiKey) throws ApiException {
+        String account = System.getenv("CONJUR_ACCOUNT");
+        String login = System.getenv("CONJUR_AUTHN_LOGIN");
+        ApiClient client = Configuration.getDefaultApiClient();
         AuthenticationApi authApi = new AuthenticationApi();
         String apiToken = authApi.getAccessToken(account, login, apiKey, "base64", null);
-        conjurAuth = (ApiKeyAuth) client.getAuthentication("conjurAuth");
+        ApiKeyAuth conjurAuth = (ApiKeyAuth) client.getAuthentication("conjurAuth");
         conjurAuth.setApiKeyPrefix("Token");
         conjurAuth.setApiKey(String.format("token=\"%s\"", apiToken));
     }
 
-    private void setupClientAuth() throws ApiException {
+    private static void setupClientAuth() throws ApiException {
         String apiKey = System.getenv("CONJUR_AUTHN_API_KEY");
-        basicAuth = (HttpBasicAuth) client.getAuthentication("basicAuth");
+        ApiClient client = Configuration.getDefaultApiClient();
+        String login = System.getenv("CONJUR_AUTHN_LOGIN");
+        HttpBasicAuth basicAuth = (HttpBasicAuth) client.getAuthentication("basicAuth");
         basicAuth.setUsername(login);
         basicAuth.setPassword(apiKey);
         
         setupAccessToken(apiKey);
     }
 
-    private static final String OIDC_POLICY_FILE = "/config/oidc-webservice.yml";
     public void setupOIDCWebservice() throws ApiException {
         PoliciesApi policiesApi = new PoliciesApi();
         SecretsApi secretsApi = new SecretsApi();
@@ -63,12 +70,27 @@ public class ConfiguredTest {
         }
     }
 
+    @AfterClass
+    public static void loadDefaultPolicy() throws ApiException, IOException {
+        PoliciesApi policiesApi = new PoliciesApi();
+        List<String> lines = Files.readAllLines(Paths.get(DEFAULT_POLICY_FILE));
+        String policyText = String.join(System.lineSeparator(), lines);
+        policiesApi.replacePolicy(System.getenv("CONJUR_ACCOUNT"), "root", policyText, null);
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws ApiException {
+        ApiClient client = Configuration.getDefaultApiClient();
+        client.setBasePath(System.getenv("CONJUR_HTTP_APPLIANCE_URL"));
+
+        setupClientAuth();
+    }
+
     @Before
-    public void setUp() throws ApiException {
+    public void setUp() throws ApiException, IOException {
         client = Configuration.getDefaultApiClient();
         login = System.getenv("CONJUR_AUTHN_LOGIN");
         account = System.getenv("CONJUR_ACCOUNT");
-        client.setBasePath(System.getenv("CONJUR_HTTP_APPLIANCE_URL"));
 
         setupClientAuth();
     }

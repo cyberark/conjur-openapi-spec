@@ -110,6 +110,7 @@ run_java_tests(){
     -e CONJUR_CA_BUNDLE=/opt/conjur-openapi-spec/config/https/ca.crt \
     --env-file .env \
     -w /src \
+    -t \
     maven:3-openjdk-15 bash -c "mvn test"
 }
 

@@ -32,7 +32,17 @@ import java.util.Map;
 public class StatusApiTest extends ConfiguredTest {
 
     private final StatusApi api = new StatusApi();
-    
+ 
+    @After
+    public void waitForPolicy() throws InterruptedException {
+        Thread.sleep(2000);
+    }
+
+    @AfterClass
+    public static void waitForFinish() throws InterruptedException {
+        Thread.sleep(1000);
+    }
+
     /**
      * Details about which authenticators are on the Conjur Server
      *
@@ -63,7 +73,7 @@ public class StatusApiTest extends ConfiguredTest {
         setupOIDCWebservice();
         String authenticator = "authn-oidc";
         String serviceId = "test";
-        String xRequestId = "reqid";
+        String xRequestId = null;
         ApiResponse<AuthenticatorStatus> response = api.getServiceAuthenticatorStatusWithHttpInfo(authenticator, serviceId, account, xRequestId);
 
         Assert.assertEquals("ok", response.getData().getStatus());
