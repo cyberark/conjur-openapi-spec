@@ -5,11 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.1.1] - 2021-04-28
 ### Added
 - DAP endpoints and scripts to run tests against a DAP instance.
   [cyberark/conjur-openapi-spec#144](https://github.com/cyberark/conjur-openapi-spec/issues/144)
 - Basic Java client integration tests and configuration.
   [cyberark/conjur-openapi-spec#181](https://github.com/cyberark/conjur-openapi-spec/pull/181)
+- New return code (406) in batch secrets request for when a binary secret is requested
+  without specifying a valid `Accept-Encoding` header.
+  [cyberark/conjur-openapi-spec#186](https://github.com/cyberark/conjur-openapi-spec/pull/186)
 
 ## [5.1.0] - 2021-04-12
 ### Added
@@ -75,3 +80,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#168](https://github.com/cyberark/conjur-openapi-spec/issues/168)
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
+
+[Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.1...HEAD
+[5.1.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.0...v5.1.1
