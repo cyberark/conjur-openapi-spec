@@ -4,10 +4,10 @@ import org.conjur.sdk.*;
 import org.conjur.sdk.auth.*;
 import org.junit.*;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.io.*;
 
 public class ConfiguredTest {
     protected ApiClient client;
@@ -79,9 +79,16 @@ public class ConfiguredTest {
     }
 
     @BeforeClass
-    public static void setUpClass() throws ApiException {
+    public static void setUpClass() throws ApiException{
         ApiClient client = Configuration.getDefaultApiClient();
-        client.setBasePath(System.getenv("CONJUR_HTTP_APPLIANCE_URL"));
+        client.setBasePath(System.getenv("CONJUR_HTTPS_APPLIANCE_URL"));
+        try {
+            File caFile = new File(System.getenv("CONJUR_CA_BUNDLE"));
+            FileInputStream caInputStream = new FileInputStream(caFile);
+            client.setSslCaCert(caInputStream);
+        } catch (FileNotFoundException e){
+            System.out.println("Unable to read SSL cert file");
+        }
 
         setupClientAuth();
     }
@@ -89,6 +96,8 @@ public class ConfiguredTest {
     @Before
     public void setUp() throws ApiException, IOException {
         client = Configuration.getDefaultApiClient();
+        basicAuth = (HttpBasicAuth) client.getAuthentication("basicAuth");
+        conjurAuth = (ApiKeyAuth) client.getAuthentication("conjurAuth");
         login = System.getenv("CONJUR_AUTHN_LOGIN");
         account = System.getenv("CONJUR_ACCOUNT");
 

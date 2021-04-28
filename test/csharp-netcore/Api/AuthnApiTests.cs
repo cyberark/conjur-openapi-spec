@@ -116,7 +116,7 @@ namespace Org.OpenAPITools.Test
         [Fact]
         public void EnableAuthenticatorServiceTest()
         {
-            var response = instance.EnableAuthenticatorInstanceWithHttpInfo(ServiceAuthenticators.Ldap, "test", account, true);
+            var response = instance.EnableAuthenticatorInstanceWithHttpInfo(ServiceAuthenticators.Ldap, "test", account, null, true);
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
