@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
+. bin/util
 
-# deconstruct docker-compose env
-echo "Stop and remove docker-compose environment"
-docker-compose down -v
+if [[ $(conjur_alive) -eq 0 ]]; then
+  announce "Stop and remove Conjur OSS"
+  stop_oss
+elif [[ $(enterprise_alive) -eq 0 ]]; then
+  announce "Stop and remove Conjur Enterprise"
+  stop_enterprise
+fi
 
-# stop and remove swagger container
-echo "Stop and remove Swagger container"
-docker stop swagger-editor || true
-docker rm swagger-editor || true
+docker stop swagger-editor 2> /dev/null || true
+docker rm swagger-editor 2> /dev/null || true
 
-docker network rm openapi-spec
+docker network rm openapi-spec 2> /dev/null || true
