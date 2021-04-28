@@ -22,7 +22,7 @@ echo "servers:
 announce "Generating Kong declarative configuration yaml"
 docker run --rm \
     -v ${PWD}:/opt/openapi \
-    node:latest /bin/bash -c "
+    node:15 /bin/bash -c "
         npm i -g insomnia-inso \
         && cd /opt/openapi \
         && inso --verbose \
