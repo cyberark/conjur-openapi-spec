@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run api contract test script
-        run: ./bin/api_test
+        run: ./bin/test_api_contract
