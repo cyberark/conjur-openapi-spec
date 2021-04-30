@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   allowing for proper binary secrets in clients (`format: binary` is broken in some clients).
   [cyberark/conjur-openapi-spec#187](https://github.com/cyberark/conjur-openapi-spec/pull/187)
 
+### Changed
+- Consolidate `bin/integration_test` and `bin/test_enterprise` into `bin/test_integration`.
+  Renamed `bin/api_test` to `bin/test_api_contract` and `bin/start` to `bin/dev` to maintain
+  repository- and company-wide script convention.
+  [cyberark/conjur-openapi-spec#166](https://github.com/cyberark/conjur-openapi-spec/issues/166)
+
 ## [5.1.1] - 2021-04-28
 ### Added
 - DAP endpoints and scripts to run tests against a DAP instance.
