@@ -2,7 +2,7 @@
 
 echo "Linting Python integration tests:"
 
-./bin/generate_client --enterprise
+./bin/generate_client --enterprise -l python
 
 docker run --rm \
     -v ${PWD}/test/python:/code/test \
