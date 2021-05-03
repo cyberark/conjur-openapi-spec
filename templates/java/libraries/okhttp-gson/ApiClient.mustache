@@ -51,6 +51,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.*;
 
 import {{invokerPackage}}.auth.Authentication;
 import {{invokerPackage}}.auth.HttpBasicAuth;
@@ -64,7 +65,7 @@ import {{invokerPackage}}.auth.OAuthFlow;
 
 public class ApiClient {
 
-    private String basePath = "{{{basePath}}}";
+    private String basePath = System.getenv().getOrDefault("CONJUR_APPLIANCE_URL", "{{{basePath}}}");
     private boolean debugging = false;
     private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
     private Map<String, String> defaultCookieMap = new HashMap<String, String>();
@@ -86,6 +87,57 @@ public class ApiClient {
     //easter egg
     private HttpLoggingInterceptor loggingInterceptor;
 
+    // Custom fields & Getters/Setters
+    private String username = System.getenv().getOrDefault("CONJUR_AUTHN_LOGIN", null);
+    private String password = System.getenv().getOrDefault("CONJUR_AUTHN_API_KEY", null);
+    private String account = System.getenv().getOrDefault("CONJUR_ACCOUNT", null);
+    private String conjurVersion = System.getenv().getOrDefault("CONJUR_VERSION", "5");
+    private String certFile = System.getenv().getOrDefault("CONJUR_CERT_FILE", null);
+    private String sslCert = System.getenv().getOrDefault("CONJUR_SSL_CERTIFICATE", null);
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public boolean version5() {
+        return conjurVersion == "5";
+    }
+
+    public String conjurVersion() {
+        return conjurVersion;
+    }
+
+    private InputStream getFileStream(String filename) {
+        File file = new File(filename);
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            return fis;
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    public InputStream getCertInputStream() {
+        InputStream certStream = null;
+        ByteArrayInputStream bais = null;
+        if (certFile != null)
+            certStream = getFileStream(certFile);
+        if (certStream != null)
+            return certStream;
+
+
+        if (sslCert != null)
+            bais = new ByteArrayInputStream(sslCert.getBytes());
+        if (bais != null)
+            return bais;
+
+        return null;
+    }
+
     /*
      * Basic constructor for ApiClient
      */
@@ -100,6 +152,14 @@ public class ApiClient {
         authentications.put("{{name}}", new OAuth());{{/isOAuth}}{{/authMethods}}
         // Prevent the authentications from being modified.
         authentications = Collections.unmodifiableMap(authentications);
+
+        if (username != null) {
+            ((HttpBasicAuth)this.getAuthentication("basicAuth")).setUsername(username);
+        }
+
+        if (password != null) {
+            ((HttpBasicAuth)this.getAuthentication("basicAuth")).setPassword(password);
+        }
     }
 
     {{#hasOAuthMethods}}

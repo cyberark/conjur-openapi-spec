@@ -41,10 +41,8 @@ public class AuthenticationApiTest extends ConfiguredTest {
         client = Configuration.getDefaultApiClient();
         login = System.getenv("CONJUR_AUTHN_LOGIN");
         account = System.getenv("CONJUR_ACCOUNT");
-        client.setBasePath("http://conjur");
 
         api = new AuthenticationApi();
-        client.setBasePath("http://conjur");
         basicAuth = (HttpBasicAuth) client.getAuthentication("basicAuth");
         basicAuth.setUsername(login);
         basicAuth.setPassword(apiKey());

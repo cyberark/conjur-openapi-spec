@@ -81,15 +81,7 @@ public class ConfiguredTest {
     @BeforeClass
     public static void setUpClass() throws ApiException{
         ApiClient client = Configuration.getDefaultApiClient();
-        client.setBasePath(System.getenv("CONJUR_HTTPS_APPLIANCE_URL"));
-        try {
-            File caFile = new File(System.getenv("CONJUR_CA_BUNDLE"));
-            FileInputStream caInputStream = new FileInputStream(caFile);
-            client.setSslCaCert(caInputStream);
-        } catch (FileNotFoundException e){
-            System.out.println("Unable to read SSL cert file");
-        }
-
+        client.setSslCaCert(client.getCertInputStream());
         setupClientAuth();
     }
 

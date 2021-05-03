@@ -111,10 +111,10 @@ run_java_tests(){
     -v ${PWD}/test/config:/config \
     -v ${PWD}/config/https:/https \
     -e CONJUR_HTTP_APPLIANCE_URL=http://conjur \
-    -e CONJUR_HTTPS_APPLIANCE_URL=https://conjur-https \
+    -e CONJUR_APPLIANCE_URL=https://conjur-https \
     -e CONJUR_ACCOUNT=dev \
     -e CONJUR_AUTHN_LOGIN=admin \
-    -e CONJUR_CA_BUNDLE=/https/ca.crt \
+    -e CONJUR_CERT_FILE=/https/ca.crt \
     --env-file .env \
     -w /src \
     maven:3-openjdk-15 bash -c "mvn test"
