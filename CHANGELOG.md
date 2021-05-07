@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Request body details for secret creation so all clients can properly set secrets. This changes
+  the MIME type of the request body to `application/octet-stream` in place of text plain,
+  allowing for proper binary secrets in clients (`format: binary` is broken in some clients).
+  [cyberark/conjur-openapi-spec#187](https://github.com/cyberark/conjur-openapi-spec/pull/187)
 
 ## [5.1.1] - 2021-04-28
 ### Added
