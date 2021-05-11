@@ -1,16 +1,9 @@
 # Conjur OpenAPI Specification
 [![Integration Tests](https://github.com/conjurinc/conjur-openapi-spec/workflows/Integration%20Tests/badge.svg)](https://github.com/conjurinc/conjur-openapi-spec/actions?query=workflow%3A%22Run+Integration+Tests%22)
-![](https://img.shields.io/badge/Certification%20Level-Community-28A745?link=https://github.com/cyberark/community/blob/master/Conjur/conventions/certification-levels.md)  
 [![Maintainability](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/maintainability)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/test_coverage)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/test_coverage)
 
 This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/).  
-
----
-
-#### **WARNING: This project is a work in progress, and all code is subject to breaking changes!**
-
----
 
 The Conjur OpenAPI Specification describes endpoints in the Conjur API via the industry-standard  
 OpenAPI v3. The specification can be used to auto-generate client code and documentation to  
@@ -18,16 +11,26 @@ streamline development processes.
 
 Find [more from CyberArk](https://github.com/cyberark).
 
-* [Api Documentation](https://github.com/cyberark/conjur-openapi-spec/wiki)
-* [Requirements](#requirements)
-* [Getting Started](#getting-started)
-* [Contributing](#contributing)
-* [License](#license)
+- [Certification level](#certification-level)
+- [Requirements](#requirements)
+  * [Use With Conjur Enterprise](#use-with-conjur-enterprise)
+- [Getting Started](#getting-started)
+  * [Swagger Editor](#swagger-editor)
+  * [Generating client libraries](#generating-client-libraries)
+    + [Examples](#examples)
+  * [Exploring the Conjur API with Postman](#exploring-the-conjur-api-with-postman)
+  * [Using the OpenAPI spec with API Gateways](#using-the-openapi-spec-with-api-gateways)
+- [Contributing](#contributing)
+- [License](#license)
 
-<!--
-Table of contents generated with markdown-toc
-http://ecotruct-canada.github.io/markdown-toc/
--->
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+## Certification level
+
+![](https://img.shields.io/badge/Certification%20Level-Community-28A745?link=https://github.com/cyberark/community/blob/master/Conjur/conventions/certification-levels.md)
+
+This repo is a **Community** level project. It's a community contributed project that **is not reviewed or supported
+by CyberArk**. For more detailed information on our certification levels, see [our community guidelines](https://github.com/cyberark/community/blob/master/Conjur/conventions/certification-levels.md#community).
 
 ## Requirements
 
