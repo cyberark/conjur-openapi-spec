@@ -17,10 +17,11 @@ function create_tar(){
     filename=$1
     shift
 
-    mkdir -p tmpdir
-    echo -n "$@" | xargs -t -I {} bash -c "cp -r {} tmpdir"
-    tar --strip-components=1 -czf "$output_directory/$filename-$version.tar.gz" tmpdir/*
-    rm -rf tmpdir
+    temp_filename="conjur-openapi-$version"
+    mkdir -p $temp_filename
+    echo -n "$@" | xargs -t -J % cp -r % $temp_filename
+    tar --strip-components=1 -czf "$output_directory/$filename-$version.tar.gz" $temp_filename/*
+    rm -rf $temp_filename
 }
 
 function bundle_files(){
@@ -28,7 +29,8 @@ function bundle_files(){
     create_tar $@
 }
 
-bundle_files conjur-openapi spec/*
+./bin/transform --oss
+bundle_files conjur-openapi out/oss/spec/*
 
 ./bin/bundle_spec
 bundle_files conjur-openapi-bundled spec.yml
