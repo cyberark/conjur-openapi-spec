@@ -5,9 +5,15 @@
 
 This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/).  
 
-The Conjur OpenAPI Specification describes endpoints in the Conjur API via the industry-standard  
-OpenAPI v3. The specification can be used to auto-generate client code and documentation to  
-streamline development processes.
+The Conjur OpenAPI specification provides a standardized, machine-readable version
+of the Conjur API that can be used to automatically generate API documentation,
+to generate Conjur client libraries in your language of choice, and to facilitate
+exploring the Conjur API using popular tools like Postman. We’ll be using this
+OpenAPI spec to build a better, more consistent, always up-to-date Conjur SDK comprised
+of clients in the most popular languages with comprehensive automated test coverage. The
+Conjur OpenAPI spec simplifies end users’ ability to interact with the Conjur API, and
+will enable the continued expansion of Conjur integrations so that Conjur works natively
+with the most popular software development tools.
 
 Find [more from CyberArk](https://github.com/cyberark).
 
