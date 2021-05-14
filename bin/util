@@ -53,3 +53,39 @@ function get_conjur_admin_api_key(){
   admin_api_key=$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')
   echo $admin_api_key
 }
+
+function conjur_alive(){
+  if [ -z `docker-compose ps -q conjur` ]; then
+    echo 1
+  elif [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q conjur)` ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function enterprise_alive(){
+  if [ -d "test/dap-intro" ]; then
+    pushd test/dap-intro > /dev/null
+    if [ -z `docker-compose ps -q conjur-master-1.mycompany.local` ]; then
+      echo 1
+    elif [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q conjur-master-1.mycompany.local)` ]; then
+      echo 1
+    else
+      echo 0
+    fi
+    popd > /dev/null
+  else
+    echo 1
+  fi
+}
+
+function stop_oss(){
+  docker-compose down -v
+}
+
+function stop_enterprise(){
+  pushd ./test/dap-intro
+  ./bin/dap --stop
+  popd
+}

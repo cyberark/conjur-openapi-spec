@@ -1,105 +1,137 @@
 #!/usr/bin/env bash
-
+source bin/util
 set -euo pipefail
 
 print_help(){
-    echo -e "./bin/generate_client [-o <output-directory>] [-l <client-language> ] [-n] [--enterprise]"
-    echo -e "\tUses the OpenApi generator to create a client for the API spec"
-    echo -e "\tDefault output goes in the 'out' directory under the generated client language"
-    echo -e "\tIf no language is specified the Python client will be generated"
-    echo
-    echo -e "\tThe -n option will prevent the creation of a client language directory"
-    echo -e "\t\tso the output would go to 'out/' instead of 'out/python' for the python client"
-    echo
-    echo -e "\tThe --enterprise option will generate the spec with included Conjur Enterprise-only endpoints"
+  announce "CONJUR OPENAPI DESCRIPTION :: CLIENT GENERATION"
+  cat << EOF
+Uses the OpenAPI Generator to create a client for the API spec.
+Can generate clients for Conjur OSS (default) or Enterprise.
+Clients are output to ./out/<oss|enterprise>/<language> by default.
+
+USAGE
+./bin/generate_client -l <language> [options]
+
+MANDATORY
+-l|--language <language>    Specify a client language
+
+OPTIONS
+-e|--enterprise             Generate client for Conjur Enterprise
+-h|--help                   Print help message
+-n|--no-sub-dir             Generated clients output directly to ./out
+-o|--output <dir>           Specify an output directory
+EOF
 }
 
 generator_version="v4.3.1"
 GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
-client_lang="python"
+client_lang=""
+appliance="oss"
+output_volume=""
+enterprise=0
+given_out_dir=0
 make_client_dir=1
-output_volume="out/"
-output_dir='/out/oss'
-input_dir='out/oss/spec'
-dap_spec=0
-
-mkdir -p out/enterprise
-mkdir -p out/oss
 
 while test $# -gt 0
 do
-    param=$1
-    shift
-    case "$param" in
-        -o)
-            output_volume=$1
-            shift
-            ;;
-        -l)
-            client_lang=$1
-            shift
-            ;;
-        -n)
-            make_client_dir=0
-            ;;
-        -h)
-            print_help
-            exit 0
-            ;;
-        --enterprise)
-            dap_spec=1
-            input_dir='out/enterprise/spec'
-            output_dir='/out/enterprise'
-            ;;
-        *)
-            break
-            ;;
-    esac
+  param=$1
+  shift
+  case "$param" in
+    -e|--enterprise)
+      enterprise=1
+      appliance="enterprise"
+      input_dir='out/enterprise/spec'
+      output_dir='/out/enterprise'
+      ;;
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    -l|--language)
+      client_lang=$1
+
+      if [[ ${client_lang:0:1} == "-" ]]; then
+        echo "Option --language requires specifying argument"
+        echo "Usage: ./bin/generate_client -l <language> [options]"
+        exit 1
+      fi
+
+      shift
+      ;;
+    -n|--no-sub-dir)
+      make_client_dir=0
+      ;;
+    -o|--output)
+      output_volume=$1
+
+      if [[ ${output_volume:0:1} == "-" ]]; then
+        echo "Option --output requires specifying argument"
+        echo "Usage: ./bin/generate_client -l <language> -o <dir>"
+        exit 1
+      fi
+
+      given_out_dir=1
+      if [ ${output_volume:0:2} == "./" ]; then
+        ouput_volume=${PWD}/${output_volume#*./}
+      elif [ ${output_volume:0:1} != "/" ]; then
+        output_volume=${PWD}/${output_volume}
+      fi
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
 done
 
-if [ ! -e "$output_volume" ]; then
-    mkdir -p "$output_volume"
+if [[ -z $client_lang ]]; then
+  echo "Missing required --language option"
+  echo "Usage: ./bin/generate_client -l <language> [options]"
+  exit 1
 fi
-output_volume="$(pushd $output_volume > /dev/null && echo ${PWD} && popd > /dev/null)"
 
-if [ $make_client_dir -eq 1 ]; then
-    output_dir="$output_dir/$client_lang"
+input_dir="out/$appliance/spec"
+if [ $given_out_dir -eq 0 ]; then
+  output_volume="${PWD}/out/$appliance/$client_lang/"
 fi
+if [ $make_client_dir -eq 0 ]; then
+  output_volume="${PWD}/out/"
+fi
+
+echo "Removing old client dir..."
+rm -rf $output_volume
+mkdir -p $output_volume
 
 # if templates for a language exist we use them for generation
 template_dir="templates/$client_lang"
 if [ -e $template_dir ]; then
-    template_arg="-t /local/$template_dir"
+  template_arg="-t /local/$template_dir"
 else
-    template_arg=""
+  template_arg=""
 fi
+
+# Check if there is a configuration file available for this language
+if [ -e "./spec/config/$client_lang.yml" ]; then
+  client_config="-c /local/spec/config/$client_lang.yml"
+else
+  client_config=""
+fi
+
+bin/transform --$appliance
 
 echo "Pulling latest release $GENERATOR_IMAGE..."
 docker pull "$GENERATOR_IMAGE"
 
-echo "Removing old client dir..."
-rm -rf "$(pwd)/out/$client_lang"
-
-# Check if there is a configuration file available for this language
-if [ -e "./spec/config/$client_lang.yml" ]; then
-    client_config="-c /local/spec/config/$client_lang.yml"
-else
-    client_config=""
-fi
-
-if [ $dap_spec -eq 1 ]; then
-    ./bin/transform --enterprise
-else
-    ./bin/transform --oss
-fi
-
 echo "Generating $client_lang client..."
-docker run --rm -v ${PWD}:/local -v $output_volume:/out "$GENERATOR_IMAGE" generate \
+docker run --rm \
+  -v ${PWD}:/local \
+  -v $output_volume:/out \
+  "$GENERATOR_IMAGE" generate \
     -i "/local/$input_dir/openapi.yml" \
     -g "$client_lang" \
-    -o "$output_dir" \
+    -o "/out/" \
     $client_config \
     $template_arg
 
-echo "Done! Client is in $output_dir folder!"
+echo "Done! Client is in $output_volume folder!"

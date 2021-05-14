@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+source bin/util
+
+if [ $(conjur_alive) -eq 0 ]; then
+  stop_oss
+fi
+
+rm -rf test/dap-intro
+git clone https://github.com/conjurdemos/dap-intro.git test/dap-intro
+chmod -R 777 test/dap-intro
+
+set -e
+pushd  ./test/dap-intro
+
+./bin/dap --provision-master
+./bin/dap --wait-for-master
+api_key=$(curl --insecure --user admin:MySecretP@ss1 https://localhost/authn/demo/login)
+echo Conjur Enterprise API key: $api_key
+
+announce "Setting up Conjur Enterprise Certificates"
+./bin/dap --import-custom-certificates
+
+popd
+
+cat << ENV > .env
+CONJUR_AUTHN_API_KEY=$api_key
+CONJUR_ACCOUNT=demo
+CONJUR_HOST=https://conjur-master.mycompany.local
+ENTERPRISE_TESTS=1
+CERT_DIR=/etc/ssl/certs
+SSL_CERT_FILE=ca.pem
+CONJUR_CERT_FILE=conjur-master.mycompany.local.pem
+CONJUR_KEY_FILE=conjur-master.mycompany.local.key
+ENV

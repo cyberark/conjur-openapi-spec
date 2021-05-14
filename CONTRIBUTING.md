@@ -129,30 +129,30 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 
 #### Automated tests
 
-`bin/api_test [-e <endpoint>]`
+`bin/test_api_contract [-e <endpoint>]`
 * Uses Schemathesis to generate test cases for API endpoints, which test the
   conformance between Conjur OSS and the OpenAPI specification.
 * Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
-`bin/integration_tests`
-* Used to run the suite of integration tests.
-* Stands up a new Conjur `docker-compose` environment, generates a Python client
+`bin/test_integration`
+* Used to run the suite of integration tests against Conjur OSS or Enterprise.
+* Stands up a new Conjur environment, generates a client
   library, and runs the integration test suite.
-* Run tests for only one client by specifying a client flag (currently only Python
-  is supported):
+* User must specify a client language to test with `-l`:
   ```shell
-  $ ./bin/integration_tests --python
+  $ ./bin/test_integration -l python
   ```
 * Run a subset of a clients tests by including an argument with the full package
   path of the tests to run:
   ```shell
-  $ ./bin/integration_tests --python test_authn_api.TestAuthnApi.test_authenticate_200
+  $ ./bin/test_integration -l python --test test_authn_api.TestAuthnApi.test_authenticate_200
   ```
-
-`bin/test_enterprise`
-* Used to run the integration tests against a Conjur Enterprise instance
-* You will need to have access to the Cyberark Docker registry in order to pull the Conjur Enterprise images
+* Tests can be run against Conjur Enterprise.
+* This requires access to the CyberArk Docker registry in order to pull Conjur Enterprise images
+  ```shell
+  $ ./bin/test_integration --enterprise -l python
+  ```
 
 #### Linters
 
@@ -182,13 +182,16 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Runs the `bin/bundle_spec` script before starting and points the UI at the bundled spec.
 * Editor available at http://localhost:9090 once the container is up.
 
-`bin/start`
+`bin/dev`
 * Used to set up a new development environment.
 * Calls both `start_editor` and `start_conjur` to bring up both Conjur and Editor containers.
 
 `bin/start_conjur`
 * Used to start a new local Conjur instance based on the project's `docker-compose`.
 * Both the http & https ports are exposed so requests can be made to Conjur from outside the docker network.
+
+`bin/start_enterprise`
+* Used to start a new local Conjur Enterprise instance based on [`dap-intro`](https://github.com/conjurdemos/dap-intro)
 
 `bin/stop`
 * Used to deconstruct the development environment.

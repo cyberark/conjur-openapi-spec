@@ -87,7 +87,7 @@ fi
 
 if [ $no_regen_client -eq 0 ]; then
     announce "Generating Python Client"
-    ./bin/generate_client python
+    ./bin/generate_client -l python
 fi
 
 # Set up Conjur K8s cluster and local Docker Registry

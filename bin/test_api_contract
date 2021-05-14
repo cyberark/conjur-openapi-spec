@@ -12,7 +12,7 @@ while test $# -gt 0; do
       echo "Conjur OSS and the OpenAPI specification."
       echo
       echo "Usage"
-      echo "./bin/api_test [options]"
+      echo "./bin/test_api_contract [options]"
       echo
       echo "-h, --help                show help"
       echo "-e, --endpoint <path>     test endpoints starting with the given path"

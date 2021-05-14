@@ -12,7 +12,7 @@ pipeline {
         stage('Enterprise Integration Tests') {
             steps {
                 script {
-                    sh "./bin/test_enterprise"
+                    sh "./bin/test_integration -e -l python"
                 }
             }
         }
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     ccCoverage.dockerPrep()
-                    sh './bin/integration_tests --python'
+                    sh './bin/test_integration -l python'
                 }
             }
 

@@ -1,25 +1,19 @@
 #!/usr/bin/env bash
-
-cleanup() {
-  echo "Cleaning up..."
-  docker-compose rm --stop --force -v
-}
-
-make_network(){
-  if [ ! -z $(docker network inspect openapi-spec > /dev/null || echo $?) ]; then
-    docker network create openapi-spec
-  fi
-}
+source bin/util
 
 if [ "$1" == "-d" ]; then
   DEBUG="true"
   shift
 fi
 
-trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
-cleanup
+if [ $(enterprise_alive) -eq 0 ]; then
+  stop_enterprise
+fi
 
-make_network
+trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
+
+docker network create openapi-spec
+
 echo "Building services..."
 docker-compose build pg conjur conjur-https
 
