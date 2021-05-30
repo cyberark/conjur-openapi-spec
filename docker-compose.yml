@@ -12,7 +12,7 @@ services:
       CONJUR_DATA_KEY: 'OyXV68Mip14xj33huGaQKewmmS+gKtDlp6ECZ2iATpU='
       DATABASE_URL: postgres://postgres@pg/postgres
       RAILS_ENV: development
-      CONJUR_AUTHENTICATORS: authn-ldap/test,authn-oidc/test,authn
+      CONJUR_AUTHENTICATORS: authn-ldap/test,authn-oidc/test,authn-jwt/test,authn
       LDAP_URI: ldap://ldap-server:389
       LDAP_BASE: dc=conjur,dc=net
       LDAP_BINDDN: cn=admin,dc=conjur,dc=net
