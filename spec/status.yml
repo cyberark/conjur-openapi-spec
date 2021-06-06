@@ -206,46 +206,6 @@ components:
         security:
           - conjurAuth: []
 
-    JWTAuthenticatorStatus:
-      parameters:
-        - $ref: 'openapi.yml#/components/parameters/RequestID'
-      get:
-        tags:
-          - 'status'
-        operationId: "getJWTAuthenticatorStatus"
-        summary: "Details whether the JWT authentication service has been configured properly"
-        description: |
-          Once the JWT status webservice has been properly configured and the relevant user
-          groups have been given permissions to access the JWT status webservice, the
-          users in those groups can check the status of the authenticator.
-        parameters:
-          - $ref: 'openapi.yml#/components/parameters/ServiceID'
-
-          - name: account
-            in: path
-            schema:
-              type: string
-            required: true
-            description: "The organization account name"
-            example: "dev"
-
-        responses:
-          '200':
-            $ref: '#/components/responses/AuthenticatorStatus'
-          "400":
-            $ref: 'openapi.yml#/components/responses/BadRequest'
-          "403":
-            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
-          "404":
-            description: "The service was not found"
-          "500":
-            $ref: '#/components/responses/AuthenticatorStatus'
-          '501':
-            $ref: '#/components/responses/AuthenticatorStatus'
-
-        security:
-          - conjurAuth: []
-
     AuthenticatorStatus:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'

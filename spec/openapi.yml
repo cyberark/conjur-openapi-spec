@@ -238,9 +238,6 @@ paths:
   '/whoami':
     $ref: 'status.yml#/components/paths/WhoAmI'
 
-  '/authn-jwt/{service_id}/{account}/status':
-    $ref: 'status.yml#/components/paths/JWTAuthenticatorStatus'
-
   '/{authenticator}/{service_id}/{account}/status':
     $ref: 'status.yml#/components/paths/ServiceAuthenticatorStatus'
 
