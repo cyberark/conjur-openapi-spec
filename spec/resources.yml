@@ -82,7 +82,12 @@ components:
         secrets:
           type: array
           items:
-            type: string
+            type: object
+            properties:
+              version:
+                type: number
+              expires_at:
+                type: string
         restricted_to:
           type: array
           items:
