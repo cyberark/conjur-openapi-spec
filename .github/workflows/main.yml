@@ -27,13 +27,3 @@ jobs:
 
       - name: run integration test script
         run: ./bin/test_integration -l csharp-netcore
-
-  java:
-    runs-on: ubuntu-latest
-    name: Java Integration Tests
-    steps:
-      - name: checkout the repo
-        uses: actions/checkout@v2
-
-      - name: run integration test script
-        run: ./bin/test_integration -l java
