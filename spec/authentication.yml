@@ -342,6 +342,8 @@ components:
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
+        security: []
+
     AWSAuthenticate:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'
@@ -415,6 +417,8 @@ components:
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
+        security: []
+
     AzureAuthenticate:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'
@@ -487,6 +491,8 @@ components:
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
+        security: []
+
 
     GCPAuthenticate:
       parameters:
@@ -534,6 +540,8 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security: []
 
 
     KubernetesAuthenticate:
@@ -681,6 +689,8 @@ components:
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
 
+        security: []
+
 
     OIDCAuthenticate:
       parameters:
@@ -724,6 +734,8 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "502":
             description: "Error connecting conjur to the OIDC provider"
+
+        security: []
 
 
     ChangePassword:
