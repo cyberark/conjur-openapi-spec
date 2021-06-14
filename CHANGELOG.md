@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the MIME type of the request body to `application/octet-stream` in place of text plain,
   allowing for proper binary secrets in clients (`format: binary` is broken in some clients).
   [cyberark/conjur-openapi-spec#187](https://github.com/cyberark/conjur-openapi-spec/pull/187)
+- Authentication methods not requiring any API authentication (conjurAuth, basicAuth, etc) now
+  specify an empty list as the `security` field ensuring utilities dont assume all authentication
+  types are valid.
+  [cyberark/conjur-openapi-spec#196](https://github.com/cyberark/conjur-openapi-spec/pull/196)
 
 ### Changed
 - Consolidate `bin/integration_test` and `bin/test_enterprise` into `bin/test_integration`.

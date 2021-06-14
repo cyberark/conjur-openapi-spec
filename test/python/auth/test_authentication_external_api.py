@@ -157,7 +157,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             post_params=[('jwt', jwt_token)],
             files={},
             response_type='str',
-            auth_settings=['basicAuth','conjurAuth','conjurKubernetesMutualTls'],
+            auth_settings=[],
             async_req=None,
             _return_http_data_only=True,
             _preload_content=True,
