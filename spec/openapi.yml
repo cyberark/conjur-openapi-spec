@@ -221,6 +221,9 @@ paths:
   '/authn-oidc/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/OIDCAuthenticate'
 
+  '/authn-jwt/{service_id}/{account}/authenticate':
+    $ref: 'authentication.yml#/components/paths/JWTAuthenticate'
+
   '/authn/{account}/password':
     $ref: 'authentication.yml#/components/paths/ChangePassword'
 
