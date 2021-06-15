@@ -19,34 +19,12 @@ components:
     JWTToken:
       type: object
       properties:
-        protected:
+        jwt:
           type: string
-        payload:
-          type: string
-        signature:
-          type: string
-      example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjRpM3NGRTdzeHFOUE9U\
-                N0ZkdmNHQTFaVkdHSV9yLXRzRFhuRXVZVDRacUUiLCJ0eXAi\
-                OiJKV1QifQ.eyJuYW1lc3BhY2VfaWQiOiIxMjAzNTEwNyIsI\
-                m5hbWVzcGFjZV9wYXRoIjoibmVzc2lMYWhhdiIsInByb2plY\
-                3RfaWQiOiIyNjU2Njk1NyIsInByb2plY3RfcGF0aCI6Im5lc\
-                3NpTGFoYXYvdGVzdC1wcm9qIiwidXNlcl9pZCI6Ijg4NzA4M\
-                DEiLCJ1c2VyX2xvZ2luIjoibmVzc2lMYWhhdiIsInVzZXJfZ\
-                W1haWwiOiJuZXNzaS5sYWhhdkBjeWJlcmFyay5jb20iLCJwa\
-                XBlbGluZV9pZCI6IjMxMzY2ODE4MSIsImpvYl9pZCI6IjEzM\
-                TI1MDA2OTQiLCJyZWYiOiJtYWluIiwicmVmX3R5cGUiOiJic\
-                mFuY2giLCJyZWZfcHJvdGVjdGVkIjoidHJ1ZSIsImp0aSI6I\
-                jJjNDEyNTlkLTcwMGYtNGZjNy05MTk1LWNlMDNhZGEyMTUyY\
-                SIsImlzcyI6ImdpdGxhYi5jb20iLCJpYXQiOjE2MjI2NDI5M\
-                zMsIm5iZiI6MTYyMjY0MjkyOCwiZXhwIjoxNjIyNjQ2NTMzL\
-                CJzdWIiOiJqb2JfMTMxMjUwMDY5NCJ9.XYk5SA5pj97BvUrg\
-                maoGvu8KjN1SMWDwoxRXKFeAkN7Wq8w7J-8KfX0scGqlZ2KX\
-                Fe48xNv3ullTJsUuBZKsjsXLfJXntZb_U4q3OXOtrWJbdXqm\
-                d8NkMMVlI_USQD0ZhD1o_jiomEBB1o6wlubmbhr3OFBKp6r0\
-                Cdai0E5bLHdHUB-bRyGx-gPijcfeAau3AruojYBBHJfvFL53\
-                t7ysDFXrIrAhf9ZCW2upjveRMSjb8LG4wRd0Kqrs2ZRlflXh\
-                XaIp3vbqGkW-uYf43G4JFRrGKp9qMZ8APvKfurWAvz7CygKZ\
-                qbPt29pg7hOYkQrZsqocFhtAxc_Q4jbFGFwkDg'
+      example:
+        {
+          "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
+        }
 
     ApiKey:
       type: string
@@ -814,6 +792,8 @@ components:
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "500":
             $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security: []
 
     ChangePassword:
       parameters:
