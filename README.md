@@ -3,7 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/maintainability)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/test_coverage)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/test_coverage)
 
-This project contains the OpenAPI v3 specification for [Conjur OSS](https://www.conjur.org/).  
+This project contains the OpenAPI v3 specification for [Conjur Open Source](https://www.conjur.org/).  
 
 The Conjur OpenAPI specification provides a standardized, machine-readable version
 of the Conjur API that can be used to automatically generate API documentation, to
@@ -43,7 +43,7 @@ by CyberArk**. For more detailed information on our certification levels, see [o
 
 This project requires Docker and access to DockerHub.
 
-The OpenAPI Specification is compatible with [Conjur OSS v1.9+](https://github.com/cyberark/conjur).  
+The OpenAPI Specification is compatible with [Conjur Open Source v1.9+](https://github.com/cyberark/conjur).  
 Clients are generated using [OpenAPI Generator v4.3.1](https://github.com/OpenAPITools/openapi-generator/tree/v4.3.1).
 
 ### Use With Conjur Enterprise
@@ -77,7 +77,7 @@ source, you can run the following script to parse the custom `x-conjur-settings`
 generate an OpenAPI spec for the specific edition of Conjur that you're using:
 
 ```shell
-./bin/transform --oss # Creates a spec definition for Conjur OSS in out/oss/
+./bin/transform --oss # Creates a spec definition for Conjur Open Source in out/oss/
 ./bin/transform --enterprise # Creates a spec definition for Conjur Enterprise in out/enterprise/
 ```
 

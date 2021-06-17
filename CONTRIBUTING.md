@@ -1,7 +1,7 @@
 # Contributing
 
 Please see our [Community Repository](https://github.com/cyberark/community) and our [Contribution Guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md).
-They provide information regarding the process of contributing to Conjur OSS projects,
+They provide information regarding the process of contributing to Conjur Open Source projects,
 including issue reporting, pull request workflow and community guidelines.
 
 * [Prerequisites](#prerequisites)
@@ -47,7 +47,7 @@ Contributing to this repository requires installation of some developer tools.
 
 ### Conjur
 
-[Conjur OSS v1.9+](https://github.com/cyberark/conjur)
+[Conjur Open Source v1.9+](https://github.com/cyberark/conjur)
 
 ### OpenAPI
 
@@ -131,12 +131,12 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 
 `bin/test_api_contract [-e <endpoint>]`
 * Uses Schemathesis to generate test cases for API endpoints, which test the
-  conformance between Conjur OSS and the OpenAPI specification.
+  conformance between Conjur Open Source and the OpenAPI specification.
 * Runs containerized contract testing on all endpoints specified in [`openapi.yml`](openapi.yml)
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
 `bin/test_integration`
-* Used to run the suite of integration tests against Conjur OSS or Enterprise.
+* Used to run the suite of integration tests against Conjur Open Source or Enterprise.
 * Stands up a new Conjur environment, generates a client
   library, and runs the integration test suite.
 * User must specify a client language to test with `-l`:
@@ -212,7 +212,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 #### Conjur Enterprise Developers
 
 The Enterprise only endpoints included in the specification all use a specific annotation to indicate that they
-are "enterprise only". When the OSS version of the spec is generated all of these objects will be removed.
+are "enterprise only". When the Open Source version of the spec is generated all of these objects will be removed.
 
 ```yaml
 someObject:
@@ -224,15 +224,13 @@ This marks `someObject` as an enterprise only feature.
 
 Note that because all `paths` have to be defined in the `openapi.yml#/paths` object it is
 acceptable to just put the annotation on the `openapi.yml#/paths/somePath` object and leave it
-off the referenced path definition. In this case when the OSS version of the spec is generated
+off the referenced path definition. In this case when the Open Source version of the spec is generated
 the path definition will have had its reference removed thereby not technically being
 included in the spec.
 
 Many of the scripts included in the `bin` directory have an optional `--enterprise` flag which
 tells the script to use the Enterprise version of the spec. To generate the Enterprise version
-of a client you would run `./bin/generate_client -l python --enterprise`. The only exception
-to this is the integration tests, which to run against an Enterprise container you must
-run the `./bin/test_dap` script.
+of a client you would run `./bin/generate_client -l python --enterprise`.
 
 ## Manual Testing
 
