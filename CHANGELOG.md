@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- New JWT authenticator endpoints have been added to the spec.
+  [cyberark/conjur-openapi-spec#193](https://github.com/cyberark/conjur-openapi-spec/pull/193)
+
 ### Fixed
 - Request body details for secret creation so all clients can properly set secrets. This changes
   the MIME type of the request body to `application/octet-stream` in place of text plain,
