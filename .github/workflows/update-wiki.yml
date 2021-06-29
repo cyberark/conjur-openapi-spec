@@ -25,7 +25,7 @@ jobs:
 
       - name: Generate new documentation
         run: |
-          ./bin/generate_client -o ./conjur-openapi-spec.wiki -l markdown -n
+          ./bin/generate_client -o ./conjur-openapi-spec.wiki -l markdown -u
           mv ./conjur-openapi-spec.wiki/README.md ./conjur-openapi-spec.wiki/Home.md
 
       - name: Update wiki git repository

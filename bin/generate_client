@@ -20,6 +20,7 @@ OPTIONS
 -h|--help                   Print help message
 -n|--no-sub-dir             Generated clients output directly to ./out
 -o|--output <dir>           Specify an output directory
+-u|--update                 Update, instead of replace, the output directory
 EOF
 }
 
@@ -32,6 +33,7 @@ output_volume=""
 enterprise=0
 given_out_dir=0
 make_client_dir=1
+update_out_dir=0
 
 while test $# -gt 0
 do
@@ -73,11 +75,14 @@ do
 
       given_out_dir=1
       if [ ${output_volume:0:2} == "./" ]; then
-        ouput_volume=${PWD}/${output_volume#*./}
+        output_volume=${PWD}/${output_volume#*./}
       elif [ ${output_volume:0:1} != "/" ]; then
         output_volume=${PWD}/${output_volume}
       fi
       shift
+      ;;
+    -u|--update)
+      update_out_dir=1
       ;;
     *)
       break
@@ -93,15 +98,18 @@ fi
 
 input_dir="out/$appliance/spec"
 if [ $given_out_dir -eq 0 ]; then
-  output_volume="${PWD}/out/$appliance/$client_lang/"
-fi
-if [ $make_client_dir -eq 0 ]; then
-  output_volume="${PWD}/out/"
+  if [ $make_client_dir -eq 0 ]; then
+    output_volume="${PWD}/out/"
+  else
+    output_volume="${PWD}/out/$appliance/$client_lang/"
+  fi
 fi
 
-echo "Removing old client dir..."
-rm -rf $output_volume
-mkdir -p $output_volume
+if [ -d $output_volume ] && [ $update_out_dir -eq 0 ]; then
+  echo "Removing old client dir..."
+  rm -rf $output_volume
+  mkdir -p $output_volume
+fi
 
 # if templates for a language exist we use them for generation
 template_dir="templates/$client_lang"
