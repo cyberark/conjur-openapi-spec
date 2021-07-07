@@ -1,7 +1,7 @@
 # Spec-Generated Ruby API Client Example
 
 This example is meant to give an example use case for OpenAPI spec generated clients.  
-It covers using some of the most popular Conjur OSS endpoints with Ruby:
+It covers using some of the most popular Conjur Open Source endpoints with Ruby:
 - Authenticate a user
 - Change user's own password
 - Rotate user's API key

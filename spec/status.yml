@@ -279,7 +279,7 @@ components:
           These routes do not require authentication.
 
           The health check attempts an internal HTTP or TCP connection to
-          each DAP service. It also attempts a simple transaction against all internal databases.
+          each Conjur Enterprise service. It also attempts a simple transaction against all internal databases.
         operationId: "health"
         responses:
           "200":
@@ -297,9 +297,9 @@ components:
           enterprise-only: true
         tags:
           - "status"
-        summary: "Health info about a given DAP server"
+        summary: "Health info about a given Conjur Enterprise server"
         description: |
-          Use the remote_health route to check the health of any DAP Server from any other DAP Server.
+          Use the remote_health route to check the health of any Conjur Enterprise Server from any other Conjur Enterprise Server.
           With this route, you can check master health relative to a follower, or follower health relative
           to a standby, and so on.
         operationId: "remoteHealth"
@@ -326,9 +326,9 @@ components:
           enterprise-only: true
         tags:
           - "status"
-        summary: "Basic information about the DAP server"
+        summary: "Basic information about the Conjur Enterprise server"
         description: |
-          Information about the DAP node which was queried against.
+          Information about the Conjur Enterprise node which was queried against.
 
           Includes authenticator info, release/version info, configuration details,
           internal services, and role information.
