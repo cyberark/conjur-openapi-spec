@@ -179,5 +179,49 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    def test_get_access_token_via_jwt_200(self):
+        """Test case for JWT authentication 200 response"""
+        service_id = 'jwt_service'
+        jwt_token = 'bad token'
+
+        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.get_access_token_via_jwt(self.account, service_id, jwt=jwt_token)
+
+        mock.assert_called_once_with(
+            '/authn-jwt/{service_id}/{account}/authenticate',
+            'POST',
+            {
+                'account': self.account,
+                'service_id': service_id
+            },
+            [],
+            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            body=None,
+            post_params=[('jwt', jwt_token)],
+            files={},
+            response_type='str',
+            auth_settings=[],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
+
+    def test_get_access_token_via_jwt_400(self):
+        """Test case for jwt_authenticate 400 response"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_access_token_via_jwt('\00', 'jwt_service', jwt='bad token')
+
+        self.assertEqual(context.exception.status, 400)
+
+    def test_get_access_token_via_jwt_401(self):
+        """Test case for jwt_authenticate 401 response"""
+        with self.assertRaises(conjur.exceptions.ApiException) as context:
+            self.api.get_access_token_via_jwt(self.account, 'jwt_service', jwt='bad token')
+
+        self.assertEqual(context.exception.status, 401)
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 source bin/util
 
+cleanup() {
+  echo "Cleaning up..."
+  docker-compose rm --stop --force -v
+}
+
 if [ "$1" == "-d" ]; then
   DEBUG="true"
   shift
