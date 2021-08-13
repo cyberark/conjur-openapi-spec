@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened, edited]
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
 
 jobs:
   contract_test:
