@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Renamed `bin/api_test` to `bin/test_api_contract` and `bin/start` to `bin/dev` to maintain
   repository- and company-wide script convention.
   [cyberark/conjur-openapi-spec#166](https://github.com/cyberark/conjur-openapi-spec/issues/166)
+- Remove Bad Gateway error code from authn-oidc error codes following [cyberark/conjur#2360](https://github.com/cyberark/conjur/pull/2360)
+  [cyberark/conjur-openapi-spec#204](https://github.com/cyberark/conjur-openapi-spec/pull/204)
 
 ## [5.1.1] - 2021-04-28
 ### Added
