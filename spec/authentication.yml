@@ -744,8 +744,6 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "502":
-            description: "Error connecting conjur to the OIDC provider"
 
         security: []
 
