@@ -16,7 +16,7 @@ CSR_PATH = pathlib.Path('test-python.csr')
 
 def read_file(path):
     """Returns the entirety of a file's contents"""
-    with open(path, 'r') as content:
+    with open(path, 'r', encoding="utf-8") as content:
         return content.read()
 
 class TestCertificateAuthorityApi(api_config.ConfiguredTest):

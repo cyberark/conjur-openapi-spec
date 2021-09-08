@@ -24,13 +24,14 @@ if (ENTERPRISE_TESTS := os.environ.get('ENTERPRISE_TESTS', default=False)) == '1
 
 def get_webservice_policy():
     """Gets the text for the webservice testing policy"""
-    with open(WEBSERVICE_POLICY, 'r') as policy:
+    with open(WEBSERVICE_POLICY, 'r', encoding="utf-8") as policy:
         return policy.read()
 
 
 def get_default_policy():
     """Gets the default testing policy"""
-    with open(pathlib.Path('.').resolve() / 'test/config/policy.yaml', 'r') as default_policy:
+    with open(pathlib.Path('.').resolve() / 'test/config/policy.yaml',
+              'r', encoding="utf-8") as default_policy:
         return default_policy.read()
 
 def get_bad_auth_api_config(username='admin'):
@@ -93,7 +94,7 @@ def setup_oidc_webservice():
     client = get_api_client()
     account = os.environ[CONJUR_ACCOUNT]
     policy_api = conjur.api.PoliciesApi(client)
-    with open(OIDC_POLICY_FILE, 'r') as policy_file:
+    with open(OIDC_POLICY_FILE, 'r', encoding="utf-8") as policy_file:
         policy = policy_file.read()
     policy_api.update_policy(account, 'root', policy)
 
