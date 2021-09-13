@@ -2,7 +2,7 @@ openapi: "3.0.0"
 
 info:
   description: "This is an API definition for CyberArk Conjur Open Source. You can find out more at [Conjur.org](https://www.conjur.org/)."
-  version: 5.1.1
+  version: 5.2.0
   title: "Conjur"
   contact:
     email: "conj_maintainers@cyberark.com"

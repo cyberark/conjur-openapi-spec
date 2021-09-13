@@ -31,7 +31,7 @@ components:
       minLength: 55
       description: "Example of a Conjur API key"
       example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
-        
+
     Authenticators:
       type: string
       enum:
@@ -744,6 +744,8 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
 
         security: []
 
