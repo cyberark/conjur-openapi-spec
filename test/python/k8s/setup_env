@@ -62,6 +62,7 @@ if [ "$(helm list -q -n $CONJUR_NAMESPACE | grep "^$HELM_RELEASE$")" = "$HELM_RE
         --set authenticators="authn\,authn-k8s/$AUTHENTICATOR_ID" \
         --set logLevel="$CONJUR_LOG_LEVEL" \
         --set service.external.enabled="false" \
+        --set image.tag="edge" \
         --reuse-values \
         --wait \
         --timeout 300s \
@@ -78,6 +79,7 @@ else
         --set authenticators="authn\,authn-k8s/$AUTHENTICATOR_ID" \
         --set logLevel="$CONJUR_LOG_LEVEL" \
         --set service.external.enabled="false" \
+        --set image.tag="edge" \
         --wait \
         --timeout 300s \
         "$HELM_RELEASE" \
