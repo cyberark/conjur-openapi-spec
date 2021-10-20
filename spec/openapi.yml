@@ -104,6 +104,15 @@ components:
         - `sales&marketing` -> `sales%26marketing`
 
   parameters:
+    Account:
+      name: account
+      in: path
+      required: true
+      description: "Organization account name"
+      example: dev
+      schema:
+        type: string
+
     ServiceID:
       name: service_id
       in: path
@@ -212,8 +221,26 @@ paths:
   '/authn/{account}/api_key':
     $ref: 'authentication.yml#/components/paths/RotateApiKey'
 
-  '/{authenticator}/{service_id}/{account}':
-    $ref: 'authentication.yml#/components/paths/EnableAuthenticatorInstance'
+  #'/{authenticator}/{service_id}/{account}':
+    #$ref: 'authentication.yml#/components/paths/EnableAuthenticatorInstance'
+
+  '/authn-k8s/{service_id}/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableK8sAuthInstance'
+
+  '/authn-azure/{service_id}/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableAzureAuthInstance'
+
+  '/authn-oidc/{service_id}/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableOIDCAuthInstance'
+
+  '/authn-gcp/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableGCPAuthInstance'
+
+  '/{authenticator}/{service_id}/{account}/{host}':
+    $ref: 'authentication.yml#/components/paths/AuthenticatorHost'
+
+  '/authn-gcp/{account}/{host}':
+    $ref: 'authentication.yml#/components/paths/GCPAuthenticatorHost'
 
 # ========== STATUS ===========
 

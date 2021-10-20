@@ -76,6 +76,14 @@ components:
           "jwt": "eyJhbGciOiJSUzI1NiIs......uTonCA"
         }
 
+    HostInfo:
+      type: object
+      additionalProperties: {}
+      example: |                
+        {
+          "authn-k8s/namespace": "test-app"
+        }
+
     LoginName:
       type: string
       minLength: 1
@@ -151,12 +159,7 @@ components:
           use this endpoint.
         operationId: "getAPIKey"
         parameters:
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         responses:
           "200":
@@ -254,12 +257,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         responses:
           "200":
@@ -313,12 +311,7 @@ components:
           applications running in Azure or Kubernetes.
         operationId: "getAccessToken"
         parameters:
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
         - name: "login"
           in: "path"
           required: true
@@ -385,12 +378,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         - name: "login"
           in: "path"
@@ -459,12 +447,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         - name: "login"
           in: "path"
@@ -522,13 +505,7 @@ components:
           For more information, see [the documentation](https://docs.conjur.org/Latest/en/Content/Operations/Services/cjr-gcp-authn.htm).
         operationId: "getAccessTokenViaGCP"
         parameters:
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            type: string
-          example: "dev"
+        - $ref: openapi.yml#/components/parameters/Account
         - name: "Accept-Encoding"
           in: "header"
           description: "Setting the Accept-Encoding header to base64 will return a pre-encoded access token"
@@ -584,12 +561,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         - name: "login"
           in: "path"
@@ -657,12 +629,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         - name: "login"
           in: "path"
@@ -722,12 +689,7 @@ components:
         parameters:
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          required: true
-          description: "Organization account name"
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
         requestBody:
           description: "ID token"
@@ -764,14 +726,9 @@ components:
           provided by JWT to authenticate with Conjur.
         operationId: "getAccessTokenViaJWT"
         parameters:
-          - name: "account"
-            in: "path"
-            required: true
-            description: "Organization account name"
-            schema:
-              $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
 
-          - $ref: 'openapi.yml#/components/parameters/ServiceID'
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         requestBody:
           description: "ID token"
@@ -826,12 +783,7 @@ components:
           using their API keys, while passwords are only used by human users.
         operationId: "changePassword"
         parameters:
-        - name: "account"
-          in: "path"
-          description: "Organization account name"
-          required: true
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
         requestBody:
           description: "New password"
           required: true
@@ -892,12 +844,7 @@ components:
           Note that the body of the request must be the empty string.
         operationId: "rotateApiKey"
         parameters:
-        - name: "account"
-          in: "path"
-          description: "Organization account name"
-          required: true
-          schema:
-            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - $ref: openapi.yml#/components/parameters/Account
         - name: "role"
           in: "query"
           description: |
@@ -925,7 +872,7 @@ components:
           - basicAuth: []
             conjurAuth: []
 
-    EnableAuthenticatorInstance:
+    EnableK8sAuthInstance:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'
       patch:
@@ -948,25 +895,11 @@ components:
           authenticators via the API, and is currently available at the Community
           (or early alpha) level. This endpoint is still subject to breaking
           changes in the future.**
-        operationId: "enableAuthenticatorInstance"
+        operationId: "enableK8sAuthInstance"
         parameters:
-        - name: "authenticator"
-          in: "path"
-          description: "The authenticator to update"
-          required: true
-          schema:
-            $ref: '#/components/schemas/ServiceAuthenticators'
-          example: "authn-oidc"
-
         - $ref: openapi.yml#/components/parameters/ServiceID
 
-        - name: "account"
-          in: "path"
-          description: "Organization account name"
-          required: true
-          schema:
-            type: string
-          example: "dev"
+        - $ref: openapi.yml#/components/parameters/Account
 
         requestBody:
           description: |
@@ -993,3 +926,691 @@ components:
         security:
           - conjurAuth: []
 
+      post:
+        tags:
+        - "authentication"
+        summary: "Performs initial setup and enables the given authenticator instance."
+        description: |
+          Allows you to initialize a k8s authenticator instance.
+
+          This will load a policy creating the webservice for authentication and a layer
+          which has access to authenticate with the webservice. It will also ensure that
+          the authenticator has been added to the enabled authenticators list.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "initializeK8sAuthenticatorInstance"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains the CA cert which will be used to generate the keypair for the authenticator
+          required: true
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: byte
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the authenticator was enabled"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-k8s/test
+                      body:
+                      - !webservice
+                      - !policy
+                        id: ca
+                        body:
+                        - !variable
+                          id: cert
+                        - !variable
+                          id: key
+                      - !layer users
+
+                      - !permit
+                        resource: !webservice
+                        privilege: [ read, authenticate ]
+                        role: !layer users
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given authenticator has already been initialized"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+        
+
+    EnableAzureAuthInstance:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      patch:
+        tags:
+        - "authentication"
+        summary: "Enables or disables authenticator service instances."
+        description: |
+          Allows you to either enable or disable a given authenticator
+          service instance.
+
+          When you enable or disable an authenticator service instance via this
+          endpoint, the status of the authenticator service instance is stored
+          in the Conjur database. The enablement status of the authenticator
+          service instance may be overridden by setting the `CONJUR_AUTHENTICATORS`
+          environment variable on the Conjur server; in the case where this
+          environment variable is set, the database record of whether the
+          authenticator service instance is enabled will be ignored.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "enableAzureAuthInstance"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
+
+        responses:
+          "204":
+            description: "The config was updated properly"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      post:
+        tags:
+        - "authentication"
+        summary: "Performs initial setup and enables the given authenticator instance."
+        description: |
+          Allows you to initialize an azure authenticator instance.
+
+          This will load a policy creating the webservice for authentication and a layer
+          which has access to authenticate with the webservice. It will also ensure that
+          the authenticator has been added to the enabled authenticators list.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "initializeAzureAuthenticatorInstance"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains the Azure authenticator provider URI for Conjur to connect to.
+          required: true
+          content:
+            text/plain:
+              schema:
+                type: string
+                format: uri
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the authenticator was enabled"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-azure/test
+                      body:
+                      - !webservice
+                      - !variable
+                        id: provider-uri
+
+                      - !layer users
+
+                      - !permit
+                        resource: !webservice
+                        privilege: [ read, authenticate ]
+                        role: !layer users
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given authenticator has already been initialized"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    EnableGCPAuthInstance:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      patch:
+        tags:
+        - "authentication"
+        summary: "Enables or disables authenticator service instances."
+        description: |
+          Allows you to either enable or disable a given authenticator
+          service instance.
+
+          When you enable or disable an authenticator service instance via this
+          endpoint, the status of the authenticator service instance is stored
+          in the Conjur database. The enablement status of the authenticator
+          service instance may be overridden by setting the `CONJUR_AUTHENTICATORS`
+          environment variable on the Conjur server; in the case where this
+          environment variable is set, the database record of whether the
+          authenticator service instance is enabled will be ignored.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "enableGCPAuthenticator"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
+
+        responses:
+          "204":
+            description: "The config was updated properly"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      post:
+        tags:
+        - "authentication"
+        summary: "Performs initial setup and enables the given authenticator instance."
+        description: |
+          Allows you to initialize a GCP authenticator instance.
+
+          This will load a policy creating the webservice for authentication and a layer
+          which has access to authenticate with the webservice. It will also ensure that
+          the authenticator has been added to the enabled authenticators list.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "initializeGCPAuthenticator"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/Account
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the authenticator was enabled"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-gcp
+                      body:
+                      - !webservice
+
+                      - !layer users
+
+                      - !permit
+                        resource: !webservice
+                        privilege: [ read, authenticate ]
+                        role: !layer users
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given authenticator has already been initialized"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    EnableOIDCAuthInstance:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      patch:
+        tags:
+        - "authentication"
+        summary: "Enables or disables authenticator service instances."
+        description: |
+          Allows you to either enable or disable a given authenticator
+          service instance.
+
+          When you enable or disable an authenticator service instance via this
+          endpoint, the status of the authenticator service instance is stored
+          in the Conjur database. The enablement status of the authenticator
+          service instance may be overridden by setting the `CONJUR_AUTHENTICATORS`
+          environment variable on the Conjur server; in the case where this
+          environment variable is set, the database record of whether the
+          authenticator service instance is enabled will be ignored.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "enableOIDCAuthInstance"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
+
+        responses:
+          "204":
+            description: "The config was updated properly"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+      post:
+        tags:
+        - "authentication"
+        summary: "Performs initial setup and enables the given authenticator instance."
+        description: |
+          Allows you to initialize an OIDC authenticator instance.
+
+          This will load a policy creating the webservice for authentication and a layer
+          which has access to authenticate with the webservice. It will also ensure that
+          the authenticator has been added to the enabled authenticators list.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "initializeOIDCAuthenticatorInstance"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        requestBody:
+          description: |
+            Contains the Azure authenticator provider URI for Conjur to connect to.
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                parameters:
+                  provider-uri:
+                    type: string
+                    format: uri
+                  id-token-user-property:
+                    type: string
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the authenticator was enabled"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-azure/test
+                      body:
+                      - !webservice
+                      - !variable
+                        id: provider-uri
+
+                      - !layer users
+
+                      - !permit
+                        resource: !webservice
+                        privilege: [ read, authenticate ]
+                        role: !layer users
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given authenticator has already been initialized"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+
+    AuthenticatorHost:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      put:
+        tags:
+        - "authentication"
+        summary: "Adds a new host which is able to authenticate with the authenticator instance"
+        description: |
+          Adds a new policy branch named `conjur/authn-<auth>/<service_id>/apps` if one does not currently exist
+          and creates a new host under that branch which is then granted access to the authenticator instances
+          layer.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "createHostForAuthenticator"
+        parameters:
+        - name: "authenticator"
+          in: "path"
+          description: "The authenticator to initialize"
+          required: true
+          schema:
+            $ref: '#/components/schemas/ServiceAuthenticators'
+          example: "authn-k8s"
+
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        - name: "host"
+          in: "path"
+          description: "The id of the new host"
+          required: true
+          schema:
+            type: string
+          example: "test-app"
+
+        requestBody:
+          description: |
+            Contains any annotations that need to be added to the host in policy
+          required: false
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostInfo"
+
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the hosts have been granted access to the authenticator"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-k8s/test/apps
+                      body:
+                      - !host
+                        id: test-app
+                        annotations:
+                          authn-k8s/namespace: test-app
+
+                    - !grant
+                      role: !layer conjur/authn-k8s/test/users
+                      members:
+                        - !host conjur/authn-k8s/test/apps/test-app
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given host already exists"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+      
+      delete:
+        tags:
+        - "authentication"
+        summary: Completely removes a host which was previously included in the authenticator instance policy branch
+        description: |
+          Completely deletes a host from Conjur.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "deleteHostForAuthenticator"
+        parameters:
+        - name: "authenticator"
+          in: "path"
+          description: "The authenticator to initialize"
+          required: true
+          schema:
+            $ref: '#/components/schemas/ServiceAuthenticators'
+          example: "authn-k8s"
+
+        - $ref: openapi.yml#/components/parameters/ServiceID
+
+        - $ref: openapi.yml#/components/parameters/Account
+
+        - name: "host"
+          in: "path"
+          description: "The id of the host"
+          required: true
+          schema:
+            type: string
+          example: "test-app"
+
+        responses:
+          "200":
+            description: "The new policy was loaded and the host has been deleted"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-k8s/test/apps
+                      body:
+                        - !delete
+                        record: !host test-app
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+
+    GCPAuthenticatorHost:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      put:
+        tags:
+        - "authentication"
+        summary: "Adds a new host which is able to authenticate with the authenticator instance"
+        description: |
+          Adds a new policy branch named `conjur/authn-<auth>/<service_id>/apps` if one does not currently exist
+          and creates a new host under that branch which is then granted access to the authenticator instances
+          layer.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "createHostForGCPAuthenticator"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/Account
+
+        - name: "host"
+          in: "path"
+          description: "The id of the new host"
+          required: true
+          schema:
+            type: string
+          example: "test-app"
+
+        requestBody:
+          description: |
+            Contains any annotations that need to be added to the host in policy
+          required: false
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostInfo"
+
+        responses:
+          "201":
+            description: "The new policy was loaded and the hosts have been granted access to the authenticator"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-gcp/apps
+                      body:
+                      - !host
+                        id: test-app
+                        annotations:
+                          authn-gcp/instance-name: <instance-name>
+                          authn-gcp/project-id: <project-id>
+
+                    - !grant
+                      role: !layer conjur/authn-gcp/users
+                      members:
+                        - !host conjur/authn-gcp/apps/test-app
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "409":
+            description: "The given host already exists"
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
+      
+      delete:
+        tags:
+        - "authentication"
+        summary: Completely removes a host which was previously included in the authenticator instance policy branch
+        description: |
+          Completely deletes a host from Conjur.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "deleteHostForAuthenticator"
+        parameters:
+        - $ref: openapi.yml#/components/parameters/Account
+
+        - name: "host"
+          in: "path"
+          description: "The id of the host"
+          required: true
+          schema:
+            type: string
+          example: "test-app"
+
+        responses:
+          "200":
+            description: "The new policy was loaded and the host has been deleted"
+            content:
+              text/plain:
+                schema:
+                  type: string
+                  format: yaml
+                  example: |
+                    - !policy
+                      id: conjur/authn-gcp/apps
+                      body:
+                        - !delete
+                        record: !host test-app
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
