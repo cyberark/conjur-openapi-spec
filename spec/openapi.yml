@@ -10,6 +10,9 @@ info:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
+servers: 
+- url: /
+
 tags:
 - name: "authentication"
   description: "Authentication"
@@ -38,21 +41,10 @@ components:
       minLength: 1
       example: "default"
 
-    CheckPrivilege:
-      description: "Checks whether a role has a privilege on a resource."
-      type: boolean
-      example: true
-
     Count:
       description: "Return only the count of results"
       type: boolean
       example: true
-
-    Identifier:
-      description: "Long identifying string for a specific resource in Conjur"
-      type: string
-      example: "dev:user:admin"
-      pattern: '\w+:\w+:\w+'
 
     Kind:
       type: string
@@ -68,16 +60,6 @@ components:
       description: "Skips this many items before returning the rest"
       type: integer
       example: 20
-
-    PermittedRoles:
-      type: boolean
-      example: true
-
-    PrivilegeLevel:
-      type: string
-      minLength: 1
-      example: "execute"
-      description: "Denotes a type of permission allowed on a resource"
 
     ResourceID:
       type: string
