@@ -92,6 +92,12 @@ components:
           "id_token": "eyJhbGciOiJSUzI1NiIs......uTonCA"
         }
 
+    UserId:
+      type: string
+      minLength: 1
+      example: "SomeUserID"
+      description: "Represents the user/host identity"
+
     ServiceAuthenticators:
       type: string
       enum:
@@ -749,7 +755,6 @@ components:
 
         security: []
 
-
     JWTAuthenticate:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'
@@ -771,6 +776,56 @@ components:
             schema:
               $ref: 'openapi.yml#/components/schemas/AccountName'
 
+          - $ref: 'openapi.yml#/components/parameters/ServiceID'
+
+        requestBody:
+          description: "ID token"
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/JWTToken'
+
+        responses:
+          "200":
+            $ref: '#/components/responses/AccessToken'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security: []
+
+    JWTAuthenticateWithId:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      post:
+        tags:
+          - "authentication"
+        summary: |
+          Gets a short-lived access token for applications using JSON Web Token (JWT)
+          to access the Conjur API. Covers the case of use of optional URL parameter "ID"
+        description: |
+          Use the JWT Authenticator to leverage the identity layer
+          provided by JWT to authenticate with Conjur.
+        operationId: "getAccessTokenViaJWTWithId"
+        parameters:
+          - name: "account"
+            in: "path"
+            required: true
+            description: "Organization account name"
+            schema:
+              $ref: 'openapi.yml#/components/schemas/AccountName'
+          - name: "id"
+            in: "path"
+            required: true
+            description: "Organization user id"
+            schema:
+              $ref: '#/components/schemas/UserId'
           - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         requestBody:

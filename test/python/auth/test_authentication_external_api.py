@@ -182,7 +182,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
     def test_get_access_token_via_jwt_200(self):
         """Test case for JWT authentication 200 response"""
         service_id = 'jwt_service'
-        jwt_token = 'bad token'
+        jwt_token = 'valid token'
 
         with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
                 as mock:
@@ -193,6 +193,41 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             'POST',
             {
                 'account': self.account,
+                'service_id': service_id
+            },
+            [],
+            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            body=None,
+            post_params=[('jwt', jwt_token)],
+            files={},
+            response_type='str',
+            auth_settings=[],
+            async_req=None,
+            _return_http_data_only=True,
+            _preload_content=True,
+            _request_timeout=None,
+            collection_formats={}
+        )
+
+    def test_get_access_token_via_jwt_with_id_200(self):
+        """Test case for JWT authentication with id 200 response"""
+        service_id = 'jwt_service'
+        jwt_token = 'valid token'
+        user_id = 'user id'
+
+        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
+                as mock:
+            self.api.get_access_token_via_jwt_with_id(self.account,
+                                                     user_id,
+                                                     service_id,
+                                                     jwt=jwt_token)
+
+        mock.assert_called_once_with(
+            '/authn-jwt/{service_id}/{account}/{id}/authenticate',
+            'POST',
+            {
+                'account': self.account,
+                'id': user_id,
                 'service_id': service_id
             },
             [],

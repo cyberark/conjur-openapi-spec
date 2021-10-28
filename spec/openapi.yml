@@ -206,6 +206,9 @@ paths:
   '/authn-jwt/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/JWTAuthenticate'
 
+  '/authn-jwt/{service_id}/{account}/{id}/authenticate':
+    $ref: 'authentication.yml#/components/paths/JWTAuthenticateWithId'
+
   '/authn/{account}/password':
     $ref: 'authentication.yml#/components/paths/ChangePassword'
 
