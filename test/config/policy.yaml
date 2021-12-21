@@ -5,6 +5,18 @@
 - !user bob
 
 - !policy
+  id: conjur/authn-gcp
+  body:
+    - !webservice
+
+    - !group users
+
+    - !permit
+      role: !group users
+      privilege: [ read, authenticate ]
+      resource: !webservice
+
+- !policy
   id: conjur/authn-ldap/test
   body:
   - !webservice
@@ -18,6 +30,10 @@
 
 - !grant
   role: !group conjur/authn-ldap/test/users
+  member: !user alice
+
+- !grant
+  role: !group conjur/authn-gcp/users
   member: !user alice
 
 - !permit

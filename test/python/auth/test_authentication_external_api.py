@@ -86,29 +86,6 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(status, 204)
 
-    def test_enable_authenticator_401(self):
-        """Test case for enable_authenticator 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
-            self.bad_auth_api.enable_authenticator(
-                'authn-gcp',
-                self.account,
-                enabled=False
-            )
-
-        self.assertEqual(context.exception.status, 401)
-
-    def test_enable_authenticator_404(self):
-        """Test case for enable_authenticator 404 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
-            self.api.enable_authenticator(
-                'authn-gcp',
-                self.account,
-                enabled=False
-            )
-
-        self.assertEqual(context.exception.status, 404)
-
-
     def test_get_api_key_via_ldap_200(self):
         """Test case for get_api_key_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
