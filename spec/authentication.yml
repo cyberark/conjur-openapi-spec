@@ -980,6 +980,68 @@ components:
           - basicAuth: []
             conjurAuth: []
 
+    EnableAuthenticator:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      patch:
+        tags:
+          - "authentication"
+        summary: "Enables or disables authenticator defined without service_id."
+        description: |
+          Allows you to either enable or disable a given authenticator that does not have service_id (For example: authn-gcp).
+
+          When you enable or disable an authenticator via this
+          endpoint, the status of the authenticator is stored
+          in the Conjur database. The enablement status of the authenticator
+          service may be overridden by setting the `CONJUR_AUTHENTICATORS`
+          environment variable on the Conjur server; in the case where this
+          environment variable is set, the database record of whether the
+          authenticator service is enabled will be ignored.
+
+          **This endpoint is part of an early implementation of support for enabling Conjur
+          authenticators via the API, and is currently available at the Community
+          (or early alpha) level. This endpoint is still subject to breaking
+          changes in the future.**
+        operationId: "enableAuthenticator"
+        parameters:
+          - name: "authenticator"
+            in: "path"
+            description: "The authenticator to update"
+            required: true
+            schema:
+              $ref: '#/components/schemas/ServiceAuthenticators'
+            example: "authn-gcp"
+
+          - name: "account"
+            in: "path"
+            description: "Organization account name"
+            required: true
+            schema:
+              type: string
+            example: "dev"
+
+        requestBody:
+          description: |
+            Contains either `enabled=true` or `enabled=false` to
+            enable or disable an authenticator
+          required: true
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                $ref: '#/components/schemas/EnableAuthenticatorSetting'
+
+        responses:
+          "204":
+            description: "The config was updated properly"
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
     EnableAuthenticatorInstance:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'

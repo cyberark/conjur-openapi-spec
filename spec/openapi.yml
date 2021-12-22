@@ -215,6 +215,9 @@ paths:
   '/authn/{account}/api_key':
     $ref: 'authentication.yml#/components/paths/RotateApiKey'
 
+  '/{authenticator}/{account}':
+    $ref: 'authentication.yml#/components/paths/EnableAuthenticator'
+
   '/{authenticator}/{service_id}/{account}':
     $ref: 'authentication.yml#/components/paths/EnableAuthenticatorInstance'
 

@@ -73,6 +73,19 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
+    def test_enable_authenticator_204(self):
+        """Test case for enable_authenticator 204 response
+
+        Updates the authenticators configuration
+        """
+        _, status, _ = self.api.enable_authenticator_with_http_info(
+            'authn-gcp',
+            self.account,
+            enabled=True
+        )
+
+        self.assertEqual(status, 204)
+
     def test_get_api_key_via_ldap_200(self):
         """Test case for get_api_key_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
