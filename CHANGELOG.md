@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.3.0] - 2021-12-22
+
+### Added
+- Add new route for enabling authenticator with default service
+  [cyberark/conjur-openapi-spec#215](https://github.com/cyberark/conjur-openapi-spec/pull/215)
+
 ## [5.2.0] - 2021-09-08
 ### Added
 - New JWT authenticator endpoints have been added to the spec.
@@ -104,6 +110,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
 
-[Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.2.0...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...HEAD
+[5.3.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.1...v5.2.0
 [5.1.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.0...v5.1.1
