@@ -1,6 +1,41 @@
 #!/usr/bin/env bash
 source bin/util
 
+print_help() {
+  cat << EOF
+This script starts Conjur Open Source in a docker-compose environment.
+
+USAGE
+./bin/start_conjur [options]
+
+OPTIONS
+-h|--help       Print help message.
+-s|--stable     Start the latest stable version of Conjur Open Source.
+                By default, the 'edge' version is used, which includes as yet
+                unreleased content.
+EOF
+}
+
+conjur_tag=""
+
+while test $# -gt 0
+do
+  param=$1
+  shift
+  case "$param" in
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    -s|--stable)
+      conjur_tag="latest"
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 cleanup() {
   echo "Cleaning up..."
   docker-compose rm --stop --force -v
@@ -23,6 +58,7 @@ echo "Building services..."
 docker-compose build pg conjur conjur-https
 
 # Start Conjur server
+export CONJUR_OPEN_SOURCE_IMAGE_TAG="${conjur_tag:-$CONJUR_OPEN_SOURCE_IMAGE_TAG}"
 echo "Starting Conjur..."
 docker-compose up -d conjur conjur-https
 docker-compose exec -T conjur conjurctl wait

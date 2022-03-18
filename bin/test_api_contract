@@ -2,6 +2,7 @@
 source bin/util
 
 endpoint_flag=""
+conjur_tag="latest"
 
 while test $# -gt 0; do
   case "$1" in
@@ -16,6 +17,7 @@ while test $# -gt 0; do
       echo
       echo "-h, --help                show help"
       echo "-e, --endpoint <path>     test endpoints starting with the given path"
+      echo "-s, --stable              test against the latest stable version of Conjur Open Source"
       exit 0
       ;;
     -e|--endpoint)
@@ -27,6 +29,10 @@ while test $# -gt 0; do
       fi
       shift
       ;;
+    -s|--stable)
+      conjur_tag="edge"
+      shift
+      ;;
     *)
       break
       ;;
@@ -35,6 +41,7 @@ done
 
 if [[ -z "$(docker-compose ps -q)" ]]; then
   announce "Environment not found. Spinning up..."
+  export CONJUR_OPEN_SOURCE_IMAGE_TAG="$conjur_tag"
   ./bin/start_conjur 1> /dev/null
   echo
 fi

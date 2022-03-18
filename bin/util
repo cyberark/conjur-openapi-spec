@@ -41,11 +41,21 @@ function ensure_client_is_generated(){
 }
 
 function ensure_conjur_up(){
+  desired_tag="$1"
+  export CONJUR_OPEN_SOURCE_IMAGE_TAG="$desired_tag"
   if [ -z $(docker-compose ps -q conjur) ]; then
     announce "Starting Conjur container"
     ./bin/start_conjur
   else
-    announce "Conjur already up!"
+    docker ps | grep openapi | grep cyberark/conjur | grep $desired_tag > /dev/null
+    desired_tag_deployed="$?"
+    if [[ "$desired_tag_deployed" == "0" ]]; then
+      announce "Conjur already up!"
+    else
+      announce "Conjur not deployed with tag $desired_tag. Re-deploying..."
+      ./bin/stop
+      ./bin/start_conjur
+    fi
   fi
 }
 

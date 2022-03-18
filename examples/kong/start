@@ -39,27 +39,30 @@ announce "Ensure Kong Gateway is active"
 if [[ -z $(curl -s http://localhost:8001/services/Conjur | grep '"name":"Conjur"') ]]; then
     echo "Kong setup failed"
     exit 1
-else
-    echo "Kong setup successful"
 fi
 
 announce "Making requests to Conjur through Kong Gateway"
 
-ensure_conjur_up
+set +e
+ensure_conjur_up latest
 sleep 10
+set -e
 
 admin_api_key="$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 token="$(curl -s http://localhost:8000/authn/dev/admin/authenticate \
     --header "Accept-Encoding: base64" \
     --data $admin_api_key)"
 
-secret_data="Hello World!"
+curl -X POST http://localhost:8000/policies/dev/policy/root \
+    -H "Authorization: Token token=\"$token\"" \
+    --data "$(< examples/config/policy.yml)" 1> /dev/null
 
-curl -is http://localhost:8000/secrets/dev/variable/testSecret \
+secret_data="Hello World!"
+curl -is http://localhost:8000/secrets/dev/variable/sampleSecret \
     -H "Authorization: Token token=\"$token\"" \
     --data "$secret_data"
 
-retrieved_secret="$(curl http://localhost:8000/secrets/dev/variable/testSecret \
+retrieved_secret="$(curl http://localhost:8000/secrets/dev/variable/sampleSecret \
     -H "Authorization: Token token=\"$token\"")"
 
 if [ "$secret_data" == "$retrieved_secret" ]; then
