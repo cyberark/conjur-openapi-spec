@@ -32,6 +32,8 @@ tags:
   description: "Server status"
 - name: "certificate authority"
   description: "Certificate authority"
+- name: "configuration"
+  description: "Configure Conjur"
 
 components:
   schemas:
@@ -220,6 +222,11 @@ paths:
 
   '/{authenticator}/{service_id}/{account}':
     $ref: 'authentication.yml#/components/paths/EnableAuthenticatorInstance'
+
+# ========== CONFIGURATION ===========
+
+  '/authenticators/{account}/persist':
+    $ref: 'configuration.yml#/components/paths/PersistAuthenticator'
 
 # ========== STATUS ===========
 

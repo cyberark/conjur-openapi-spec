@@ -1,0 +1,73 @@
+components:
+  responses:
+    PersistedAuthenticator:
+      description: "The loaded Conjur policy"
+      content:
+        text/yaml:
+          schema:
+            type: string
+
+    UpdatedAuthenticator:
+      description: "The loaded/updated Conjur policy"
+      content:
+        text/yaml:
+          schema:
+            type: string
+
+  paths:
+    PersistAuthenticator:
+      post:
+        tags:
+        - 'configuration'
+        operationId: "persistAuthenticator"
+        summary: "Configures and persists an authenticator webservice"
+        description: |
+          Once the status webservice has been properly configured and the relevant user
+          groups have been given permissions to access the status webservice, the
+          users in those groups can check the status of the authenticator.
+
+          This operation only supports the GCP authenticator
+
+          See [Conjur Documentation](https://docs.conjur.org/Latest/en/Content/Integrations/Authn-status.htm)
+          for details on setting up the authenticator status webservice.
+        parameters:
+          - name: account
+            in: path
+            schema:
+              type: string
+            required: true
+            description: "The organization account name"
+            example: "dev"
+        requestBody:
+          description: "Configuration details"
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  {
+                    "authenticator": "authn-oidc",
+                    "service-id": "test-auth",
+                    "provider-uri": "http://provider",
+                    "id-token-user-property": "user-name"
+                  }
+            
+        responses:
+          '200':
+            $ref: '#/components/responses/UpdatedAuthenticator'
+          '201':
+            $ref: '#/components/responses/PersistedAuthenticator'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "403":
+            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
+
+        security:
+          - conjurAuth: []
