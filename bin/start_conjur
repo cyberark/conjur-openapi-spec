@@ -15,6 +15,10 @@ if [ $(enterprise_alive) -eq 0 ]; then
   stop_enterprise
 fi
 
+if [ $(conjur_alive) -eq 0 ]; then
+  stop_oss
+fi
+
 trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
 
 docker network create openapi-spec

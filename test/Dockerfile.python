@@ -1,9 +1,10 @@
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 ENV INSTALL_DIR=/opt/conjur-openapi-spec
 
-RUN apt-get update && \
-    apt-get install -y bash \
+RUN apt-get -y update && \
+    apt-get install -y apt-transport-https \
+                       bash \
                        binutils \
                        build-essential \
                        git \

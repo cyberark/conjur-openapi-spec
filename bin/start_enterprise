@@ -5,6 +5,10 @@ if [ $(conjur_alive) -eq 0 ]; then
   stop_oss
 fi
 
+if [ $(enterprise_alive) -eq 0 ]; then
+  stop_enterprise
+fi
+
 rm -rf test/dap-intro
 git clone https://github.com/conjurdemos/dap-intro.git test/dap-intro
 chmod -R 777 test/dap-intro
