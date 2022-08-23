@@ -7,6 +7,8 @@ info:
   contact:
     email: "conj_maintainers@cyberark.com"
   license:
+    # These values are overwritten by the client as the generator did not correctly read the license name.
+    # See https://github.com/cyberark/conjur-sdk-java/blob/main/config/java.yml
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 

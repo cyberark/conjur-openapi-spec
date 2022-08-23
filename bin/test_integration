@@ -189,7 +189,7 @@ run_python_tests(){
     docker run --rm $enterprise_params \
       --network $docker_network \
       --env-file .env \
-      python-tests bash -c "nose2 -v -s test ${test_params}"
+      python-tests bash -c "nose2 -v -s test ${test_params} --with-coverage --coverage-report xml"
   fi
 }
 
