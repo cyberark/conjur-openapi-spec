@@ -117,12 +117,13 @@ The demos show how to use popular Conjur API endpoints:
 - Load the root policy
 - Store and retrieve a secret
 
-There are currently examples in two languages, Python and Ruby.  
+There are currently examples in three languages - Python, Ruby and Bash.  
 The examples can be run using their respective scripts:
 
 ```shell
 $ ./examples/python/start
 $ ./examples/ruby/start
+$ ./examples/bash/start
 ```
 
 Each example performs the following steps:

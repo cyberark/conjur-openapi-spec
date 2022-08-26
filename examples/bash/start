@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+source ./bin/util
+
+ensure_client_is_generated bash conjur
+ensure_conjur_up
+
+export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
+
+announce "Running Bash Example..."
+docker run --rm \
+  -v ${PWD}/out/oss/bash:/src \
+  -v ${PWD}/examples/bash/bash_client.sh:/src/bash_client.sh \
+  -v ${PWD}/examples/config:/config/policy \
+  -v ${PWD}/config/https:/config/https \
+  --network openapi-spec \
+  -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
+  ubuntu:22.04 \
+  bash -c "
+    apt-get update; apt-get install -y curl bsdmainutils
+    bash /src/bash_client.sh
+  "
+  # TODO: Use new docker image that has curl so this doesn't have to redownlaod each time it's run
