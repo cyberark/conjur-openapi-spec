@@ -709,10 +709,95 @@ components:
 
         security: []
 
+    OIDCAuthenticateProviders:
+      parameters:
+        - $ref: 'openapi.yml#/components/parameters/RequestID'
+      get:
+        description: |
+          Retrieve a list of configured OIDC Providers with redirect
+          information.
+        operationId: retrieveOIDCProviders
+        security: []
+        summary: |
+          Retrieve a list of configured OIDC Providers with redirect
+          information.
+        tags:
+          - authentication
+        parameters:
+          - description: Organization account name
+            in: path
+            name: account
+            required: true
+            schema:
+              $ref: 'openapi.yml#/components/schemas/AccountName'
+
+        responses:
+          '200':
+            description: The response body contains a list of available OIDC providers.
+            content:
+              application/json:
+                schema:
+                  items:
+                    type: object
+                    example:
+                      service_id: okta
+                      type: authn-oidc
+                      name: Okta
+                      nonce: f94836444e160559c2e75285ff9003f258227c158344c79cd0
+                      code_verifier: 1ab148fbf52ea5372a14f6929e78097deacef5a789901a3cfe
+                      redirect_uri: 'https://dev-92899799.okta.com/oauth2/default/v1/authorize?client_id=0ia3x3xig6sHiu9yT5d7&response_type=code&scope=openid%20email%20profile&nonce=f94836444e160559c2e75285ff9003f258227c158344c79cd0&code_challenge=r3yKl4Nssf0dUYQb3i0SqaQgD3_kVo7LKiMmWTm2xYU&code_challenge_method=S256&redirect_uri=http%3A%2F%2Fconjur.mycompany.com%2Fauthn-oidc%2Fokta%2Fcucumber%2Fauthenticate'
+                  type: array
 
     OIDCAuthenticate:
       parameters:
         - $ref: 'openapi.yml#/components/parameters/RequestID'
+      get:
+        description: |
+          Use an external OIDC Provider to authenticate Conjur Users
+          and Hosts.
+        operationId: retrieveAccessTokenViaOIDC
+        parameters:
+        - $ref: openapi.yml#/components/parameters/ServiceID
+        - name: "account"
+          in: "path"
+          required: true
+          description: "Organization account name"
+          schema:
+            $ref: 'openapi.yml#/components/schemas/AccountName'
+        - description: OIDC Code returned after the OIDC redirect authentication workflow
+          in: query
+          name: code
+          required: true
+          schema:
+            type: string
+        - description: Nonce provided to the OIDC provider at the start of the redirect authentication workflow
+          in: query
+          name: nonce
+          required: true
+          schema:
+            type: string
+        - description: The Code Verifier (PKCE) value which corresponds to the Code Challenge value provided to the OIDC provider at the start of the redirect authentication workflow
+          in: query
+          name: code_verifier
+          schema:
+            type: string
+          required: true
+        responses:
+          "200":
+            $ref: '#/components/responses/AccessToken'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "401":
+            $ref: 'openapi.yml#/components/responses/UnauthorizedError'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
+        security: []
+        summary: |
+          Gets a short-lived access token for applications using OpenID
+          Connect (OIDC) to access the Conjur API.
+        tags:
+          - authentication
+
       post:
         tags:
         - "authentication"
@@ -1109,4 +1194,3 @@ components:
 
         security:
           - conjurAuth: []
-

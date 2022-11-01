@@ -10,7 +10,7 @@ info:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
-servers: 
+servers:
 - url: /
 
 tags:
@@ -202,6 +202,9 @@ paths:
 
   '/authn-oidc/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/OIDCAuthenticate'
+
+  '/authn-oidc/{account}/providers':
+    $ref: 'authentication.yml#/components/paths/OIDCAuthenticateProviders'
 
   '/authn-jwt/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/JWTAuthenticate'
