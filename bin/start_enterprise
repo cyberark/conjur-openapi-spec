@@ -5,12 +5,12 @@ if [ $(conjur_alive) -eq 0 ]; then
   stop_oss
 fi
 
-rm -rf test/dap-intro
-git clone https://github.com/conjurdemos/dap-intro.git test/dap-intro
-chmod -R 777 test/dap-intro
+rm -rf test/conjur-intro
+git clone https://github.com/conjurdemos/conjur-intro.git test/conjur-intro
+chmod -R 777 test/conjur-intro
 
 set -e
-pushd  ./test/dap-intro
+pushd ./test/conjur-intro
 
 ./bin/dap --provision-master
 ./bin/dap --wait-for-master

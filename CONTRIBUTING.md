@@ -191,7 +191,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Both the http & https ports are exposed so requests can be made to Conjur from outside the docker network.
 
 `bin/start_enterprise`
-* Used to start a new local Conjur Enterprise instance based on [`dap-intro`](https://github.com/conjurdemos/dap-intro)
+* Used to start a new local Conjur Enterprise instance based on [`conjur-intro`](https://github.com/conjurdemos/conjur-intro)
 
 `bin/stop`
 * Used to deconstruct the development environment.
