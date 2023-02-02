@@ -17,9 +17,6 @@ pushd ./test/conjur-intro
 api_key=$(curl --insecure --user admin:MySecretP@ss1 https://localhost/authn/demo/login)
 echo Conjur Enterprise API key: $api_key
 
-announce "Setting up Conjur Enterprise Certificates"
-./bin/dap --import-custom-certificates
-
 popd
 
 cat << ENV > .env
