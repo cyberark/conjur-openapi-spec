@@ -20,7 +20,8 @@ def get_oidc_id_token():
     result = requests.post(
         'http://oidc-keycloak:8080/auth/realms/master/protocol/openid-connect/token',
         data=oidc_request_form,
-        auth=('conjurClient', '1234')
+        auth=('conjurClient', '1234'),
+        timeout=30
     )
     result = json.loads(result.content)
     return result['id_token']
