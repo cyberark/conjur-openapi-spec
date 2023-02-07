@@ -203,7 +203,7 @@ if [[ $no_rebuild_conjur -eq 0 ||
     announce "Starting Conjur Enterprise"
 	  bin/start_enterprise
 
-    pushd  ./test/dap-intro
+    pushd ./test/conjur-intro
     # Create the parameter to import volumes from the Enterprise container so we have its certificates
     for name in $(docker-compose ps -q)
     do
