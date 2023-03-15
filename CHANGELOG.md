@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Added two new routes which provide information on enabled OIDC providers and updated the OIDC authenticate route.
+  [cyberark/conjur-openapi-spec#220](https://github.com/cyberark/conjur-openapi-spec/pull/220)
+
 ## [5.3.0] - 2021-12-22
 
 ### Added

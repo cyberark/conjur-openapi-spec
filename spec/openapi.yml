@@ -203,6 +203,9 @@ paths:
   '/authn-oidc/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/OIDCAuthenticate'
 
+  '/authn-oidc/{account}/providers':
+    $ref: 'authentication.yml#/components/paths/ListOIDCAuthenticators'
+
   '/authn-jwt/{service_id}/{account}/authenticate':
     $ref: 'authentication.yml#/components/paths/JWTAuthenticate'
 
