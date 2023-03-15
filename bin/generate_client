@@ -140,6 +140,6 @@ docker run --rm \
     -g "$client_lang" \
     -o "/out/" \
     $client_config \
-    $template_arg
+    $template_arg 1> /dev/null
 
 echo "Done! Client is in $output_volume folder!"

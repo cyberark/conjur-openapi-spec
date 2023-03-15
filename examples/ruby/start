@@ -1,10 +1,8 @@
 #!/bin/bash
-set -e
-
 source ./bin/util
 
-ensure_client_is_generated ruby conjur
-ensure_conjur_up
+ensure_client_is_generated ruby oss
+ensure_conjur_up latest
 
 # Remove the gem if it is already built so we dont create a gemfile
 # which contains itself when we build

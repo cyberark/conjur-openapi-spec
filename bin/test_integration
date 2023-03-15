@@ -27,6 +27,7 @@ OPTIONS
                             This option does not maintaing Conjur Enterprise.
        	                    WARNING: may cause failing test cases.
 --no-regen-client           Prevent the script from re-generating the client library.
+-s|--stable                 Runs tests against the latest stable version of Conjur Open Source.
 -t|--test <test>            Runs a given test in a client test suite.
 EOF
 }
@@ -42,6 +43,7 @@ enterprise=0
 appliance="oss"
 enterprise_params=""
 docker_network="openapi-spec"
+conjur_open_source_tag="edge"
 
 no_regen_client=0
 no_rebuid_conjur=0
@@ -86,6 +88,9 @@ do
       ;;
     --no-regen-client)
       no_regen_client=1
+      ;;
+    -s|--stable)
+      conjur_open_source_tag="latest"
       ;;
     -t|--test)
       test="$1"
@@ -197,11 +202,12 @@ if [[ $no_rebuild_conjur -eq 0 ||
 ( $(conjur_alive) -eq 1 && $enterprise -eq 0 ) ||
 ( $(enterprise_alive) -eq 1 && $enterprise -eq 1 ) ]]; then
   if [[ $enterprise -eq 0 ]]; then
-	announce "Starting Conjur OSS"
-	bin/start_conjur
+    announce "Starting Conjur OSS"
+    export CONJUR_OPEN_SOURCE_IMAGE_TAG="$conjur_open_source_tag"
+    bin/start_conjur
   else
     announce "Starting Conjur Enterprise"
-	  bin/start_enterprise
+    bin/start_enterprise
 
     pushd ./test/conjur-intro
     # Create the parameter to import volumes from the Enterprise container so we have its certificates

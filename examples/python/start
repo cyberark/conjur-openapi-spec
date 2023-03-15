@@ -1,10 +1,8 @@
 #!/bin/bash
-set -e
-
 source ./bin/util
 
-ensure_client_is_generated python conjur
-ensure_conjur_up
+ensure_client_is_generated python oss
+ensure_conjur_up latest
 
 export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)
 

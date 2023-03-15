@@ -6,7 +6,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
 
   conjur:
-    image: cyberark/conjur:edge
+    image: cyberark/conjur:${CONJUR_OPEN_SOURCE_IMAGE_TAG:-edge}
     command: server -a dev -f /policy/policy.yaml
     environment:
       CONJUR_DATA_KEY: 'OyXV68Mip14xj33huGaQKewmmS+gKtDlp6ECZ2iATpU='
@@ -148,5 +148,4 @@ services:
 
 networks:
   default:
-    external:
-      name: openapi-spec
+    name: openapi-spec

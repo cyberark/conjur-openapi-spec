@@ -56,7 +56,7 @@ cmd="python3 examples/postman/postman_env_setup.py"
 arg=""
 
 if [[ local_env -eq 1 ]]; then
-    ensure_conjur_up
+    ensure_conjur_up latest
 
     export CONJUR_AUTHN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 
