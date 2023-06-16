@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- Removed possible 403 response code from Roles API endpoints. As of Conjur
+  v1.19.3, requests to the Roles API return 404 when the caller has insufficient
+  privilege - see [cyberark/conjur#2755](https://github.com/cyberark/conjur/pull/2755).
+  [cyberark/conjur-openapi-spec#225](https://github.com/cyberark/conjur-openapi-spec/pull/225)
+
 ## [5.3.0] - 2021-12-22
 
 ### Added
