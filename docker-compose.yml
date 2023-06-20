@@ -146,6 +146,25 @@ services:
       - ./test/config/oidc:/scripts
       - ./test/config/oidc/keycloak/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
 
+  kong:
+    image: kong
+    command: tail -f /dev/null
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: "/opt/openapi/out/kong/kong.yml"
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_PROXY_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    volumes:
+     - .:/opt/openapi
+
 networks:
   default:
     external:

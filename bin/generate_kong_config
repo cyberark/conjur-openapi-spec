@@ -3,38 +3,32 @@ set -e
 . bin/util
 
 announce "Bundling OpenAPI spec"
-
 bin/bundle_spec
+
+announce "Update spec: bump OAI version, include Docker host URL"
 docker run --rm \
-    -v $(pwd):/opt/openapi \
+    -v "${PWD}:/opt/openapi" \
     python:latest /bin/bash -c "
         cd /opt/openapi && \\
         pip3 install pyyaml && \\
         python3 examples/kong/util.py bump_spec_version
+        python3 examples/kong/util.py update_server_url
     "
-
-# a Kong declarative configuration requires a defined target server
-# using http://host.docker.interal allows a containerized Kong Gateway to target
-# a local Conjur instance
-echo "servers:
-  - url: http://host.docker.internal:80" | sudo tee -a tmp_spec.yml >/dev/null
 
 announce "Generating Kong declarative configuration yaml"
 docker run --rm \
-    -v ${PWD}:/opt/openapi \
-    node:15 /bin/bash -c "
-        npm i -g insomnia-inso \
-        && cd /opt/openapi \
-        && inso --verbose \
-            generate config tmp_spec.yml \
-            --type declarative \
-            --output out/kong/kong.yml
-    "
+    -v "${PWD}:/opt/openapi" \
+    kong/inso:latest \
+        --verbose \
+        generate config /opt/openapi/tmp_spec.yml \
+        --type declarative \
+        --output /opt/openapi/out/kong/kong.yml
+rm tmp_spec.yml
 
 announce "Remove authentication plugins from API routes"
 # these plugins consume authentication credentials instead of passing them to Conjur
 docker run --rm \
-    -v $(pwd):/opt/openapi \
+    -v "${PWD}:/opt/openapi" \
     python:latest /bin/bash -c "
         cd /opt/openapi && \\
         pip3 install pyyaml && \\

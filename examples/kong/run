@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -e
+. bin/util
+
+apk add curl
+
+announce "Ensure Kong Gateway is active"
+if [[ -z $(curl -s http://kong:8001/services/Conjur | grep '"name":"Conjur"') ]]; then
+    echo "Kong setup failed"
+    exit 1
+else
+    echo "Kong setup successful"
+fi
+
+announce "Making requests to Conjur through Kong Gateway"
+
+sleep 10
+
+token="$(curl -s http://kong:8000/authn/dev/admin/authenticate \
+    --header "Accept-Encoding: base64" \
+    --data $ADMIN_API_KEY)"
+
+secret_data="Hello World!"
+
+curl -is http://kong:8000/secrets/dev/variable/testSecret \
+    -H "Authorization: Token token=\"$token\"" \
+    --data "$secret_data"
+
+retrieved_secret="$(curl http://kong:8000/secrets/dev/variable/testSecret \
+    -H "Authorization: Token token=\"$token\"")"
+
+if [ "$secret_data" == "$retrieved_secret" ]; then
+    announce "Secret stored and retrieved!"
+else
+    announce "Unsuccessful secret storage and retrieval."
+    exit 1
+fi

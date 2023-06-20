@@ -12,59 +12,23 @@ if [ "$(uname -s)" == "Linux" ]; then
     host_option="--add-host host.docker.internal:host-gateway"
 fi
 
-if [[ -z $(docker container ls -q --filter name=kong) ]]; then
+ensure_conjur_up
+
+if [[ -z $(docker-compose ps -q kong) ]]; then
     announce "Starting Kong in Docker"
-    docker run -d --name kong \
-        $host_option \
-        -v $(pwd):/opt/openapi \
-        -e "KONG_DATABASE=off" \
-        -e "KONG_DECLARATIVE_CONFIG=/opt/openapi/out/kong/kong.yml" \
-        -e "KONG_PROXY_ACCESS_LOG=/dev/stdout" \
-        -e "KONG_ADMIN_ACCESS_LOG=/dev/stdout" \
-        -e "KONG_PROXY_ERROR_LOG=/dev/stderr" \
-        -e "KONG_ADMIN_ERROR_LOG=/dev/stderr" \
-        -e "KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl" \
-        -p 8000:8000 \
-        -p 8443:8443 \
-        -p 8001:8001 \
-        -p 8444:8444 \
-        kong kong start
+    docker-compose up -d kong
+    docker-compose exec kong kong start
 else
     announce "Reloading Kong config"
-    docker exec kong kong reload
+    docker-compose exec kong kong reload
 fi
-sleep 10
-
-announce "Ensure Kong Gateway is active"
-if [[ -z $(curl -s http://localhost:8001/services/Conjur | grep '"name":"Conjur"') ]]; then
-    echo "Kong setup failed"
-    exit 1
-else
-    echo "Kong setup successful"
-fi
-
-announce "Making requests to Conjur through Kong Gateway"
-
-ensure_conjur_up
 sleep 10
 
 admin_api_key="$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
-token="$(curl -s http://localhost:8000/authn/dev/admin/authenticate \
-    --header "Accept-Encoding: base64" \
-    --data $admin_api_key)"
 
-secret_data="Hello World!"
-
-curl -is http://localhost:8000/secrets/dev/variable/testSecret \
-    -H "Authorization: Token token=\"$token\"" \
-    --data "$secret_data"
-
-retrieved_secret="$(curl http://localhost:8000/secrets/dev/variable/testSecret \
-    -H "Authorization: Token token=\"$token\"")"
-
-if [ "$secret_data" == "$retrieved_secret" ]; then
-    announce "Secret stored and retrieved!"
-else
-    announce "Unsuccessful secret storage and retrieval."
-    exit 1
-fi
+docker run \
+    -v "$(pwd):/opt/openapi" \
+    -w "/opt/openapi" \
+    -e ADMIN_API_KEY="$admin_api_key" \
+    --network "openapi-spec" \
+    bash:latest examples/kong/run
