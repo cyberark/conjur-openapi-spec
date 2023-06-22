@@ -179,7 +179,7 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
 
     def test_parameter_combos_b(self):
         """Test Conjur's response to being given all optional parameters besides `graph`
-        Conjur responses with `all` results ONLY
+        Conjur responds with `all` results ONLY
         """
         details, status, _ = self.api.show_role_with_http_info(
             self.account,
@@ -201,7 +201,17 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
         ]
 
         if api_config.ENTERPRISE_TESTS:
-            target_details.append('!:!:root')
+            system_memberships = [
+                'system:group:conjur/replication-sets/full/replicated-data',
+                'system:policy:conjur',
+                'system:policy:conjur/replication-sets',
+                'system:policy:conjur/replication-sets/full',
+                'system:policy:root',
+                'system:user:admin',
+                '!:!:root'
+            ]
+            for membership in system_memberships:
+                target_details.append(membership)
 
         self.assertEqual(status, 200)
         for i in target_details:
@@ -213,7 +223,7 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
 
     def test_parameter_combos_c(self):
         """Test Conjur's response to being given both `members` and `memberships`
-        Conjur response with `memberships` results ONLY
+        Conjur responds with `memberships` results ONLY
         """
         self.add_user_to_group('bob')
 

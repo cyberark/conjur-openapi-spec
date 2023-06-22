@@ -177,26 +177,6 @@ class TestRolesApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
-    def test_add_member_to_role_403(self):
-        """Test case for 403 status response when adding role member
-        403 - the authenticated user lacks the necessary privilege
-        """
-        # establish a new api client as user Bob
-        bob_client = api_config.get_api_client(username='bob')
-        bob_roles_api = conjur.RolesApi(bob_client)
-
-        # attempt to add Alice as a member of userGroup as Bob
-        with self.assertRaises(conjur.ApiException) as context:
-            bob_roles_api.add_member_to_role(
-                self.account,
-                'group',
-                'userGroup',
-                members='',
-                member=self.ALICE_ID
-            )
-
-        self.assertEqual(context.exception.status, 403)
-
     def test_add_member_to_role_404(self):
         """Test case for 404 status response when adding role member
         404 - the role inteded for assignment as member does not exist
@@ -285,32 +265,6 @@ class TestRolesApi(api_config.ConfiguredTest):
             )
 
         self.assertEqual(context.exception.status, 401)
-
-    def test_remove_member_from_role_403(self):
-        """Test case for 403 status response when deleting role member
-        403 - the authenticated client lacks the necessary privilege
-        """
-        # add Alice as a member of userGroup and confirm
-        self.add_user_to_group('alice')
-        group_members = self.api.show_role(self.account, 'group', 'userGroup', members='')
-        self.assertEqual(len(group_members), 2)
-        self.assertEqual(group_members[1]['member'], self.ALICE_ID)
-
-        # establish a new api client as user Bob
-        bob_client = api_config.get_api_client(username='bob')
-        bob_roles_api = conjur.RolesApi(bob_client)
-
-        # attempt to delete Alice as member of userGroup as Bob
-        with self.assertRaises(conjur.ApiException) as context:
-            bob_roles_api.remove_member_from_role(
-                self.account,
-                'group',
-                'userGroup',
-                members='',
-                member=self.ALICE_ID
-            )
-
-        self.assertEqual(context.exception.status, 403)
 
     def test_remove_member_from_role_404(self):
         """Test case for 404 status response when deleting role member

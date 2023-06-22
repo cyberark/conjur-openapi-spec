@@ -129,8 +129,6 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "403":
-            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
@@ -196,8 +194,6 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "403":
-            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
@@ -263,8 +259,6 @@ components:
             $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
-          "403":
-            $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
             $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
