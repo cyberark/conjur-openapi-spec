@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.3.1] - 2023-07-11
+
 ### Removed
 - Removed possible 403 response code from Roles API endpoints. As of Conjur
   v1.19.3, requests to the Roles API return 404 when the caller has insufficient
@@ -116,7 +118,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
 
-[Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.1...HEAD
+[5.3.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.1...v5.2.0
 [5.1.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.1.0...v5.1.1
+[5.1.0]: https://github.com/cyberark/conjur-openapi-spec/releases/tag/v5.1.0
