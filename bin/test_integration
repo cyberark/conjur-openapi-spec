@@ -118,7 +118,8 @@ setup_keycloak(){
   docker-compose exec -T oidc-keycloak bash -c "/scripts/create_client"
   docker-compose exec -T oidc-keycloak bash -c "/scripts/create_user bob bob bob@conjur.net"
   docker-compose exec -T conjur bash -c "/policy/oidc/fetchCertificate"
-  export KEYCLOAK_CERT="$(docker compose exec conjur cat /etc/ssl/certs/keycloak.pem)"
+  KEYCLOAK_CERT="$(docker compose exec conjur cat /etc/ssl/certs/keycloak.pem)"
+  export KEYCLOAK_CERT
 }
 
 gen_client() {
@@ -176,15 +177,15 @@ run_python_tests(){
   fi
 
   if [[ $enterprise -eq 0 ]]; then
-    docker-compose build test-python
+    docker compose build test-python
 
     announce "Running Python Integration Tests"
-    docker-compose run \
+    docker compose run \
       --rm \
       --no-deps \
       --env KEYCLOAK_CERT \
       test-python \
-      nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test ${test_params}
+      nose2 --plugin nose2.plugins.junitxml --with-coverage --coverage-report xml -X -v -s test "${test_params}"
   else
     docker build -f test/Dockerfile.python -t python-tests --build-arg APPLIANCE=enterprise .
 
