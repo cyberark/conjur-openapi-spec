@@ -10,6 +10,7 @@ CERT_DIR = pathlib.Path(os.environ.get('CERT_DIR', default='config/https'))
 SSL_CERT_FILE = os.environ.get('SSL_CERT_FILE', default='ca.crt')
 CONJUR_CERT_FILE = os.environ.get('CONJUR_CERT_FILE', default='conjur.crt')
 CONJUR_KEY_FILE = os.environ.get('CONJUR_KEY_FILE', default='conjur.key')
+KEYCLOAK_CERT = os.environ.get('KEYCLOAK_CERT')
 
 # Environment Constants
 CONJUR_AUTHN_API_KEY = 'CONJUR_AUTHN_API_KEY'
@@ -110,6 +111,12 @@ def setup_oidc_webservice():
         'variable',
         'conjur/authn-oidc/test/id-token-user-property',
         body='preferred_username'
+    )
+    secrets_api.create_secret(
+        account,
+        'variable',
+        'conjur/authn-oidc/test/ca-cert',
+        body=KEYCLOAK_CERT
     )
 
 class ConfiguredTest(unittest.TestCase):

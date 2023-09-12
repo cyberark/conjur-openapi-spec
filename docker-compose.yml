@@ -148,5 +148,5 @@ services:
 
 networks:
   default:
-    external:
-      name: openapi-spec
+    name: openapi-spec
+    external: true

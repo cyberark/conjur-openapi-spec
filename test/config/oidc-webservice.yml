@@ -11,6 +11,7 @@
 
   - !variable provider-uri
   - !variable id-token-user-property
+  - !variable ca-cert
 
   - !permit
     role: !group users
