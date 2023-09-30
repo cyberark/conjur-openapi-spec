@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 
-import unittest
 import datetime
 import os
+import unittest
 
-import conjur
+from conjur import ApiException
+from conjur.api import AuthenticationApi, HostFactoryApi, PoliciesApi
+from conjur.models import CreatedHost, HostToken
 
 from . import api_config
 
@@ -26,7 +28,7 @@ FACTORY_POLICY = '''
 '''
 
 HOST_TOKEN_MEMBERS = ['expiration', 'cidr', 'token']
-EXPIRE = datetime.date.today() + datetime.timedelta(days=1)
+EXPIRE = str(datetime.date.today() + datetime.timedelta(days=1))
 
 class TestHostFactoryApi(api_config.ConfiguredTest):
     """HostFactoryApi unit test stubs"""
@@ -34,17 +36,17 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        policy_api = conjur.PoliciesApi(cls.client)
+        policy_api = PoliciesApi(cls.client)
         policy_api.load_policy(cls.account, 'root', FACTORY_POLICY)
 
     def setUp(self):
-        self.api = conjur.HostFactoryApi(self.client)
-        self.bad_auth_api = conjur.HostFactoryApi(self.bad_auth_client)
+        self.api = HostFactoryApi(self.client)
+        self.bad_auth_api = HostFactoryApi(self.bad_auth_client)
 
     def get_host_token(self):
         """Gets a token used for creating new hosts"""
-        token = self.api.create_token(EXPIRE, HOST_FACTORY)
-        return token[0]['token']
+        tokens = self.api.create_token(EXPIRE, HOST_FACTORY)
+        return tokens[0].token
 
     # test cases for conjur.HostFactoryApi.create_host
 
@@ -54,18 +56,18 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
 
-        new_host, status, _ = self.api.create_host_with_http_info(TEST_HOST)
-        self.assertEqual(status, 201)
-        self.assertIsInstance(new_host, conjur.models.CreateHost)
+        response = self.api.create_host_with_http_info(TEST_HOST)
+        self.assertEqual(response.status_code, 201)
+        self.assertIsInstance(response.data, CreatedHost)
 
         # Make sure the new host can authenticate
-        authn = conjur.api.AuthenticationApi(self.client)
+        authn = AuthenticationApi(self.client)
         authn.get_access_token(
             self.account,
             f'host/{TEST_HOST}',
-            body=new_host.api_key
+            body=response.data.api_key
         )
 
         self.client.configuration.api_key = old_key
@@ -74,7 +76,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 401 response when creating a host
         401 - Unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.create_host(TEST_HOST)
 
         self.assertEqual(context.exception.status, 401)
@@ -85,9 +87,9 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
 
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.create_host("")
         self.assertEqual(context.exception.status, 422)
 
@@ -99,22 +101,25 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 200 response when creating a host token
         Creates one or more host identity tokens.
         """
-        token_data_list, response, _ = self.api.create_token_with_http_info(
+        response = self.api.create_token_with_http_info(
             EXPIRE,
             HOST_FACTORY
         )
-        token_data = token_data_list[0]
+        token = response.data[0]
 
-        self.assertEqual(response, 200)
-        self.assertIsInstance(token_data, dict)
-        for i in HOST_TOKEN_MEMBERS:
-            self.assertIn(i, token_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(token, HostToken)
+
+        self.assertEqual(token.cidr, [])
+        for attribute in [token.expiration, token.token]:
+            self.assertIsInstance(attribute, str)
+            self.assertGreater(len(attribute), 0)
 
     def test_create_token_401(self):
         """Test case for 401 response when creating a host token
         401 - Unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.create_token(EXPIRE, HOST_FACTORY)
 
         self.assertEqual(context.exception.status, 401)
@@ -125,9 +130,9 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         The requesting role requires `execute` privilege on the Host Factory
         """
         no_exec_client = api_config.get_api_client('carl')
-        no_exec_api = conjur.HostFactoryApi(no_exec_client)
+        no_exec_api = HostFactoryApi(no_exec_client)
 
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             no_exec_api.create_token(EXPIRE, HOST_FACTORY)
 
         self.assertEqual(context.exception.status, 403)
@@ -136,7 +141,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 404 response when creating a host token
         404 - the requested host factory does not exist
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.create_token(EXPIRE, "fake_factory")
 
         self.assertEqual(context.exception.status, 404)
@@ -145,7 +150,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 422 response when creating a host token
         422 - Unprocessable entity
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.create_token('fake_date', HOST_FACTORY)
 
         self.assertEqual(context.exception.status, 422)
@@ -159,11 +164,11 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
 
-        _, status, _ = self.api.revoke_token_with_http_info(token)
-        self.assertEqual(status, 204)
+        response = self.api.revoke_token_with_http_info(token)
+        self.assertEqual(response.status_code, 204)
 
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
-        with self.assertRaises(conjur.exceptions.ApiException):
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
+        with self.assertRaises(ApiException):
             self.api.create_host(TEST_HOST)
 
         self.client.configuration.api_key = old_key
@@ -172,7 +177,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 400 response when revoking a host token
         400 - Bad request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.revoke_token('\00')
 
         self.assertEqual(context.exception.status, 400)
@@ -182,19 +187,17 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         401 - Unauthorized request
         """
         token = self.get_host_token()
-        old_key = dict(self.client.configuration.api_key)
 
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.revoke_token(token)
 
         self.assertEqual(context.exception.status, 401)
-        self.client.configuration.api_key = old_key
 
     def test_revoke_token_404(self):
         """Test case for 404 response when revoking a host token
         404 - Conjur did not find the specified token
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.revoke_token("fake_token")
 
         self.assertEqual(context.exception.status, 404)

@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 import unittest
 
-import conjur
+from conjur import ApiException
+from conjur.api import PoliciesApi, RolesApi
 
 from .. import api_config
 
@@ -39,12 +40,12 @@ class TestRolesApi(api_config.ConfiguredTest):
         cls.ROOT_ID = f'{cls.account}:policy:root'
 
     def setUp(self):
-        self.api = conjur.RolesApi(self.client)
-        self.bad_auth_api = conjur.RolesApi(self.bad_auth_client)
+        self.api = RolesApi(self.client)
+        self.bad_auth_api = RolesApi(self.bad_auth_client)
 
         # set a new root policy including a new group and users Alice and Bob
         # these will be used to test member addition/deletion
-        policy_api = conjur.PoliciesApi(self.client)
+        policy_api = PoliciesApi(self.client)
         policy_api.replace_policy(self.account, 'root', ROLES_POLICY)
 
     def tearDown(self):
@@ -69,14 +70,14 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 200 status response when getting role data
         Gets information on the specified role
         """
-        role_details, status, _ = self.api.show_role_with_http_info(self.account, 'user', 'admin')
+        response = self.api.show_role_with_http_info(self.account, 'user', 'admin')
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(role_details, dict)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.data, dict)
 
         members = ['created_at', 'id', 'members']
         for i in members:
-            self.assertIn(i, role_details)
+            self.assertIn(i, response.data)
 
     def test_show_role_400(self):
         """Test case for 400 status response when getting role data
@@ -84,7 +85,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(self.account, NULL_BYTE, 'admin')
 
         self.assertEqual(context.exception.status, 400)
@@ -93,7 +94,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 401 status response when getting role data
         401 - unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(self.account, 'user', 'admin')
 
         self.assertEqual(context.exception.status, 401)
@@ -102,7 +103,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 404 status response when getting role data
         404 - the role could not be found
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(self.account, 'user', 'fakeUser')
 
         self.assertEqual(context.exception.status, 404)
@@ -111,7 +112,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 422 status response when getting role data
         422 - Conjur recieved a malformed request parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',
@@ -130,8 +131,8 @@ class TestRolesApi(api_config.ConfiguredTest):
         The example shown here is a user Bob being assigned as a member of a group
         204 - successful member assignment, empty response body
         """
-        _, status, _ = self.add_user_to_group('bob')
-        self.assertEqual(status, 204)
+        response = self.add_user_to_group('bob')
+        self.assertEqual(response.status_code, 204)
 
         group_member_data = self.api.show_role(
             self.account,
@@ -151,7 +152,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.add_member_to_role(
                 self.account,
                 NULL_BYTE,
@@ -166,7 +167,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 401 status response when adding role member
         401 - unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.add_member_to_role(
                 self.account,
                 'group',
@@ -181,7 +182,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 404 status response when adding role member
         404 - the role inteded for assignment as member does not exist
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.add_member_to_role(
                 self.account,
                 'group',
@@ -196,7 +197,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 422 status response when adding role member
         422 - Conjur recieved a malformed request parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.add_member_to_role(
                 self.account,
                 'group',
@@ -220,14 +221,14 @@ class TestRolesApi(api_config.ConfiguredTest):
         self.assertEqual(group_members[1]['member'], self.BOB_ID)
 
         # remove Bob as member of userGroup
-        _, delete_status, _ = self.api.remove_member_from_role_with_http_info(
+        response = self.api.remove_member_from_role_with_http_info(
             self.account,
             'group',
             'userGroup',
             members='',
             member=self.BOB_ID
         )
-        self.assertEqual(delete_status, 204)
+        self.assertEqual(response.status_code, 204)
 
         # confirm Bob's removal as member
         group_members = self.api.show_role(self.account, 'group', 'userGroup', members='')
@@ -240,7 +241,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.remove_member_from_role(
                 self.account,
                 NULL_BYTE,
@@ -255,7 +256,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 401 status response when deleting role member
         401 - unauthenticated request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.remove_member_from_role(
                 self.account,
                 'group',
@@ -270,7 +271,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 404 status response when deleting role member
         404 - the queried role intended for deletion was not found
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.remove_member_from_role(
                 self.account,
                 'group',
@@ -285,7 +286,7 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 422 status response when deleting role member
         422 - Conjur recieved a malformed request parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.remove_member_from_role(
                 self.account,
                 'group',

@@ -24,7 +24,7 @@ OPTIONS
 EOF
 }
 
-generator_version="v4.3.1"
+generator_version="latest-release" # v7.0.1 as of 29 Sept 2023
 GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
 client_lang=""

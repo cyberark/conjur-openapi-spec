@@ -1,9 +1,9 @@
-
-import pathlib
 import os
+import pathlib
 import unittest
 
-import conjur
+from conjur import ApiClient, Configuration
+from conjur.api import AuthenticationApi, PoliciesApi, SecretsApi
 
 CONJUR_HOST = os.environ.get('CONJUR_HOST', default='https://conjur-https')
 CERT_DIR = pathlib.Path(os.environ.get('CERT_DIR', default='config/https'))
@@ -36,7 +36,7 @@ def get_default_policy():
         return default_policy.read()
 
 def get_bad_auth_api_config(username='admin'):
-    """Gets a default API config to be used with the testsing setup with no password
+    """Gets a default API config to be used with the testing setup with no password
     specified"""
     config = get_api_config(username=username)
     config.password = None
@@ -44,9 +44,9 @@ def get_bad_auth_api_config(username='admin'):
 
 def get_api_config(username='admin'):
     """Gets a default API config to be used with the testsing setup"""
-    config = conjur.Configuration(
-            host=CONJUR_HOST,
-        )
+    config = Configuration(
+        host=CONJUR_HOST,
+    )
     config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
     config.cert_file = CERT_DIR.joinpath(CONJUR_CERT_FILE)
     config.key_file = CERT_DIR.joinpath(CONJUR_KEY_FILE)
@@ -57,7 +57,7 @@ def get_api_key(username, role):
     """Gets the api key for a given username"""
     if username == 'admin':
         return os.environ[CONJUR_AUTHN_API_KEY]
-    auth_api = conjur.api.AuthenticationApi(get_api_client())
+    auth_api = AuthenticationApi(get_api_client())
     api_key = auth_api.rotate_api_key(
         os.environ[CONJUR_ACCOUNT],
         role=f'{role}:{username}'
@@ -79,27 +79,28 @@ def get_api_client(username='admin', role='user'):
 
     config = get_api_config()
 
-    client = conjur.ApiClient(config)
-    auth = conjur.api.AuthenticationApi(client)
+    client = ApiClient(config)
+    auth = AuthenticationApi(client)
     api_token = auth.get_access_token(
-            account,
-            username,
-            body=api_key,
-            accept_encoding='base64'
-        )
-    client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
+        account,
+        username,
+        body=api_key,
+        accept_encoding='base64'
+    )
+    client.configuration.api_key_prefix['conjurAuth'] = 'Token'
+    client.configuration.api_key['conjurAuth'] = f'token="{api_token}"'
     return client
 
 def setup_oidc_webservice():
     """Loads a policy for the oidc webservice into conjur"""
     client = get_api_client()
     account = os.environ[CONJUR_ACCOUNT]
-    policy_api = conjur.api.PoliciesApi(client)
+    policy_api = PoliciesApi(client)
     with open(OIDC_POLICY_FILE, 'r', encoding="utf-8") as policy_file:
         policy = policy_file.read()
     policy_api.update_policy(account, 'root', policy)
 
-    secrets_api = conjur.api.SecretsApi(client)
+    secrets_api = SecretsApi(client)
     secrets_api.create_secret(
         account,
         'variable',
@@ -127,7 +128,7 @@ class ConfiguredTest(unittest.TestCase):
         cls.account = os.environ[CONJUR_ACCOUNT]
 
         cls.client = get_api_client()
-        cls.bad_auth_client = conjur.ApiClient(get_api_config())
+        cls.bad_auth_client = ApiClient(get_api_config())
         cls.load_default_policy()
 
     @classmethod
@@ -143,5 +144,5 @@ class ConfiguredTest(unittest.TestCase):
         Compartmentalizes test cases by replacing any loaded policy
         """
         default_policy = get_default_policy()
-        policy_api = conjur.api.PoliciesApi(cls.client)
+        policy_api = PoliciesApi(cls.client)
         policy_api.replace_policy(cls.account, 'root', default_policy)
