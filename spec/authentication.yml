@@ -28,7 +28,7 @@ components:
 
     ApiKey:
       type: string
-      minLength: 55
+      maxLength: 56
       description: "Example of a Conjur API key"
       example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
 
