@@ -131,12 +131,33 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
+    def test_get_secret_200(self):
+        """Test case for get_secret 200 response
+
+        Fetches the value of a secret from the specified Variable.
+        """
+        # Conjur's default outbound Content-Type on secret retrieval requests
+        # is application/octet-stream, a binary data type. This has recently
+        # been updated in the OpenAPI description, meaning this generated API
+        # client now returns byte strings on secret retrieval requests.
+        #
+        # Loading a standard string and a byte string on create_secret calls
+        # are functionally the same, and don't affect the retrieved type. This
+        # variable is a byte string to simplify value comparison.
+        secret_val = b'secret data'
+        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
+
+        response = self.api.get_secret_with_http_info(self.account, "variable", TEST_VARIABLES[0])
+        self.assertEqual(response.data, secret_val)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/octet-stream')
+
     def test_get_secret_version_200(self):
         """Test case for get_secret 200 response with version parameter
 
         Fetches the value of a secret from the specified Variable.
         """
-        secret_val = "secret data"
+        secret_val = b'secret data'
         self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
         response = self.api.get_secret_with_http_info(
@@ -147,18 +168,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, secret_val)
-
-    def test_get_secret_200(self):
-        """Test case for get_secret 200 response
-
-        Fetches the value of a secret from the specified Variable.
-        """
-        secret_val = "secret data"
-        self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
-
-        response = self.api.get_secret_with_http_info(self.account, "variable", TEST_VARIABLES[0])
-        self.assertEqual(response.data, secret_val)
-        self.assertEqual(response.status_code, 200)
 
     def test_get_secret_401(self):
         """Test case for get_secret 401 response with version parameter

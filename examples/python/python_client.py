@@ -120,7 +120,7 @@ retrieved_secret = secrets_api.get_secret(
     account=ACCOUNT_NAME,
     kind="variable",
     identifier=secret_id
-)
+).decode()
 print("Retrieved secret: ", retrieved_secret)
 
 if retrieved_secret != secret:
