@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import unittest
 
-import conjur
+from conjur import ApiException
 
 from . import test_roles_api
 from .test_roles_api import NULL_BYTE
@@ -121,36 +121,36 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
 
     def test_show_graph_200(self):
         """Test case for show 200 response with graph query param"""
-        details, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'admin',
             graph=''
         )
 
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
         # root policy as parent should always be first for admin user
-        for i in details:
+        for i in response.data:
             self.assertIn('parent', i)
             self.assertIn('child', i)
 
     def test_show_graph_400(self):
         """Test case for show_role 400 response with graph query param"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(self.account, 'user', NULL_BYTE, graph='')
 
         self.assertEqual(context.exception.status, 400)
 
     def test_show_graph_401(self):
         """Test case for show_role 401 response with graph query param"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(self.account, 'user', 'admin', graph='')
 
         self.assertEqual(context.exception.status, 401)
 
     def test_show_graph_404(self):
         """Test case for show_role 404 response with graph query param"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(self.account, 'user', 'nonexist', graph='')
 
         self.assertEqual(context.exception.status, 404)
@@ -161,7 +161,7 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
         """Test Conjur's response to being given all optional parameters in a single request
         Conjur responds with `graph` results ONLY
         """
-        details, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'admin',
@@ -171,9 +171,9 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
             graph=''
         )
 
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
 
-        for i in details:
+        for i in response.data:
             self.assertIn('parent', i)
             self.assertIn('child', i)
 
@@ -181,7 +181,7 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
         """Test Conjur's response to being given all optional parameters besides `graph`
         Conjur responds with `all` results ONLY
         """
-        details, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'admin',
@@ -213,13 +213,13 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
             for membership in system_memberships:
                 target_details.append(membership)
 
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
         for i in target_details:
             # This will throw an error causing the test to fail if
             # i is not present in details
-            details.remove(i)
+            response.data.remove(i)
 
-        self.assertEqual(len(details), 0)
+        self.assertEqual(len(response.data), 0)
 
     def test_parameter_combos_c(self):
         """Test Conjur's response to being given both `members` and `memberships`
@@ -227,7 +227,7 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
         """
         self.add_user_to_group('bob')
 
-        details, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'bob',
@@ -242,9 +242,9 @@ class TestRolesQueryParamsApi(test_roles_api.TestRolesApi):
                 'member': self.BOB_ID
             }
 
-        self.assertEqual(status, 200)
-        self.assertEqual(len(details), 1)
-        self.assertEqual(details[0], target_details)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0], target_details)
 
 if __name__ == '__main__':
     unittest.main()

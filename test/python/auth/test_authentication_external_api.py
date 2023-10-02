@@ -1,11 +1,12 @@
 from __future__ import absolute_import
 
+import json
 import unittest
 from unittest.mock import patch
-import json
-
 import requests
-import conjur
+
+from conjur import ApiClient, ApiException
+from conjur.api import AuthenticationApi
 
 from .. import api_config
 
@@ -33,28 +34,27 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
     Separate from the Authn tests to avoid issues with changing api keys/paswords
     """
     def setUp(self):
-        self.api = conjur.api.AuthenticationApi(self.client)
-        self.bad_auth_api = conjur.api.AuthenticationApi(self.bad_auth_client)
+        self.api = AuthenticationApi(self.client)
+        self.bad_auth_api = AuthenticationApi(self.bad_auth_client)
 
     def test_enable_authenticator_instance_204(self):
         """Test case for enable_authenticator_instance 204 response
 
         Updates the authenticators configuration
         """
-        _, status, _ = self.api.enable_authenticator_instance_with_http_info(
+        response = self.api.enable_authenticator_instance_with_http_info(
             'authn-ldap',
             'test',
             self.account,
             enabled=True
         )
-
-        self.assertEqual(status, 204)
+        self.assertEqual(response.status_code, 204)
 
     def test_enable_authenticator_instance_401(self):
         """Test case for enable_authenticator_instance 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.enable_authenticator_instance(
-                'oidc',
+                'authn-oidc',
                 'okta',
                 self.account,
                 enabled=False
@@ -62,9 +62,13 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 401)
 
+    # Python clients gen'd with the latest generator version are unable to
+    # get a 404 response on this endpoint. The API now validates parameters
+    # that are defined as enums in the OpenAPI description.
+    @unittest.skip("Outdated")
     def test_enable_authenticator_instance_404(self):
         """Test case for enable_authenticator_instance 404 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.enable_authenticator_instance(
                 'oidc',
                 'okta',
@@ -79,28 +83,27 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         Updates the authenticators configuration
         """
-        _, status, _ = self.api.enable_authenticator_with_http_info(
+        response = self.api.enable_authenticator_with_http_info(
             'authn-gcp',
             self.account,
-            enabled=True
+            enabled=True,
         )
-
-        self.assertEqual(status, 204)
+        self.assertEqual(response.status_code, 204)
 
     def test_get_api_key_via_ldap_200(self):
         """Test case for get_api_key_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
         alice_config.password = 'alice'
-        alice_client = conjur.ApiClient(alice_config)
-        alice_api = conjur.api.AuthenticationApi(alice_client)
+        alice_client = ApiClient(alice_config)
+        alice_api = AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.get_api_key_via_ldap_with_http_info('test', self.account)
+        response = alice_api.get_api_key_via_ldap_with_http_info('test', self.account)
 
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_api_key_via_ldap_401(self):
         """Test case for get_api_key_via_ldap 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.get_api_key_via_ldap('aws', self.account)
 
         self.assertEqual(context.exception.status, 401)
@@ -108,21 +111,20 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
     def test_get_access_token_via_ldap_200(self):
         """Test case for get_access_token_via_ldap 200 response"""
         alice_config = api_config.get_api_config(username='alice')
-        alice_client = conjur.ApiClient(alice_config)
-        alice_api = conjur.api.AuthenticationApi(alice_client)
+        alice_client = ApiClient(alice_config)
+        alice_api = AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.get_access_token_via_ldap_with_http_info(
+        response = alice_api.get_access_token_via_ldap_with_http_info(
             'test',
             self.account,
             'alice',
             body='alice'
         )
-
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_access_token_via_ldap_401(self):
         """Test case for get_access_token_via_ldap 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_ldap(
                 'test',
                 self.account,
@@ -137,18 +139,18 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         api_config.setup_oidc_webservice()
         id_token = get_oidc_id_token()
 
-        _, status, _ = self.api.get_access_token_via_oidc_with_http_info(
+        response = self.api.get_access_token_via_oidc_with_http_info(
             'test',
             self.account,
             id_token=id_token
         )
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_access_token_via_oidc_401(self):
         """Test case for oidc_authenticate 401 response"""
         api_config.setup_oidc_webservice()
 
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_oidc('test', self.account, id_token='bad-token')
 
         self.assertEqual(context.exception.status, 401)
@@ -157,7 +159,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         """Test case for gcp_authenticate 200 response"""
         jwt_token = 'bad token'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
+        with patch.object(ApiClient, 'call_api', return_value=None) \
                 as mock:
             self.api.get_access_token_via_gcp(self.account, jwt=jwt_token)
 
@@ -166,29 +168,38 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             'POST',
             {'account': self.account},
             [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             body=None,
             post_params=[('jwt', jwt_token)],
             files={},
-            response_type='str',
+            response_types_map={
+                '200': 'str',
+                '400': None,
+                '401': None,
+                '500': None
+            },
             auth_settings=[],
             async_req=None,
             _return_http_data_only=True,
             _preload_content=True,
             _request_timeout=None,
-            collection_formats={}
+            collection_formats={},
+            _request_auth=None
         )
 
     def test_get_access_token_via_gcp_400(self):
         """Test case for gcp_authenticate 400 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_gcp('\00', jwt='bad token')
 
         self.assertEqual(context.exception.status, 400)
 
     def test_get_access_token_via_gcp_401(self):
         """Test case for gcp_authenticate 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_gcp(self.account, jwt='bad token')
 
         self.assertEqual(context.exception.status, 401)
@@ -198,8 +209,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         service_id = 'jwt_service'
         jwt_token = 'valid token'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
-                as mock:
+        with patch.object(ApiClient, 'call_api', return_value=None) as mock:
             self.api.get_access_token_via_jwt(self.account, service_id, jwt=jwt_token)
 
         mock.assert_called_once_with(
@@ -210,17 +220,27 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
                 'service_id': service_id
             },
             [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             body=None,
             post_params=[('jwt', jwt_token)],
             files={},
-            response_type='str',
+            response_types_map={
+                '200': 'str',
+                '400': None,
+                '401': None,
+                '404': None,
+                '500': None
+            },
             auth_settings=[],
             async_req=None,
             _return_http_data_only=True,
             _preload_content=True,
             _request_timeout=None,
-            collection_formats={}
+            collection_formats={},
+            _request_auth=None
         )
 
     def test_get_access_token_via_jwt_with_id_200(self):
@@ -229,8 +249,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         jwt_token = 'valid token'
         user_id = 'user id'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
-                as mock:
+        with patch.object(ApiClient, 'call_api', return_value=None) as mock:
             self.api.get_access_token_via_jwt_with_id(self.account,
                                                      user_id,
                                                      service_id,
@@ -245,29 +264,39 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
                 'service_id': service_id
             },
             [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
+            {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             body=None,
             post_params=[('jwt', jwt_token)],
             files={},
-            response_type='str',
+            response_types_map={
+                '200': 'str',
+                '400': None,
+                '401': None,
+                '404': None,
+                '500': None
+            },
             auth_settings=[],
             async_req=None,
             _return_http_data_only=True,
             _preload_content=True,
             _request_timeout=None,
-            collection_formats={}
+            collection_formats={},
+            _request_auth=None
         )
 
     def test_get_access_token_via_jwt_400(self):
         """Test case for jwt_authenticate 400 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_jwt('\00', 'jwt_service', jwt='bad token')
 
         self.assertEqual(context.exception.status, 400)
 
     def test_get_access_token_via_jwt_401(self):
         """Test case for jwt_authenticate 401 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.get_access_token_via_jwt(self.account, 'jwt_service', jwt='bad token')
 
         self.assertEqual(context.exception.status, 401)

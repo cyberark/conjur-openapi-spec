@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import unittest
 
-import conjur
+from conjur import ApiException
 
 from . import test_roles_api
 from .test_roles_api import NULL_BYTE
@@ -16,7 +16,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 200 status response for GET requests using 'members' query parameter
         Queries group:userGroup role for its members, which should only be dev:user:admin
         """
-        group_member_data, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'group',
             'userGroup',
@@ -33,13 +33,13 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
             }
         ]
 
-        self.assertEqual(status, 200)
-        self.assertEqual(group_member_data, target_response)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, target_response)
 
     def test_get_members_400(self):
         """Test case for 400 status response for GET requests using 'members' query parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 NULL_BYTE,
@@ -53,7 +53,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 401 status response for GET requests using 'members' query parameter
         401 - unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(
                 self.account,
                 'user',
@@ -67,7 +67,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 404 status response for GET requests using 'members' query parameter
         404 - the queried role does not exist
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',
@@ -81,7 +81,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 422 status response for GET requests using 'members' query parameter
         422 - Conjur recieved a malformed request parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',
@@ -119,7 +119,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         )
 
         # testLayer will be listed in all memberships of bob
-        bob_membership_data, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'bob',
@@ -133,8 +133,8 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
             self.BOB_ID
         ]
 
-        self.assertEqual(status, 200)
-        for i in bob_membership_data:
+        self.assertEqual(response.status_code, 200)
+        for i in response.data:
             self.assertIn(i, target_membership_data)
 
     def test_get_all_memberships_400(self):
@@ -143,7 +143,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 NULL_BYTE,
@@ -157,7 +157,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 401 status response for GET requests using 'all' query parameter
         401 - unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(
                 self.account,
                 'user',
@@ -171,7 +171,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 404 status response for GET requests using 'all' query parameter
         404 - the queried role does not exist
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',
@@ -209,7 +209,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         )
 
         # testLayer will not be listed in direct memberships of bob
-        bob_membership_data, status, _ = self.api.show_role_with_http_info(
+        response = self.api.show_role_with_http_info(
             self.account,
             'user',
             'bob',
@@ -218,9 +218,9 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
 
         memberships = [f'{self.account}:group:userGroup', f'{self.account}:group:anotherGroup']
 
-        self.assertEqual(status, 200)
+        self.assertEqual(response.status_code, 200)
         for i in range(0, 2):
-            self.assertIn(bob_membership_data[i]['role'], memberships)
+            self.assertIn(response.data[i]['role'], memberships)
 
     def test_get_direct_memberships_400(self):
         """Test case for 400 status response for GET requests using 'memberships' query parameter
@@ -228,7 +228,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         This same request made directly to Conjur with HTTP results in a 422 status response
         400 - request rejected by NGINX proxy
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 NULL_BYTE,
@@ -242,7 +242,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 401 status response for GET requests using 'memberships' query parameter
         401 - unauthorized request
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.bad_auth_api.show_role(
                 self.account,
                 'user',
@@ -256,7 +256,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 404 status response for GET requests using 'memberships' query parameter
         404 - the queried role does not exist
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',
@@ -270,7 +270,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 422 status response for GET requests using 'memberships' query parameter
         422 - Conjur recieved a malformed request parameter
         """
-        with self.assertRaises(conjur.ApiException) as context:
+        with self.assertRaises(ApiException) as context:
             self.api.show_role(
                 self.account,
                 'user',

@@ -52,7 +52,6 @@ components:
           "version": 15.0
         }
 
-
     Resource:
       type: object
       properties:
@@ -105,24 +104,7 @@ components:
           "permissions": [],
           "policy": "dev:policy:root",
           "policy_versions": [],
-        } 
-
-    Resources:
-      type: array
-      items:
-        $ref: '#/components/schemas/Resource'
-      example:
-        [
-          {
-            "annotations": [],
-            "created_at": "2021-03-23T16:37:14.455+00:00",
-            "id": "dev:policy:conjur/authn-ldap/test",
-            "owner": "dev:user:admin",
-            "permissions": [],
-            "policy": "dev:policy:root",
-            "policy_versions": [],
-          } 
-        ]
+        }
 
   responses:
     Resource:
@@ -137,7 +119,9 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Resources'
+            type: array
+            items:
+              $ref: '#/components/schemas/Resource'
 
   paths:
     ListResources:

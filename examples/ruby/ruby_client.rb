@@ -3,6 +3,7 @@
 
 # Load the gem
 require 'conjur-sdk'
+require 'json'
 
 CERT_DIR = '/config/https'
 SSL_CERT_FILE = 'ca.crt'
@@ -65,8 +66,8 @@ config.password = new_password
 
 # Add Conjur Token header to api configuration
 token_body = 'token="%s"' % [token]
-config.api_key['Authorization'] = token_body
-config.api_key_prefix['Authorization'] = 'Token'
+config.api_key_prefix['conjurAuth'] = 'Token'
+config.api_key['conjurAuth'] = token_body
 
 policy_instance = ConjurSDK::PoliciesApi.new
 authn_instance = ConjurSDK::AuthenticationApi.new
@@ -121,11 +122,13 @@ puts "Secret stored."
 # Retrieve a secret, uses conjurAuth
 puts
 puts "Retrieving secret..."
-retrieved_secret = secrets_instance.get_secret(
-  account=ACCOUNT,
-  kind="variable",
-  identifier=secret_id
-)
+retrieved_secret = JSON.parse(
+  secrets_instance.get_secret(
+    account=ACCOUNT,
+    kind="variable",
+    identifier=secret_id
+  )
+)['body']
 puts "Retrieved secret: #{retrieved_secret}"
 
 if retrieved_secret != secret

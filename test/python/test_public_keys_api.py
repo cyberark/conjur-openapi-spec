@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import unittest
 
-import conjur
+from conjur.api import PublicKeysApi
 
 from . import api_config
 
@@ -11,7 +11,7 @@ class TestPublicKeysApi(api_config.ConfiguredTest):
     """PublicKeysApi unit test stubs"""
 
     def setUp(self):
-        self.api = conjur.api.public_keys_api.PublicKeysApi(self.client)
+        self.api = PublicKeysApi(self.client)
 
     def test_show(self):
         """Test case for show

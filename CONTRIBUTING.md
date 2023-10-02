@@ -146,7 +146,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Run a subset of a clients tests by including an argument with the full package
   path of the tests to run:
   ```shell
-  $ ./bin/test_integration -l python --test test_authn_api.TestAuthnApi.test_authenticate_200
+  $ ./bin/test_integration -l python --test auth.test_authentication_api.TestAuthnApi.test_get_access_token_200
   ```
 * Tests can be run against Conjur Enterprise.
 * This requires access to the CyberArk Docker registry in order to pull Conjur Enterprise images

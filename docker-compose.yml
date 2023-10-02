@@ -76,7 +76,7 @@ services:
       - ./config/https/:/config
 
   test-dotnet:
-    image: mcr.microsoft.com/dotnet/sdk:2.1
+    image: mcr.microsoft.com/dotnet/sdk:7.0
     command: ['sleep', '999d']
     depends_on:
       - conjur

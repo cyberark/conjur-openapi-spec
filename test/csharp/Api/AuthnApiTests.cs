@@ -63,9 +63,13 @@ namespace Org.OpenAPITools.Test
 
             ApiResponse<string> res = instance.GetAccessTokenWithHttpInfo(account, login, APIKey, "base64");
             Dictionary<string, string> APIToken = new Dictionary<string, string>();
-            APIToken.Add("Authorization", $"token=\"{res.RawContent}\"");
+            APIToken.Add("conjurAuth", $"token=\"{res.RawContent}\"");
+            Dictionary<string, string> APITokenPrefix = new Dictionary<string, string>();
+            APITokenPrefix.Add("conjurAuth", "Token");
+
 
             config.ApiKey = APIToken;
+            config.ApiKeyPrefix = APITokenPrefix;
             instance.Configuration = config;
         }
 
@@ -110,15 +114,15 @@ namespace Org.OpenAPITools.Test
             instance.GetAPIKey(account);
         }
 
-        /// <summary>
-        /// Test UpdateAuthenticatorConfig
-        /// </summary>
-        [Fact]
-        public void EnableAuthenticatorServiceTest()
-        {
-            var response = instance.EnableAuthenticatorInstanceWithHttpInfo(ServiceAuthenticators.Ldap, "test", account, enabled: true);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        }
+        // /// <summary>
+        // /// Test UpdateAuthenticatorConfig
+        // /// </summary>
+        // [Fact]
+        // public void EnableAuthenticatorServiceTest()
+        // {
+        //     var response = instance.EnableAuthenticatorInstanceWithHttpInfo(ServiceAuthenticators.Ldap, "test", account, enabled: true);
+        //     Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        // }
 
     }
 

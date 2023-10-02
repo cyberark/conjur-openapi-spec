@@ -1,6 +1,6 @@
 components:
   schemas:
-    CreateHost:
+    CreatedHost:
       description: Contains information about a created host
       type: object
       properties:
@@ -97,42 +97,30 @@ components:
           "id": "new-host"
         }
 
-    CreateHostToken:
-      type: array
-      items:
-        type: object
-        properties:
-          expiration:
+    HostToken:
+      type: object
+      properties:
+        expiration:
+          type: string
+        cidr:
+          type: array
+          items:
             type: string
-          cidr:
-            type: array
-            items:
-              type: string
-          token:
-            type: string
-        required:
-          - expiration
-          - cidr
-          - token
+        token:
+          type: string
+      required:
+        - expiration
+        - cidr
+        - token
       example:
-        [
-          {
+        {
             "expiration": "2017-08-04T22:27:20+00:00",
             "cidr": [
               "127.0.0.1/32",
               "127.0.0.2/32"
             ],
             "token": "281s2ag1g8s7gd2ezf6td3d619b52t9gaak3w8rj0p38124n384sq7x"
-          },
-          {
-            "expiration": "2017-08-04T22:27:20+00:00",
-            "cidr": [
-              "127.0.0.1/32",
-              "127.0.0.2/32"
-            ],
-            "token": "2c0vfj61pmah3efbgpcz2x9vzcy1ycskfkyqy0kgk1fv014880f4"
           }
-        ]
 
   responses:
     CreateHost:
@@ -140,14 +128,16 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/CreateHost"
+            $ref: "#/components/schemas/CreatedHost"
 
     CreateHostToken:
       description: "Zero or more tokens were created and delivered in the response body"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/CreateHostToken'
+            type: array
+            items:
+              $ref: '#/components/schemas/HostToken'
 
   paths:
     CreateHostToken:
