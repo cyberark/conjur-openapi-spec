@@ -104,5 +104,5 @@ if __name__ == "__main__":
 
     # write the output file
     output_dir = get_output_dir(generate_dap)
-    with (output_dir / input_file.name).open(mode="w") as f:
+    with (output_dir / os.path.basename(input_file.name)).open(mode="w") as f:
         f.write(yaml.dump(data))
