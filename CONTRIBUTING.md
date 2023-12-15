@@ -187,7 +187,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Calls both `start_editor` and `start_conjur` to bring up both Conjur and Editor containers.
 
 `bin/start_conjur`
-* Used to start a new local Conjur instance based on the project's `docker-compose`.
+* Used to start a new local Conjur instance based on the project's `docker compose`.
 * Both the http & https ports are exposed so requests can be made to Conjur from outside the docker network.
 
 `bin/start_enterprise`
@@ -195,7 +195,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 
 `bin/stop`
 * Used to deconstruct the development environment.
-* Stops and removes the `docker-compose` environment and Swagger Editor.
+* Stops and removes the `docker compose` environment and Swagger Editor.
 
 `bin/bundle_spec`
 * Bundles all the sharded spec files into one file named `spec.yml` in the root project directory.

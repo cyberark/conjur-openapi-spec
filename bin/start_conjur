@@ -3,7 +3,7 @@ source bin/util
 
 cleanup() {
   echo "Cleaning up..."
-  docker-compose rm --stop --force -v
+  docker compose rm --stop --force -v
 }
 
 if [ "$1" == "-d" ]; then
@@ -15,14 +15,14 @@ if [ $(enterprise_alive) -eq 0 ]; then
   stop_enterprise
 fi
 
-trap 'echo "ERROR: Test script encountered an error!"; docker-compose logs; cleanup' ERR
+trap 'echo "ERROR: Test script encountered an error!"; docker compose logs; cleanup' ERR
 
 docker network create openapi-spec
 
 echo "Building services..."
-docker-compose build pg conjur conjur-https
+docker compose build pg conjur conjur-https
 
 # Start Conjur server
 echo "Starting Conjur..."
-docker-compose up -d conjur conjur-https
-docker-compose exec -T conjur conjurctl wait
+docker compose up -d conjur conjur-https
+docker compose exec -T conjur conjurctl wait

@@ -115,9 +115,9 @@ fi
 setup_keycloak(){
   announce "Setting up Keycloak"
 
-  docker-compose exec -T oidc-keycloak bash -c "/scripts/create_client"
-  docker-compose exec -T oidc-keycloak bash -c "/scripts/create_user bob bob bob@conjur.net"
-  docker-compose exec -T conjur bash -c "/policy/oidc/fetchCertificate"
+  docker compose exec -T oidc-keycloak bash -c "/scripts/create_client"
+  docker compose exec -T oidc-keycloak bash -c "/scripts/create_user bob bob bob@conjur.net"
+  docker compose exec -T conjur bash -c "/policy/oidc/fetchCertificate"
   KEYCLOAK_CERT="$(docker compose exec conjur cat /etc/ssl/certs/keycloak.pem)"
   export KEYCLOAK_CERT
 }
@@ -209,7 +209,7 @@ if [[ $no_rebuild_conjur -eq 0 ||
 
     pushd ./test/conjur-intro
     # Create the parameter to import volumes from the Enterprise container so we have its certificates
-    for name in $(docker-compose ps -q)
+    for name in $(docker compose ps -q)
     do
         enterprise_params+="--volumes-from $name "
     done

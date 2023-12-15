@@ -58,15 +58,15 @@ arg=""
 if [[ local_env -eq 1 ]]; then
     ensure_conjur_up
 
-    export CONJUR_AUTHN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+    export CONJUR_AUTHN_API_KEY="$(docker compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 
-    if [ -z `docker-compose ps -q cli` ]; then
-        docker-compose build cli
-        docker-compose up -d --no-deps cli
+    if [ -z `docker compose ps -q cli` ]; then
+        docker compose build cli
+        docker compose up -d --no-deps cli
     fi
-    docker-compose exec -T cli conjur init -u http://conjur -a dev --force=true
-    docker-compose exec -T cli conjur authn login -u admin -p $CONJUR_AUTHN_API_KEY
-    export CONJUR_ADMIN_TOKEN="$(docker-compose exec -T cli conjur authn authenticate -H)"
+    docker compose exec -T cli conjur init -u http://conjur -a dev --force=true
+    docker compose exec -T cli conjur authn login -u admin -p $CONJUR_AUTHN_API_KEY
+    export CONJUR_ADMIN_TOKEN="$(docker compose exec -T cli conjur authn authenticate -H)"
 
     arg="--apikey \$CONJUR_AUTHN_API_KEY --token \"\$CONJUR_ADMIN_TOKEN\""
 fi
