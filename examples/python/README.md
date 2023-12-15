@@ -10,7 +10,7 @@ It covers using some of the most popular Conjur Open Source endpoints with Pytho
 
 The `run` script is responsible for executing the example by environment-conscious means by:
 - If needed, generating a new Python client from the OpenAPI spec
-- If needed, spinning up a new `docker-compose` environment with Conjur and a Postgres database
+- If needed, spinning up a new `docker compose` environment with Conjur and a Postgres database
 - Running the example in a Python Docker container
 
 Documentation regarding format and use of OpenAPI client instances and their functions is

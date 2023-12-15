@@ -48,7 +48,7 @@ announce "Making requests to Conjur through Kong Gateway"
 ensure_conjur_up
 sleep 10
 
-admin_api_key="$(docker-compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
+admin_api_key="$(docker compose exec -T conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
 token="$(curl -s http://localhost:8000/authn/dev/admin/authenticate \
     --header "Accept-Encoding: base64" \
     --data $admin_api_key)"

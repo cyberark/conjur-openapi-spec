@@ -127,7 +127,7 @@ $ ./examples/ruby/start
 
 Each example performs the following steps:
 - Generate an OpenAPI client with `./bin/generate_client -l <language>` (if not already present)
-- Spin up the a Conjur environment from `docker-compose` (if not already present)
+- Spin up the a Conjur environment from `docker compose` (if not already present)
 - Perform language-specific environment setup
 - Run the example
 

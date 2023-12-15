@@ -15,7 +15,7 @@ ADMIN_API_KEY = ENV["CONJUR_ADMIN_API_KEY"]
 if ADMIN_API_KEY.empty?
   STDERR.puts "Conjur Admin API key Environment Variable not set!"
   STDERR.puts "Use the privided script, or be sure to first execute: "
-  STDERR.puts 'export CONJUR_ADMIN_API_KEY="$(docker-compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d \'\\r\')'
+  STDERR.puts 'export CONJUR_ADMIN_API_KEY="$(docker compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d \'\\r\')'
   exit(1)
 end
 

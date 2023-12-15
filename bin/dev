@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Start Conjur docker-compose environment
+# Start Conjur docker compose environment
 bin/start_conjur
 
 # Start Swagger Editor
