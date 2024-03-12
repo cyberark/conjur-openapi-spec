@@ -14,10 +14,17 @@ pipeline {
     }
 
     stages {
+        stage('Scan for internal URLs') {
+            steps {
+                script {
+                    detectInternalUrls()
+                }
+            }
+        }
         stage('Get InfraPool Agent') {
             steps {
                 script {
-                INFRAPOOL_EXECUTORV2_AGENT_0 = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
+                    INFRAPOOL_EXECUTORV2_AGENT_0 = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
                 }
             }
         }
