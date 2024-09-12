@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 source bin/util
 
+export REGISTRY_URL=${INFRAPOOL_REGISTRY_URL:-"docker.io"}
+
 print_help(){
   announce "CONJUR OPENAPI DESCRIPTION :: INTEGRATION TESTS"
   cat << EOF

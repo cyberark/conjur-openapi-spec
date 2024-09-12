@@ -13,6 +13,13 @@ pipeline {
         cron(getDailyCronString())
     }
 
+    environment {
+        MODE = release.canonicalizeMode()
+
+        // Ensures CI uses the internal registry for conjur edge images
+        REGISTRY_URL = "registry.tld"
+    }
+
     stages {
         stage('Scan for internal URLs') {
             steps {
