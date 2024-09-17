@@ -47,7 +47,7 @@ export CONJUR_NAMESPACE="conjur-oss"
 export CONJUR_ACCOUNT="dev"
 export CONJUR_LOG_LEVEL="info"
 export CONJUR_VERSION="1.11.0"
-export VERSION="2.0.3"
+export VERSION="2.0.7"
 
 export TEST_APP_NAMESPACE="app-test"
 export ANNOTATION_BASE_AUTHN="true"

@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM python:latest
 ARG namespace
 MAINTAINER CyberArk
 
@@ -9,10 +9,7 @@ RUN apt-get update && \
                        binutils \
                        build-essential \
                        git \
-                       jq \
-                       python3 \
-                       python3-dev \
-                       python3-pip
+                       jq
 
 RUN mkdir -p $INSTALL_DIR
 WORKDIR $INSTALL_DIR
