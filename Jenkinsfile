@@ -37,6 +37,9 @@ pipeline {
         }
 
         stage('Integration Tests') {
+            environment {
+                INFRAPOOL_REGISTRY_URL = "registry.tld"
+            }
             steps {
                 script {
                     INFRAPOOL_EXECUTORV2_AGENT_0.agentSh "./bin/test_integration -l python"
@@ -78,7 +81,7 @@ pipeline {
                     chmod 700 get_helm.sh
                     ./get_helm.sh
 
-                    curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.10.0/kind-linux-amd64
+                    curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
                     chmod 700 kind
                     sudo mv ./kind /usr/local/bin/kind
 
