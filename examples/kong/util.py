@@ -1,5 +1,7 @@
-import yaml
 import sys
+
+import yaml
+
 
 def bump_spec_version():
     """Converts conjurKubernetesMutualTls to OAI v3.1 compatible definition.
@@ -31,4 +33,12 @@ def strip_plugins():
         f.write(dump)
 
 if __name__ == '__main__':
-    globals()[sys.argv[1]]()
+    functions = {
+        "bump_spec_version": bump_spec_version,
+        "strip_plugins": strip_plugins
+    }
+    if sys.argv[1] in functions:
+        functions[sys.argv[1]]()
+    else:
+        print("Invalid argument")
+        sys.exit(1)

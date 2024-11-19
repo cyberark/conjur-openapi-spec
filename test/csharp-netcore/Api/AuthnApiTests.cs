@@ -69,7 +69,7 @@ namespace Org.OpenAPITools.Test
             instance.Configuration = config;
         }
 
-        public void Dispose(){}
+        public void Dispose() { }
 
         /// <summary>
         /// Test Authenticate
@@ -98,6 +98,7 @@ namespace Org.OpenAPITools.Test
         [Fact]
         public void ChangePasswordTest()
         {
+            // file deepcode ignore NoHardcodedCredentials/test: This is a test file
             string newPassword = "TestPassword@123";
             var response = instance.ChangePasswordWithHttpInfo(account, newPassword);
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);

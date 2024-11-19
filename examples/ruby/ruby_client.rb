@@ -10,6 +10,7 @@ CONJUR_CERT_FILE = 'conjur.crt'
 CONJUR_KEY_FILE = 'conjur.key'
 
 ACCOUNT = "dev"
+# file deepcode ignore HardcodedCredential: This is an example file
 LOGIN = "admin"
 ADMIN_API_KEY = ENV["CONJUR_ADMIN_API_KEY"]
 if ADMIN_API_KEY.empty?
@@ -20,6 +21,7 @@ if ADMIN_API_KEY.empty?
 end
 
 # Constants
+# file deepcode ignore HardcodedPassword: This is an example file
 new_password = "N3w-Passw0rd!"
 secret = "supersecretstuff"
 secret_id = "sampleSecret"

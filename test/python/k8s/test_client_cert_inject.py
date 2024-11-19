@@ -6,8 +6,7 @@ import pathlib
 import unittest
 
 import conjur
-
-from OpenSSL import crypto, SSL
+from OpenSSL import crypto
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
@@ -46,6 +45,7 @@ def generateCSR(host_id, key):
 class TestClientCertInject(unittest.TestCase):
 
     def setUp(self):
+        # file deepcode ignore PT/test: This is a test file
         with open(os.environ['CONJUR_AUTHN_TOKEN_FILE'], 'r') as content:
             encoded_token = base64.b64encode(content.read().replace('\r', '').encode()).decode('utf-8')
 
@@ -57,6 +57,7 @@ class TestClientCertInject(unittest.TestCase):
             content.write(os.environ['CONJUR_SSL_CERTIFICATE'])
 
         config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
+        # file deepcode ignore NoHardcodedCredentials/test: This is a test file
         config.username = 'admin'
         config.api_key = {'Authorization': 'Token token="{}"'.format(encoded_token)}
 
