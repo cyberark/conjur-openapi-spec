@@ -54,10 +54,6 @@ export ANNOTATION_BASE_AUTHN="true"
 export AUTHENTICATOR_ID="my-authenticator-id"
 export SERVICE_ACCOUNT='conjur-oss'
 
-export DOCKER_REG_NAME="kind-registry"
-export DOCKER_REG_PORT="5000"
-export DOCKER_REG_URL="localhost:$DOCKER_REG_PORT"
-
 # check for required tools
 if ! command -v kind &> /dev/null; then
     echo "kind binary not found. See https://kind.sigs.k8s.io/docs/quick-start/"
@@ -90,7 +86,7 @@ if [ $no_regen_client -eq 0 ]; then
     ./bin/generate_client -l python
 fi
 
-# Set up Conjur K8s cluster and local Docker Registry
+# Set up Conjur K8s cluster
 ./test/python/k8s/setup_env
 
 conjur_master_pod="$(kubectl get pods \
