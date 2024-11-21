@@ -30,8 +30,8 @@ init_cli() {
         announce "Pulling and Pushing Conjur CLI Image"
 
         cli_app_image="conjur-cli:$CONJUR_NAMESPACE"
-        docker pull cyberark/conjur-cli:5
-        docker tag cyberark/conjur-cli:5 $cli_app_image
+        docker pull cyberark/conjur-cli:8
+        docker tag cyberark/conjur-cli:8 $cli_app_image
         kind load docker-image $cli_app_image --name $KIND_CLUSTER_NAME
 
         announce "Deploying Conjur CLI Pod"
@@ -50,8 +50,8 @@ init_cli() {
     announce "Ensure that Conjur CLI pod is initialized"
 
     conjur_url="https://conjur-oss.$CONJUR_NAMESPACE.svc.cluster.local"
-    kubectl exec $conjur_cli_pod -- bash -c "yes yes | conjur init -a $CONJUR_ACCOUNT -u $conjur_url"
-    kubectl exec $conjur_cli_pod -- conjur authn login -u admin -p $CONJUR_ADMIN_API_KEY
+    kubectl exec $conjur_cli_pod -- bash -c "yes yes | conjur init --self-signed -a $CONJUR_ACCOUNT -u $conjur_url"
+    kubectl exec $conjur_cli_pod -- conjur login -i admin -p $CONJUR_ADMIN_API_KEY
 }
 
 load_policy() {
@@ -143,7 +143,7 @@ setup_test_app() {
 
     test_app_image="test-app:$CONJUR_NAMESPACE"
     docker tag test-app:$CONJUR_NAMESPACE $test_app_image
-    docker push $test_app_image
+    kind load docker-image $test_app_image --name $KIND_CLUSTER_NAME
 }
 
 deploy_test_app() {

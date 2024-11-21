@@ -6,7 +6,7 @@ trap 'cleanup' ERR
 
 cleanup() {
     echo "Cleaning up..."
-    kubectl delete namespace $CONJUR_NAMESPACE $TEST_APP_NAMESPACE
+    kubectl delete namespace $CONJUR_NAMESPACE $TEST_APP_NAMESPACE --ignore-not-found
 }
 
 print_help(){
