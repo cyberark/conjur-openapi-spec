@@ -1,6 +1,6 @@
 FROM python:latest
 ARG namespace
-MAINTAINER CyberArk
+LABEL maintainer="CyberArk"
 
 ENV INSTALL_DIR=/opt/conjur-openapi-spec
 

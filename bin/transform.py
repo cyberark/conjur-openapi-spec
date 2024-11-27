@@ -61,7 +61,7 @@ def remove_object(obj, obj_path):
 
 def usage():
     print("Usage: transform <input-file> [--enterprise/--oss]")
-    exit()
+    sys.exit()
 
 def get_output_dir(generate_dap):
     """Finds which directory to output to, this is dependant on whether we
@@ -92,7 +92,7 @@ if __name__ == "__main__":
             data = yaml.safe_load(f)
         except yaml.YAMLError as e:
             print(e)
-            exit(1)
+            sys.exit(1)
 
     # retrieve a list of annotations in the object we are parsing
     annotations = find_annotations(data)

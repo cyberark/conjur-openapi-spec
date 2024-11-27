@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
+import json
 import os
 import unittest
-import json
 
 import conjur
 
 from .. import api_config
 from ..api_config import CONJUR_AUTHN_API_KEY
+
 
 class TestAuthnApi(api_config.ConfiguredTest):
     """AuthnApi integration tests. Ensures that authentication with a Conjur server is working"""
@@ -169,6 +170,7 @@ class TestAuthnApi(api_config.ConfiguredTest):
         )
         self.assertEqual(status, 200)
 
+        # file deepcode ignore NoHardcodedCredentials/test: This is a test file
         self.config.username = 'alice'
         self.config.password = new_key_alice
         self.api.get_api_key(self.account)

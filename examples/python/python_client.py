@@ -14,10 +14,12 @@ CONJUR_CERT_FILE = 'conjur.crt'
 CONJUR_KEY_FILE = 'conjur.key'
 
 ACCOUNT_NAME = "dev"
+# file deepcode ignore NoHardcodedCredentials: This is an example file
 LOGIN = "admin"
 ADMIN_API_KEY = os.environ["CONJUR_ADMIN_API_KEY"]
 
 # Constants
+# file deepcode ignore NoHardcodedPasswords: This is an example file
 new_password = "N3w-Passw0rd!"
 secret = "supersecretstuff"
 secret_id = "sampleSecret"
@@ -128,7 +130,7 @@ print("Retrieved seceret: ", retrieved_secret)
 if retrieved_secret != secret:
     print("Secret Malformed.")
     print("Secret stored: ", secret)
-    print("Secret retrieved: ", retrieved)
+    print("Secret retrieved: ", retrieved_secret)
     sys.exit(1)
 
 print("\nDone!")

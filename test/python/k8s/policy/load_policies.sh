@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -eou pipefail
 
-if [ "$CONJUR_APPLIANCE_URL" != "" ]; then
-  conjur init -u $CONJUR_APPLIANCE_URL -a $CONJUR_ACCOUNT
-fi
-
-# check for unset vars after checking for appliance url
-set -u
-
-conjur authn login -u admin -p $CONJUR_ADMIN_PASSWORD
+conjur login -i admin -p $CONJUR_ADMIN_PASSWORD
 
 readonly POLICY_DIR="/policy"
 
@@ -22,7 +15,7 @@ readonly POLICY_FILES=(
 
 for policy_file in "${POLICY_FILES[@]}"; do
   echo "Loading policy $policy_file..."
-  conjur policy load root $policy_file
+  conjur policy load -b root -f $policy_file
 done
 
-conjur authn logout
+conjur logout

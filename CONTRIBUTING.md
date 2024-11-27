@@ -84,12 +84,12 @@ For a full list of all scripts and their purpose see the [utility script referen
 
 ### Environment Setup
 
-Setup the development environment using the `start` script. The script starts a Swagger Editor
+Setup the development environment using the `start_conjur` script. The script starts a Swagger Editor
 container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the
 spec against.
 
 ```shell
-$ ./bin/start
+$ ./bin/start_conjur
 ```
 
 To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger Editor editor with

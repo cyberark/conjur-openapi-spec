@@ -3,5 +3,5 @@
 ./bin/get_conjur_admin_key
 
 docker compose up -d cli
-docker compose exec cli bash -c "conjur init -u http://conjur -a dev"
+docker compose exec cli bash -c "conjur init -i -u http://conjur -a dev"
 docker compose exec cli bash

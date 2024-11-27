@@ -64,9 +64,9 @@ if [[ local_env -eq 1 ]]; then
         docker compose build cli
         docker compose up -d --no-deps cli
     fi
-    docker compose exec -T cli conjur init -u http://conjur -a dev --force=true
-    docker compose exec -T cli conjur authn login -u admin -p $CONJUR_AUTHN_API_KEY
-    export CONJUR_ADMIN_TOKEN="$(docker compose exec -T cli conjur authn authenticate -H)"
+    docker compose exec -T cli conjur init -i -u http://conjur -a dev --force=true
+    docker compose exec -T cli conjur login -i admin -p $CONJUR_AUTHN_API_KEY
+    export CONJUR_ADMIN_TOKEN="$(docker compose exec -T cli conjur authenticate -H)"
 
     arg="--apikey \$CONJUR_AUTHN_API_KEY --token \"\$CONJUR_ADMIN_TOKEN\""
 fi

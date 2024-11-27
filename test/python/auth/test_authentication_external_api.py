@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
+import json
 import unittest
 from unittest.mock import patch
-import json
 
-import requests
 import conjur
+import requests
 
 from .. import api_config
+
 
 def get_oidc_id_token():
     """Authenticates with the OIDC server and gets the ID token for user bob"""
@@ -17,6 +18,7 @@ def get_oidc_id_token():
         'password': 'bob',
         'scope': 'openid'
     }
+    # file deepcode ignore AuthOverHttp/test: This is a test file
     result = requests.post(
         'http://oidc-keycloak:8080/auth/realms/master/protocol/openid-connect/token',
         data=oidc_request_form,
@@ -159,6 +161,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
                 as mock:
+            # file deepcode ignore HardcodedNonCryptoSecret/test: This is a test file
             self.api.get_access_token_via_gcp(self.account, jwt=jwt_token)
 
         mock.assert_called_once_with(
