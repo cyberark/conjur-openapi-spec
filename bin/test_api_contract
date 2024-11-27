@@ -47,9 +47,9 @@ docker compose build test-api
 echo
 
 announce "Configuring Conjur Environment..."
-export CONJUR_ADMIN_API_KEY="$(docker compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r')"
-export ENCODED_LOGIN="$(echo "admin:${CONJUR_ADMIN_API_KEY}" | base64 | tr -d '\r')"
-export CONJUR_ADMIN_TOKEN="$(curl --header "Accept-Encoding: base64" --data "${CONJUR_ADMIN_API_KEY}" http://localhost/authn/dev/admin/authenticate | tr -d '\r')"
+export CONJUR_ADMIN_API_KEY="$(docker compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r\n')"
+export ENCODED_LOGIN="$(echo "admin:${CONJUR_ADMIN_API_KEY}" | base64 | tr -d '\r\n')"
+export CONJUR_ADMIN_TOKEN="$(curl --header "Accept-Encoding: base64" --data "${CONJUR_ADMIN_API_KEY}" http://localhost/authn/dev/admin/authenticate | tr -d '\r\n')"
 echo
 
 announce "Running example in container..."
@@ -58,7 +58,7 @@ docker compose run --rm --no-deps \
     test-api \
     bash -c \
     "schemathesis run \
-    --show-errors-tracebacks \
+    --show-trace \
     --request-tls-verify /config/ca.crt \
     --hypothesis-suppress-health-check=filter_too_much \
     --hypothesis-deadline None ${endpoint_flag}\
