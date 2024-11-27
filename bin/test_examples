@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+for i in examples/*; do
+    if [ -x $i/start ]; then
+        eval "./$i/start"
+    fi
+done
