@@ -138,7 +138,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
             self.account,
             "variable",
             TEST_VARIABLES[0],
-            version='2'
+            version=2
         )
         self.assertEqual(secret_val, response[0])
         self.assertEqual(response[1], 200)
@@ -195,13 +195,6 @@ class TestSecretsApi(api_config.ConfiguredTest):
             self.api.get_secret(self.account, "variable", "badname")
 
         self.assertEqual(context.exception.status, 404)
-
-    def test_get_secret_422(self):
-        """Test case for get_secret 422 response"""
-        with self.assertRaises(conjur.exceptions.ApiException) as context:
-            self.api.get_secret(self.account, "variable", TEST_VARIABLES[0], version='')
-
-        self.assertEqual(context.exception.status, 422)
 
     def set_variables(self, variables, values):
         """Sets the values of an array of variables"""

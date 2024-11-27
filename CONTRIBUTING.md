@@ -234,7 +234,7 @@ of a client you would run `./bin/generate_client -l python --enterprise`.
 
 ## Manual Testing
 
-You can access a compatible version of the the Conjur (Ruby-based) command line
+You can access a compatible version of the the Conjur command line
 interface by starting the `cli` docker compose container:
 ```shell
 $ ./bin/cli
