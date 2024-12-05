@@ -6,7 +6,7 @@ echo "Linting Python integration tests:"
 
 docker run --rm \
     -v ${PWD}/test/python:/code/test \
-    -v ${PWD}/test/config/.pylintrc:/code/.pylintrc \
+    -v ${PWD}/.pylintrc:/code/.pylintrc \
     -v ${PWD}/out/enterprise/python:/code/module \
     -v ${PWD}/requirements.txt:/requirements.txt \
     python:3.8 \

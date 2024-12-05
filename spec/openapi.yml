@@ -40,6 +40,7 @@ components:
       type: string
       minLength: 1
       example: "default"
+      pattern: ^[^ :]+$
 
     Count:
       description: "Return only the count of results"
@@ -48,23 +49,37 @@ components:
 
     Kind:
       type: string
-      minLength: 1
+      pattern: ^[a-z]+$
       example: "variable"
+      enum:
+        - "variable"
+        - "policy"
+        - "user"
+        - "role"
+        - "host"
+        - "host_factory"
+        - "group"
+        - "layer"
 
     Limit:
       description: "Return no more than this number of results"
       type: integer
+      format: "int32"
+      minimum: 0
       example: 10
 
     Offset:
       description: "Skips this many items before returning the rest"
       type: integer
+      format: "int32"
+      minimum: 0
       example: 20
 
     ResourceID:
       type: string
       minLength: 1
       example: "prod%2Faws%2Fdb-password"
+      pattern: ^[^ :]+$
       description: |
         Resource identifier. Requires to be encoded when in path.
 
@@ -79,11 +94,15 @@ components:
     ResourceVersion:
       description: "Version of the resource (Conjur keeps the last 20 versions of a secret)"
       type: integer
+      nullable: true
+      format: "int32"
+      minimum: 1
       example: 1
 
     RoleType:
       type: string
       minLength: 1
+      pattern: ^[^ ]+$
       description: |
         ##### Kinds of roles:
 
@@ -112,6 +131,7 @@ components:
       example: prod%2fgke
       schema:
         type: string
+        pattern: ^[^ :]+$
 
     RequestID:
       name: X-Request-Id
