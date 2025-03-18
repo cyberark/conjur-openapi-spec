@@ -6,21 +6,21 @@ import yaml
 def bump_spec_version():
     """Converts conjurKubernetesMutualTls to OAI v3.1 compatible definition.
     OAI v3.1 is not supported by spec bundling tool"""
-    with open("spec.yml", "r") as f:
+    with open("spec.yml", "r", encoding="utf-8") as f:
         spec_yaml = yaml.full_load(f)
 
     security_schemes = spec_yaml["components"]["securitySchemes"]
     security_schemes["conjurKubernetesMutualTls"]["type"] = "mutualTLS"
     security_schemes["conjurKubernetesMutualTls"].pop("scheme")
 
-    with open("tmp_spec.yml", "w") as f:
+    with open("tmp_spec.yml", "w", encoding="utf-8") as f:
         dump = yaml.dump(spec_yaml, default_flow_style=False)
         f.write(dump)
 
 def strip_plugins():
     """Removes Kong authentication plugins from each route,
     allow Conjur to handle authentication headers"""
-    with open("out/kong/kong.yml", "r") as f:
+    with open("out/kong/kong.yml", "r", encoding="utf-8") as f:
         kong_yaml = yaml.full_load(f)
 
     routes = kong_yaml["services"][0]["routes"]
@@ -28,7 +28,7 @@ def strip_plugins():
         if "plugins" in route:
             route.pop("plugins")
 
-    with open("out/kong/kong.yml", "w") as f:
+    with open("out/kong/kong.yml", "w", encoding="utf-8") as f:
         dump = yaml.dump(kong_yaml, default_flow_style=False)
         f.write(dump)
 
