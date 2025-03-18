@@ -27,9 +27,9 @@ class Annotation:
         else:
             self.dap_only = False
 
-def __find_annotations(obj, object_path=[]):
+def __find_annotations(obj, object_path=None):
     """Helper function recurses through a yaml object and returns a list of all annotations"""
-    annotations = list()
+    annotations = []
     if not isinstance(obj, dict):
         return annotations
     for i in obj:
@@ -39,6 +39,7 @@ def __find_annotations(obj, object_path=[]):
     return annotations
 
 def find_annotations(obj):
+    """Finds all annotations in a given object"""
     return __find_annotations(obj, [])
 
 def verify_object_exists(obj: dict, obj_path: list):
@@ -47,8 +48,7 @@ def verify_object_exists(obj: dict, obj_path: list):
         return True
     if obj_path[0] in obj:
         return verify_object_exists(obj[obj_path[0]], obj_path[1:])
-    else:
-        return False
+    return False
 
 def remove_object(obj, obj_path):
     """Removes the sub-object defined by obj_path from obj"""
@@ -60,6 +60,7 @@ def remove_object(obj, obj_path):
             del obj[obj_path[0]]
 
 def usage():
+    """Prints usage information and exits"""
     print("Usage: transform <input-file> [--enterprise/--oss]")
     sys.exit()
 
@@ -87,7 +88,7 @@ if __name__ == "__main__":
         usage()
 
     # read in the input object we are parsing
-    with input_file.open() as f:
+    with input_file.open(encoding="utf-8") as f:
         try:
             data = yaml.safe_load(f)
         except yaml.YAMLError as e:
@@ -104,5 +105,5 @@ if __name__ == "__main__":
 
     # write the output file
     output_dir = get_output_dir(generate_dap)
-    with (output_dir / os.path.basename(input_file.name)).open(mode="w") as f:
+    with (output_dir / os.path.basename(input_file.name)).open(mode="w", encoding="utf-8") as f:
         f.write(yaml.dump(data))

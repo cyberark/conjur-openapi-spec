@@ -1,4 +1,5 @@
 [MESSAGES CONTROL]
+ignore=test
 disable=
 
     # redundant, we generally only have one class per module for integration tests
@@ -6,6 +7,18 @@ disable=
     # pylint catches auto-generated import statements as code duplication
     R0801,
     # pylint sets a maximum number of public methods for each test suite (20)
-    R0904
+    R0904,
+    # import-error is specific to the environment running pylint
+    E0401,
+    # pylint complains about re-assigning variables defined in outer scope
+    W0621,
+    # pylint incorrectly identifies some regular variables as constants
+    C0103,
+    # pylint warns about using an unassigned variable, which is intentional
+    E0606,
+    # too few public methods in a utility script
+    R0903,
 
-max-line-length=100
+    
+
+max-line-length=140

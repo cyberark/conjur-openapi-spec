@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import base64
 import os
 import pathlib
 import sys
 
 import conjur
-from conjur.rest import ApiException
 
 CERT_DIR = pathlib.Path('config/https')
 SSL_CERT_FILE = 'ca.crt'
@@ -24,10 +22,10 @@ new_password = "N3w-Passw0rd!"
 secret = "supersecretstuff"
 secret_id = "sampleSecret"
 simple_policy = None
-with open("config/policy/simple.yml", "r") as file:
+with open("config/policy/simple.yml", "r", encoding="utf-8") as file:
     empty_policy = file.read()
 policy = None
-with open("config/policy/policy.yml", "r") as file:
+with open("config/policy/policy.yml", "r", encoding="utf-8") as file:
     policy = file.read()
 
 # Setup API client config
@@ -66,7 +64,7 @@ print("Password change successful.")
 api_client.configuration.password = new_password
 
 # Add Conjur Token header to client configuration
-token_body = 'token="{}"'.format(access_token)
+token_body = f'token="{access_token}"'
 api_client.configuration.api_key = {'Authorization': token_body}
 api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
 

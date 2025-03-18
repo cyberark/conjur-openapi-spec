@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--apikey")
@@ -114,7 +113,7 @@ def custom_auth_setup(collection_json):
     collection_json["variable"] = env
     return collection_json
 
-with open(collection_path, 'r') as content:
+with open(collection_path, 'r', encoding="utf-8") as content:
     collection_json = json.loads(content.read())
 
 collection_json = initial_setup(collection_json)
@@ -122,5 +121,5 @@ if args.apikey or args.token:
     collection_json = custom_auth_setup(collection_json)
 
 # write updated collection to collection file
-with open(collection_path, 'w') as content:
+with open(collection_path, 'w', encoding="utf-8") as content:
     content.write(json.dumps(collection_json, indent=4, sort_keys=False))
