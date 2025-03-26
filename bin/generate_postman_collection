@@ -76,7 +76,7 @@ docker run --rm \
     -w /openapi \
     --env CONJUR_AUTHN_API_KEY \
     --env CONJUR_ADMIN_TOKEN \
-    python:3.9 \
+    python:latest \
     /bin/bash -c "
         $cmd $arg
     "
