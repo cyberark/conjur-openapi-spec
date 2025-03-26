@@ -23,5 +23,6 @@ test/python/k8s/policy/generated/
 
 release_artifacts
 test/conjur-intro
+dist/
 
 tmp_spec.yml

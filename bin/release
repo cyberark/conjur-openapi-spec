@@ -4,7 +4,26 @@ output_directory="dist"
 rm -rf "$output_directory"
 mkdir -p "$output_directory"
 
-version=$RELEASE_VERSION
+# Try to install zip since isn't available on infrapool agents
+if ! command -v zip &>/dev/null; then
+  echo "zip is not installed. Attempting to install..."
+  sudo apt update && sudo apt install -y zip
+fi
+
+prune_version() {
+  local version
+  version=$(<VERSION)
+  echo "${version%%-*}"
+}
+
+if [ -f VERSION ]; then
+  version=$(prune_version)
+else
+  version="0.0.0-dev"
+fi
+
+# Replace the version in openapi.yml to match the release version
+sed -i "" "s/version: .*/version: $version/" "spec/openapi.yml"
 
 function create_zip(){
     filename=$1
@@ -19,7 +38,8 @@ function create_tar(){
 
     temp_filename="conjur-openapi-$version"
     mkdir -p $temp_filename
-    echo -n "$@" | xargs -t -J % cp -r % $temp_filename
+    printf '%s\n' "$@" | xargs -t -I % cp -r % "$temp_filename"
+
     tar --strip-components=1 -czf "$output_directory/$filename-$version.tar.gz" $temp_filename/*
     rm -rf $temp_filename
 }
