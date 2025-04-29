@@ -9,6 +9,5 @@ openssl genrsa -out ./test-python.key 2048
 chmod 400 ./test-python.key
 openssl req -config ./config/https/openssl.conf -new -sha256 \
   -subj "/C=US/ST=./L=./O=./CN=${common_name}" \
-  -extensions v3_intermediate_ca \
   -outform PEM \
   -key ./test-python.key -out ./test-python.csr

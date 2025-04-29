@@ -13,6 +13,8 @@ set -e
 pushd ./test/conjur-intro
 
 ./bin/dap --provision-master
+./bin/dap --import-custom-certificates
+docker cp "$(docker compose ps -q conjur-master-1.mycompany.local)":/opt/conjur/etc/ssl/. ./system/haproxy/certs
 ./bin/dap --wait-for-master
 api_key=$(curl --insecure --user admin:MySecretP@ss1 https://localhost/authn/demo/login)
 echo Conjur Enterprise API key: $api_key
