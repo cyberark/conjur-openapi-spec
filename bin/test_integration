@@ -54,7 +54,7 @@ else
   sudo_prefix=""
 fi
 
-declare -a supported_langs=("csharp-netcore" "java" "python")
+declare -a supported_langs=("csharp-netcore" "python")
 language=""
 test=""
 

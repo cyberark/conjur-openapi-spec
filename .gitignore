@@ -26,3 +26,4 @@ test/conjur-intro
 dist/
 
 tmp_spec.yml
+/.idea/
