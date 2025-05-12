@@ -52,6 +52,21 @@ components:
           "version": 15.0
         }
 
+    PolicyAnnotation:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        policy:
+          type: string
+      example:
+        {
+          "name": "purpose",
+          "value": "demonstrate storing & fetching secrets using Conjur",
+          "policy": "myConjurAccount:policy:root"
+        }
 
     Resource:
       type: object
@@ -78,7 +93,7 @@ components:
         annotations:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/PolicyAnnotation'
         secrets:
           type: array
           items:
