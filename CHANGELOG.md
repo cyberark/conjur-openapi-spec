@@ -121,6 +121,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [cyberark/conjur-openapi-spec#168](https://github.com/cyberark/conjur-openapi-spec/issues/168)
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
+- Updated Docker image in `bin/transform` script from `python:3.9` to `python:3.12`, as 3.9 is nearing end-of-life. [cyberark/conjur-openapi-spec#230](https://github.com/cyberark/conjur-openapi-spec/issues/230)
 
 [Unreleased]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.1...HEAD
 [5.3.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...v5.3.1
