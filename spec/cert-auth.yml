@@ -95,6 +95,10 @@ components:
               - The authenticated Host ID does not match the of the CSR Common Name (CN).
           "404":
             description: "CA Service with the given ID does not exist"
+          "406":
+            $ref: 'openapi.yml#/components/responses/NotAcceptable'
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
 
         security:
         - conjurAuth: []

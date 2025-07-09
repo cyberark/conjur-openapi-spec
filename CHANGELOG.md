@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [5.4.0] - 2025-07-24
+## [5.4.0] - 2025-07-30
 
 ### Changed
+- Switched to using the `schemathesis/schemathesis:stable` Docker image for running API contract tests.
+- Updated the OpenAPI spec to indicate that the `client_ip` field in `PolicyVersion` is `nullable`.
+- Clarified in the OpenAPI spec that the `ListResources` endpoint may return an object (e.g., `{"count": 1}`).
+- Documented `422` and `500` responses for several API endpoints in the OpenAPI spec definition.
 - Updated `openapi` from `v3.0.0` to `v3.1.0` in `spec/openapi.yml`.
 - Updated `openapitools/openapi-generator-cli` Docker image in `bin/generate_client` from `v4.3.1` to `v7.14.0`, as 4.3.1 does not support v3.1.0 openapi spec files.
 - Updated python Docker image in `bin/lint_specs` form `v3.8` to `v3.13` as 3.8 reached EOL.

@@ -154,13 +154,15 @@ components:
     InadequatePrivileges:
       description: "The authenticated user lacks the necessary privileges"
     InternalServerError:
-      description: "Malfromed request, rejected by the server"
+      description: "Malformed request, rejected by the server"
     ResourceNotFound:
       description: "The requested resource does not exist, the authenticated user lacks the required privileges to enumerate this resource, or its value has not been set"
     ResourcesNotFound:
       description: "At least one resource was unable to be found"
     UnauthorizedError:
       description: "Authentication information is missing or invalid"
+    NotAcceptable:
+      description: "The server could not produce a response matching the list of acceptable values defined in the request's proactive content negotiation headers"
     UnprocessableEntity:
       description: "A request parameter was either missing or invalid."
 

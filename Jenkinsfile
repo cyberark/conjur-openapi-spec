@@ -75,15 +75,13 @@ pipeline {
       }
     }
 
-    // Commented out for now as it's failing. Will need to be fixed in a follow-up PR.
-    // This was originally handled in GH Actions and needs to be ported to Jenkins.
-    // stage('Test API Contract') {
-    //   steps {
-    //     script {
-    //       infrapool.agentSh "./bin/test_api_contract"
-    //     }
-    //   }
-    // }
+    stage('Test API Contract') {
+      steps {
+        script {
+          infrapool.agentSh "./bin/test_api_contract"
+        }
+      }
+    }
 
     stage('Lint Tests') {
       steps {
