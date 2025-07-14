@@ -18,7 +18,7 @@ class TestPublicKeysApi(api_config.ConfiguredTest):
 
         Shows all public keys for a resource.
         """
-        resp = self.api.show_public_keys(self.account, 'Variable', 'one/password')
+        resp = self.api.show_public_keys(self.account, 'user', 'alice')
 
         self.assertIsInstance(resp, str)
 
