@@ -2,8 +2,11 @@ from __future__ import absolute_import
 
 import unittest
 from unittest.mock import patch
+from urllib.parse import quote
+
 
 import conjur
+from typing import List
 
 from . import api_config
 
@@ -42,7 +45,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
             TEST_VARIABLES[0],
             body=secret_val
         )
-        self.assertEqual(resp[1], 201)
+        self.assertEqual(resp.status_code, 201)
 
     def test_create_secret_401(self):
         """Test case for create_secret response 401"""
@@ -77,14 +80,14 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
     def test_create_secret_expirations_201(self):
         """Test case for create_secret with expirations query parameter 201 response code"""
-        _, status, _ = self.api.create_secret_with_http_info(
+        res = self.api.create_secret_with_http_info(
             self.account,
             "variable",
             TEST_VARIABLES[0],
             expirations="",
         )
 
-        self.assertEqual(status, 201)
+        self.assertEqual(res.status_code, 201)
 
     def test_create_secret_expirations_401(self):
         """Test case for create_secret with expirations query parameter 401 response code"""
@@ -140,8 +143,8 @@ class TestSecretsApi(api_config.ConfiguredTest):
             TEST_VARIABLES[0],
             version=2
         )
-        self.assertEqual(secret_val, response[0])
-        self.assertEqual(response[1], 200)
+        self.assertEqual(secret_val, response.data)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_secret_200(self):
         """Test case for get_secret 200 response
@@ -152,8 +155,8 @@ class TestSecretsApi(api_config.ConfiguredTest):
         self.api.create_secret(self.account, "variable", TEST_VARIABLES[0], body=secret_val)
 
         response = self.api.get_secret_with_http_info(self.account, "variable", TEST_VARIABLES[0])
-        self.assertEqual(secret_val, response[0])
-        self.assertEqual(response[1], 200)
+        self.assertEqual(secret_val, response.data)
+        self.assertEqual(response.status_code, 200)
 
     def test_get_secret_401(self):
         """Test case for get_secret 401 response with version parameter
@@ -196,7 +199,7 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    def set_variables(self, variables, values):
+    def set_variables(self, variables: List[str], values: List[str]):
         """Sets the values of an array of variables"""
         for secret, value in zip(variables, values):
             self.api.create_secret(self.account, "variable", secret, body=value)
@@ -211,14 +214,14 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
-        response, status, _ = self.api.get_secrets_with_http_info(
+        res = self.api.get_secrets_with_http_info(
             ",".join(secret_list)
         )
 
-        self.assertEqual(status, 200)
+        self.assertEqual(res.status_code, 200)
         for secret, value in zip(secret_list, secret_values):
-            self.assertIn(secret, response)
-            self.assertEqual(response[secret], value)
+            self.assertIn(secret, res.data)
+            self.assertEqual(res.data[secret], value)
 
     def test_get_secrets_401(self):
         """Test case for get_secrets 401 response"""
@@ -261,33 +264,28 @@ class TestSecretsApi(api_config.ConfiguredTest):
 
     def test_get_secrets_encoded(self):
         """Test case for get_secrets 200 response with base64 encoded binary secrets"""
-        secret_values = [b'one\xffbinary', b'two']
+        secret_values = ["one\xffbinary", "two"]
         self.set_variables(TEST_VARIABLES, secret_values)
 
         # Secrets have to be in the format org:variable:secret_name
         secret_list = [f"{self.account}:variable:{i}" for i in TEST_VARIABLES]
-        with patch.object(conjur.api_client.ApiClient, 'call_api', return_value=None) \
-                as mock:
-            self.api.get_secrets(
-                ",".join(secret_list),
-                accept_encoding="base64"
-            )
+        variable_ids = ",".join(secret_list)
+        with patch.object(conjur.api_client.ApiClient, 'call_api',
+                          return_value=api_config.get_mocked_rest_response()) as mock:
+            self.api.get_secrets(variable_ids, accept_encoding="base64")
+
         mock.assert_called_once_with(
-            '/secrets',
             'GET',
-            {},
-            [('variable_ids', ','.join(secret_list))],
-            {'Accept-Encoding': 'base64', 'Accept': 'application/json'},
-            body=None,
-            post_params=[],
-            files={},
-            response_type='object',
-            auth_settings=['conjurAuth'],
-            async_req=None,
-            _return_http_data_only=True,
-            _preload_content=True,
+            f'{self.client.configuration.host}/secrets?variable_ids={quote(variable_ids)}',
+            {
+                'Accept': 'application/json',
+                'Accept-Encoding': 'base64',
+                'User-Agent': self.client.user_agent,
+                'Authorization': f'Token {self.client.configuration.api_key["conjurAuth"]}',
+            },
+            None,
+            [],
             _request_timeout=None,
-            collection_formats={}
         )
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ set -e
 
 source ./bin/util
 
-ensure_client_is_generated python conjur
+ensure_client_is_generated python oss
 ensure_conjur_up
 
 export CONJUR_ADMIN_API_KEY=$(get_conjur_admin_api_key)

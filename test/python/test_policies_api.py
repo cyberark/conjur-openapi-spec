@@ -38,11 +38,11 @@ class TestPoliciesApi(api_config.ConfiguredTest):
     def test_replace_policy_201(self):
         """Test case for replace_policy 201 response
 
-        Loads or replace_policys a Conjur policy document.
+        Loads or replace_policy's a Conjur policy document.
         """
-        _, status, _ = self.api.replace_policy_with_http_info(self.account, 'root', TEST_POLICY)
+        res = self.api.replace_policy_with_http_info(self.account, 'root', TEST_POLICY)
 
-        self.assertEqual(status, 201)
+        self.assertEqual(res.status_code, 201)
 
     def test_replace_policy_401(self):
         """Test case for replace_policy 401 response"""
@@ -84,9 +84,9 @@ class TestPoliciesApi(api_config.ConfiguredTest):
 
         Modifies an existing Conjur policy.
         """
-        _, status, _ = self.api.update_policy_with_http_info(self.account, 'root', MODIFY_POLICY)
+        res = self.api.update_policy_with_http_info(self.account, 'root', MODIFY_POLICY)
 
-        self.assertEqual(status, 201)
+        self.assertEqual(res.status_code, 201)
 
     def test_update_policy_400(self):
         """Test case for update_policy 400 response"""
@@ -128,9 +128,9 @@ class TestPoliciesApi(api_config.ConfiguredTest):
 
         Adds data to the existing Conjur policy.
         """
-        _, status, _ = self.api.load_policy_with_http_info(self.account, 'root', UPDATE_POLICY)
+        res = self.api.load_policy_with_http_info(self.account, 'root', UPDATE_POLICY)
 
-        self.assertEqual(status, 201)
+        self.assertEqual(res.status_code, 201)
 
     def test_load_policy_400(self):
         """Test case for load_policy 400 response"""

@@ -28,7 +28,8 @@ components:
 
     ApiKey:
       type: string
-      minLength: 55
+      minLength: 50
+      maxLength: 56
       description: "Example of a Conjur API key"
       example: "14m9cf91wfsesv1kkhevg12cdywm2wvqy6s8sk53z1ngtazp1t9tykc"
 
@@ -203,14 +204,14 @@ components:
           see [the documentation](https://docs.conjur.org/Latest/en/Content/Integrations/kubernetes.htm).
         operationId: "k8sInjectClientCert"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "Host-Id-Prefix"
           in: header
           description: "Dot-separated policy tree, prefixed by `host.`, where the application identity is defined"
           schema:
             type: string
-          example: "host/conjur/authn-k8s/my-authenticator-id/apps"
+            example: "host/conjur/authn-k8s/my-authenticator-id/apps"
         requestBody:
           description: |
             Valid certificate signing request that includes the host
@@ -258,7 +259,7 @@ components:
           Your HTTP/REST client probably provides HTTP basic authentication support.
         operationId: "getAPIKeyViaLDAP"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -389,7 +390,7 @@ components:
           [AWS IAM Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/AWS_IAM_Authenticator.htm) (`authn-iam`).
         operationId: "getAccessTokenViaAWS"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -463,7 +464,7 @@ components:
           documentation: [Azure Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/azure_authn.htm) (`authn-azure`).
         operationId: "getAccessTokenViaAzure"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -588,7 +589,7 @@ components:
           documentation: [Kubernetes Authenticator](https://docs.conjur.org/Latest/en/Content/Operations/Services/k8s_auth.htm) (`authn-k8s`).
         operationId: "getAccessTokenViaKubernetes"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -661,7 +662,7 @@ components:
           [LDAP Authenticator](https://docs.conjur.org/Latest/en/Content/Integrations/ldap/ldap_authenticator.html) (`authn-ldap`).
         operationId: "getAccessTokenViaLDAP"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -726,7 +727,7 @@ components:
           For more information see [the documentation](https://docs.conjur.org/Latest/en/Content/OIDC/OIDC.htm).
         operationId: "getAccessTokenViaOIDC"
         parameters:
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"
@@ -1075,7 +1076,7 @@ components:
             $ref: '#/components/schemas/ServiceAuthenticators'
           example: "authn-oidc"
 
-        - $ref: openapi.yml#/components/parameters/ServiceID
+        - $ref: 'openapi.yml#/components/parameters/ServiceID'
 
         - name: "account"
           in: "path"

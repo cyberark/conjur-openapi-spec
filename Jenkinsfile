@@ -116,7 +116,7 @@ pipeline {
       steps {
         script {
           infrapool.agentSh "./bin/test_integration -l python"
-          infrapool.agentSh "./bin/test_integration -l csharp-netcore"
+          infrapool.agentSh "./bin/test_integration -l csharp"
         }
       }
 
@@ -142,20 +142,6 @@ pipeline {
     }
 
     stage('K8s Inject Test') {
-      when {
-        anyOf {
-          expression {
-            script {
-              infrapool.agentSh(returnStatus: true, script: 'git diff origin/main --name-only | grep --quiet "^test/python/k8s/.*"') == 0
-            }
-          }
-          expression {
-            script {
-              infrapool.agentSh(returnStatus: true, script: 'git diff origin/main --name-only | grep --quiet "spec/authentication.yaml"') == 0
-            }
-          }
-        }
-      }
       steps {
         script {
           infrapool.agentSh '''
@@ -163,7 +149,7 @@ pipeline {
           chmod 700 get_helm.sh
           ./get_helm.sh
 
-          curl -fsSL -o kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
+          curl -fsSL -o kind https://github.com/kubernetes-sigs/kind/releases/latest/download/kind-linux-amd64
           chmod 700 kind
           sudo mv ./kind /usr/local/bin/kind
 

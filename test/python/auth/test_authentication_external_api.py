@@ -2,10 +2,12 @@ from __future__ import absolute_import
 
 import json
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import conjur
 import requests
+import random
+import string
 
 from .. import api_config
 
@@ -32,7 +34,7 @@ def get_oidc_id_token():
 class TestExternalAuthnApi(api_config.ConfiguredTest):
     """Class tests api functions relating to external authenticators
 
-    Separate from the Authn tests to avoid issues with changing api keys/paswords
+    Separate from the Authn tests to avoid issues with changing api keys/passwords
     """
     def setUp(self):
         self.api = conjur.api.AuthenticationApi(self.client)
@@ -43,14 +45,14 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         Updates the authenticators configuration
         """
-        _, status, _ = self.api.enable_authenticator_instance_with_http_info(
+        res = self.api.enable_authenticator_instance_with_http_info(
             'authn-ldap',
             'test',
             self.account,
             enabled=True
         )
 
-        self.assertEqual(status, 204)
+        self.assertEqual(res.status_code, 204)
 
     def test_enable_authenticator_instance_401(self):
         """Test case for enable_authenticator_instance 401 response"""
@@ -81,13 +83,13 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
         Updates the authenticators configuration
         """
-        _, status, _ = self.api.enable_authenticator_with_http_info(
+        res = self.api.enable_authenticator_with_http_info(
             'authn-gcp',
             self.account,
             enabled=True
         )
 
-        self.assertEqual(status, 204)
+        self.assertEqual(res.status_code, 204)
 
     def test_get_api_key_via_ldap_200(self):
         """Test case for get_api_key_via_ldap 200 response"""
@@ -96,9 +98,9 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         alice_client = conjur.ApiClient(alice_config)
         alice_api = conjur.api.AuthenticationApi(alice_client)
 
-        _, status, _ = alice_api.get_api_key_via_ldap_with_http_info('test', self.account)
+        res = alice_api.get_api_key_via_ldap_with_http_info('test', self.account)
 
-        self.assertEqual(status, 200)
+        self.assertEqual(res.status_code, 200)
 
     def test_get_api_key_via_ldap_401(self):
         """Test case for get_api_key_via_ldap 401 response"""
@@ -109,28 +111,23 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
 
     def test_get_access_token_via_ldap_200(self):
         """Test case for get_access_token_via_ldap 200 response"""
-        alice_config = api_config.get_api_config(username='alice')
-        alice_client = conjur.ApiClient(alice_config)
-        alice_api = conjur.api.AuthenticationApi(alice_client)
+        username = 'alice'
+        role = 'user'
+        service_id = 'test'
+        api_key = api_config.get_api_key(username, role)
+        config = api_config.get_api_config(username=username)
+        client = conjur.ApiClient(config)
+        api = conjur.api.AuthenticationApi(client)
 
-        _, status, _ = alice_api.get_access_token_via_ldap_with_http_info(
-            'test',
-            self.account,
-            'alice',
-            body='alice'
-        )
+        res = api.get_access_token_via_ldap_with_http_info(service_id, self.account, username, body=api_key)
 
-        self.assertEqual(status, 200)
+        self.assertEqual(res.status_code, 200)
 
     def test_get_access_token_via_ldap_401(self):
         """Test case for get_access_token_via_ldap 401 response"""
+        bad_api_key = ''.join(random.choices(string.ascii_letters + string.digits, k=random.randint(51, 56)))
         with self.assertRaises(conjur.exceptions.ApiException) as context:
-            self.api.get_access_token_via_ldap(
-                'test',
-                self.account,
-                'admin',
-                body='test'
-            )
+            self.api.get_access_token_via_ldap('test', self.account, 'admin', body=bad_api_key)
 
         self.assertEqual(context.exception.status, 401)
 
@@ -139,12 +136,12 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         api_config.setup_oidc_webservice()
         id_token = get_oidc_id_token()
 
-        _, status, _ = self.api.get_access_token_via_oidc_with_http_info(
+        res = self.api.get_access_token_via_oidc_with_http_info(
             'test',
             self.account,
             id_token=id_token
         )
-        self.assertEqual(status, 200)
+        self.assertEqual(res.status_code, 200)
 
     def test_get_access_token_via_oidc_401(self):
         """Test case for oidc_authenticate 401 response"""
@@ -159,27 +156,20 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         """Test case for gcp_authenticate 200 response"""
         jwt_token = 'bad token'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
-                as mock:
-            # file deepcode ignore HardcodedNonCryptoSecret/test: This is a test file
-            self.api.get_access_token_via_gcp(self.account, jwt=jwt_token)
+        with patch.object(conjur.ApiClient, 'call_api', return_value=api_config.get_mocked_rest_response()) as mock:
+            self.api.get_access_token_via_gcp(account=self.account, jwt=jwt_token)
 
         mock.assert_called_once_with(
-            '/authn-gcp/{account}/authenticate',
             'POST',
-            {'account': self.account},
-            [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
-            body=None,
-            post_params=[('jwt', jwt_token)],
-            files={},
-            response_type='str',
-            auth_settings=[],
-            async_req=None,
-            _return_http_data_only=True,
-            _preload_content=True,
+            f'{self.client.configuration.host}/authn-gcp/{self.account}/authenticate',
+            {
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': self.client.user_agent
+            },
+            None,
+            [('jwt', jwt_token)],
             _request_timeout=None,
-            collection_formats={}
         )
 
     def test_get_access_token_via_gcp_400(self):
@@ -201,64 +191,42 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
         service_id = 'jwt_service'
         jwt_token = 'valid token'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
-                as mock:
+        with patch.object(conjur.ApiClient, 'call_api', return_value=api_config.get_mocked_rest_response()) as mock:
             self.api.get_access_token_via_jwt(self.account, service_id, jwt=jwt_token)
 
         mock.assert_called_once_with(
-            '/authn-jwt/{service_id}/{account}/authenticate',
             'POST',
+            f'{self.client.configuration.host}/authn-jwt/{service_id}/{self.account}/authenticate',
             {
-                'account': self.account,
-                'service_id': service_id
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': self.client.user_agent
             },
-            [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
-            body=None,
-            post_params=[('jwt', jwt_token)],
-            files={},
-            response_type='str',
-            auth_settings=[],
-            async_req=None,
-            _return_http_data_only=True,
-            _preload_content=True,
+            None,
+            [('jwt', jwt_token)],
             _request_timeout=None,
-            collection_formats={}
         )
 
     def test_get_access_token_via_jwt_with_id_200(self):
         """Test case for JWT authentication with id 200 response"""
         service_id = 'jwt_service'
-        jwt_token = 'valid token'
-        user_id = 'user id'
+        jwt_token = 'valid_token'
+        user_id = 'user_id'
 
-        with patch.object(conjur.ApiClient, 'call_api', return_value=None) \
-                as mock:
-            self.api.get_access_token_via_jwt_with_id(self.account,
-                                                     user_id,
-                                                     service_id,
-                                                     jwt=jwt_token)
+        with patch.object(conjur.ApiClient, 'call_api', return_value=api_config.get_mocked_rest_response()) as mock:
+            self.api.get_access_token_via_jwt_with_id(self.account, user_id, service_id, jwt=jwt_token)
 
         mock.assert_called_once_with(
-            '/authn-jwt/{service_id}/{account}/{id}/authenticate',
             'POST',
+            f'{self.client.configuration.host}/authn-jwt/{service_id}/{self.account}/{user_id}/authenticate',
             {
-                'account': self.account,
-                'id': user_id,
-                'service_id': service_id
+                'Accept': 'text/plain',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': self.client.user_agent
             },
-            [],
-            {'Accept': 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded'},
-            body=None,
-            post_params=[('jwt', jwt_token)],
-            files={},
-            response_type='str',
-            auth_settings=[],
-            async_req=None,
-            _return_http_data_only=True,
-            _preload_content=True,
+            None,
+            [('jwt', jwt_token)],
             _request_timeout=None,
-            collection_formats={}
         )
 
     def test_get_access_token_via_jwt_400(self):
@@ -274,6 +242,7 @@ class TestExternalAuthnApi(api_config.ConfiguredTest):
             self.api.get_access_token_via_jwt(self.account, 'jwt_service', jwt='bad token')
 
         self.assertEqual(context.exception.status, 401)
+
 
 if __name__ == '__main__':
     unittest.main()

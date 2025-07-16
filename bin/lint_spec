@@ -6,4 +6,4 @@ docker run --rm \
     -v ${PWD}/spec.yml:/code/spec.yml \
     -v ${PWD}/.spectral.yml:/code/spectral.yml \
     node:latest \
-    /bin/bash -c "npm i -g @stoplight/spectral@6.1.0 && spectral lint -v --fail-severity=warn --ruleset /code/spectral.yml  /code/spec.yml"
+    /bin/bash -c "npm i -g @stoplight/spectral-cli@6.15.0 && spectral lint -v --fail-severity=warn --ruleset /code/spectral.yml  /code/spec.yml"

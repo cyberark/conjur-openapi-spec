@@ -65,8 +65,8 @@ api_client.configuration.password = new_password
 
 # Add Conjur Token header to client configuration
 token_body = f'token="{access_token}"'
-api_client.configuration.api_key = {'Authorization': token_body}
-api_client.configuration.api_key_prefix = {'Authorization': 'Token'}
+api_client.configuration.api_key = {'conjurAuth': token_body}
+api_client.configuration.api_key_prefix = {'conjurAuth': 'Token'}
 
 policy_api = conjur.PoliciesApi(api_client)
 login_api = conjur.AuthenticationApi(api_client)

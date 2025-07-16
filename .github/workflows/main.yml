@@ -26,4 +26,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run integration test script
-        run: ./bin/test_integration -l csharp-netcore
+        run: ./bin/test_integration -l csharp

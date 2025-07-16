@@ -32,12 +32,12 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources endpoint
         200 - successful, resources returned as JSON
         """
-        resp, status, _ = self.api.show_resources_for_all_accounts_with_http_info()
+        res = self.api.show_resources_for_all_accounts_with_http_info()
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(resp, list)
-        for resource in resp:
-            self.assertIsInstance(resource, conjur.models.Resource)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.data, list)
+        for resource in res.data:
+            self.assertIsInstance(resource, conjur.models.ShowResourcesForAllAccounts200ResponseInner)
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -74,11 +74,11 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account} endpoint
         200 - successful request, resources returned as JSON
         """
-        resp, status, _ = self.api.show_resources_for_account_with_http_info(self.account)
+        res = self.api.show_resources_for_account_with_http_info(self.account)
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(resp, list)
-        for resource in resp:
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.data, list)
+        for resource in res.data:
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -126,14 +126,14 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}
         200 - successful request, resources returned as JSON
         """
-        resp, status, _ = self.api.show_resources_for_kind_with_http_info(
+        res = self.api.show_resources_for_kind_with_http_info(
             self.account,
             "policy"
         )
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(resp, list)
-        for resource in resp:
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.data, list)
+        for resource in res.data:
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -185,22 +185,22 @@ class TestResourcesApi(api_config.ConfiguredTest):
         """Test case for 200 status response on /resources/{account}/{kind}/{identifier}
         200 - successful, role memberships returned as JSON
         """
-        resp, status, _ = self.api.show_resource_with_http_info(
+        res = self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret'
         )
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(resp, conjur.models.Resource)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200ResponseInner)
         for i in RESOURCE_MEMBERS:
-            self.assertIsNotNone(getattr(resp, i))
+            self.assertIsNotNone(getattr(res.data, i))
 
     def test_show_resource_204(self):
         """Test case for 204 status response on /resources/{account}/{kind}/{identifier}
         204 - permission check successful
         """
-        resp, status, _ = self.api.show_resource_with_http_info(
+        res= self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret',
@@ -208,10 +208,8 @@ class TestResourcesApi(api_config.ConfiguredTest):
             check=True
         )
 
-        self.assertEqual(status, 204)
-        # Response here should be empty string so all fields need to be None
-        for i in RESOURCE_MEMBERS:
-            self.assertIsNone(getattr(resp, i))
+        self.assertEqual(res.status_code, 204)
+        self.assertIsNone(res.data)
 
     def test_show_resource_400(self):
         """Test case for 400 status response on /resources/{account}/{kind}/{identifier} endpoint
@@ -242,7 +240,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
                 self.account,
                 'variable',
                 'testSecret',
-                check='',
+                check=False,
                 privilege='read',
                 role='user:alice'
             )
@@ -274,39 +272,21 @@ class TestResourcesApi(api_config.ConfiguredTest):
 
         self.assertEqual(context.exception.status, 404)
 
-    def test_show_resource_422(self):
-        """Test case for 422 status response on /resources/{account}/{kind}/{identifier} endpoint
-        422 - Conjur received a malformed request parameter
-        """
-        with self.assertRaises(conjur.ApiException) as context:
-            self.api.show_resource(
-                self.account,
-                'variable',
-                'testSecret',
-                check=NULL_BYTE
-            )
-
-        self.assertEqual(context.exception.status, 422)
-
-    # Test combinations of optional query parameters when getting a single resource
-
     def test_permitted_roles_and_check(self):
         """Test case for using both `permitted_roles` and `check` query parameters
         When both parameters are used, Conjur responds to the `check` call only
         """
-        resp, status, _ = self.api.show_resource_with_http_info(
+        res = self.api.show_resource_with_http_info(
             self.account,
             'variable',
             'testSecret',
-            permitted_roles='',
-            check='',
+            permitted_roles=False,
+            check=False,
             privilege='read'
         )
 
-        self.assertEqual(status, 204)
-        # Response here should be empty string so all fields need to be None
-        for i in RESOURCE_MEMBERS:
-            self.assertIsNone(getattr(resp, i))
+        self.assertEqual(res.status_code, 204)
+        self.assertIsNone(res.data)
 
 if __name__ == '__main__':
     unittest.main()

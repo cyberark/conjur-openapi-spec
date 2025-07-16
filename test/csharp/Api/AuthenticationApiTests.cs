@@ -10,17 +10,11 @@
 
 using System;
 using System.Net;
-using System.IO;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection;
-using RestSharp;
 using Xunit;
 
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Api;
-using Org.OpenAPITools.Model;
 
 namespace Org.OpenAPITools.Test
 {
@@ -33,13 +27,13 @@ namespace Org.OpenAPITools.Test
     /// </remarks>
     public class AuthenticationApiTests : IDisposable
     {
-        private AuthenticationApi instance;
-        private AuthenticationApi nonAuthInstance;
-        private Configuration config;
+        private readonly AuthenticationApi instance;
+        private readonly AuthenticationApi nonAuthInstance;
+        private readonly Configuration config;
 
-        private string APIKey;
-        private string account;
-        private string login;
+        private readonly string APIKey;
+        private readonly string account;
+        private readonly string login;
 
         public AuthenticationApiTests()
         {
@@ -47,23 +41,30 @@ namespace Org.OpenAPITools.Test
             account = Environment.GetEnvironmentVariable("CONJUR_ACCOUNT");
             login = Environment.GetEnvironmentVariable("CONJUR_AUTHN_LOGIN");
 
-            Dictionary<string, string> APIPrefix = new Dictionary<string, string>();
-            APIPrefix.Add("Authorization", "Token");
+            var APIPrefix = new Dictionary<string, string>
+            {
+                { "Authorization", "Token" }
+            };
+
             config = new Configuration(
                 new Dictionary<string, string>(),
                 new Dictionary<string, string>(),
                 APIPrefix,
                 Environment.GetEnvironmentVariable("CONJUR_HTTP_APPLIANCE_URL")
-            );
-            config.Username = "admin";
-            config.Password = APIKey;
+            )
+            {
+                Username = "admin",
+                Password = APIKey
+            };
 
             instance = new AuthenticationApi(config);
             nonAuthInstance = new AuthenticationApi(config);
 
-            ApiResponse<string> res = instance.GetAccessTokenWithHttpInfo(account, login, APIKey, "base64");
-            Dictionary<string, string> APIToken = new Dictionary<string, string>();
-            APIToken.Add("Authorization", $"token=\"{res.RawContent}\"");
+            var res = instance.GetAccessTokenWithHttpInfo(account, login, APIKey, "base64");
+            var APIToken = new Dictionary<string, string>
+            {
+                { "Authorization", $"token=\"{res.RawContent}\"" }
+            };
 
             config.ApiKey = APIToken;
             instance.Configuration = config;
@@ -117,10 +118,8 @@ namespace Org.OpenAPITools.Test
         [Fact]
         public void EnableAuthenticatorServiceTest()
         {
-            var response = instance.EnableAuthenticatorInstanceWithHttpInfo(ServiceAuthenticators.Ldap, "test", account, enabled: true);
+            var response = instance.EnableAuthenticatorInstanceWithHttpInfo("authn-ldap", "test", account, enabled: true);
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
-
     }
-
 }

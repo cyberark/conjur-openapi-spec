@@ -6,10 +6,10 @@ components:
         text/plain:
           schema:
             type: string
-          example: |
-            ssh-rsa AAAAB3Nzabc2 admin@alice.com
+            example: |
+              ssh-rsa AAAAB3Nzabc2 admin@alice.com
 
-            ssh-rsa AAAAB3Nza3nx alice@example.com
+              ssh-rsa AAAAB3Nza3nx alice@example.com
 
   paths:
     PublicKeys:
@@ -34,16 +34,18 @@ components:
           in: "path"
           description: "Type of resource"
           required: true
-          example: user
           schema:
-            $ref: 'openapi.yml#/components/schemas/Kind'
+            allOf:
+            - $ref: 'openapi.yml#/components/schemas/Kind'
+            - example: "user"
         - name: "identifier"
           in: "path"
           description: "ID of the resource for which to get the information about"
           required: true
-          example: "admin"
           schema:
-            $ref: 'openapi.yml#/components/schemas/ResourceID'
+            allOf:
+            - $ref: 'openapi.yml#/components/schemas/ResourceID'
+            - example: "admin"
 
         responses:
           "200":

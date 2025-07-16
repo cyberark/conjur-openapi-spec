@@ -10,7 +10,7 @@ On the surface level the framework works by running each subclass of `unittest.T
 finds. Before any of the tests are run the `setUpClass` method is run, and before each individual
 test is run the `setUp` method is run. The same is true for `tearDownClass` and `tearDown`.
 
-Each of the test classes inherits from the `api_config.ConfiguredTest` class which itself inherts from
+Each of the test classes inherits from the `api_config.ConfiguredTest` class which itself inherits from
 `unittest.TestCase`. The `ConfiguredTest` class includes `setUpClass` and `tearDownClass` methods which
 make sure each test class has an already authenticated client and a badly authenticated client for
 failing tests.

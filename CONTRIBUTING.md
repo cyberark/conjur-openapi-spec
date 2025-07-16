@@ -51,12 +51,12 @@ Contributing to this repository requires installation of some developer tools.
 
 ### OpenAPI
 
-[OpenAPI Specification v3.0.0](https://github.com/OAI/OpenAPI-Specification/tree/3.0.0)
-[OpenAPI Generator v4.3.1](https://github.com/OpenAPITools/openapi-generator/tree/v4.3.1)
+[OpenAPI Specification v3.1.0](https://github.com/OAI/OpenAPI-Specification/tree/3.1.0)
+[OpenAPI Generator v7.14.0](https://github.com/OpenAPITools/openapi-generator/tree/v7.14.0)
 
 ### Swagger
 
-[Swagger Editor v3.14.6](https://github.com/swagger-api/swagger-editor/tree/v3.14.6)
+[Swagger Editor next-v5](https://github.com/swagger-api/swagger-editor/tree/next)
 
 ## Development
 

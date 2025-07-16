@@ -5,7 +5,7 @@ set -e
 
 generate_policy() {
     # generate Conjur policies from templates
-    # defines authn-k8s endpoint and identies that can authenticate to it
+    # defines authn-k8s endpoint and identities that can authenticate to it
     announce "Generating Policy"
     pushd test/python/k8s/policy
         mkdir -p ./generated
@@ -21,7 +21,7 @@ generate_policy() {
 }
 
 init_cli() {
-    # intialize Conjur CLI pod
+    # Initialize Conjur CLI pod
     # pull image, push to kind, and build CLI pod
     set_namespace $CONJUR_NAMESPACE
     conjur_cli_pod=$(get_conjur_cli_pod_name)
@@ -58,8 +58,11 @@ load_policy() {
     # load Conjur policies generated from templates
     announce "Loading Conjur Policy"
 
-    kubectl exec $conjur_cli_pod -- rm -rf /policy
-    kubectl cp ./test/python/k8s/policy $conjur_cli_pod:/policy
+    policy_dir="/tmp/policy"
+
+    kubectl exec $conjur_cli_pod -- rm -rf $policy_dir
+
+    kubectl cp ./test/python/k8s/policy $conjur_cli_pod:$policy_dir
 
     kubectl exec $conjur_cli_pod -- \
         bash -c "
@@ -67,10 +70,10 @@ load_policy() {
             CONJUR_ACCOUNT=${CONJUR_ACCOUNT} \
             CONJUR_ADMIN_PASSWORD=${CONJUR_ADMIN_API_KEY} \
             TEST_APP_NAMESPACE_NAME=${TEST_APP_NAMESPACE} \
-            /policy/load_policies.sh
+            ${policy_dir}/load_policies.sh
         "
 
-    kubectl exec $conjur_cli_pod -- rm -rf ./policy
+    kubectl exec $conjur_cli_pod -- rm -rf $policy_dir
 
     echo "Conjur Policy Loaded"
 }
@@ -83,7 +86,7 @@ configure_conjur_ca() {
     conjur_master="$(kubectl get pods --selector "app=conjur-oss" --no-headers | awk '{ print $1 }')"
     kubectl exec $conjur_master -c conjur-oss -- bash -c "
         CONJUR_ACCOUNT=$CONJUR_ACCOUNT
-        rake authn_k8s:ca_init['conjur/authn-k8s/$AUTHENTICATOR_ID']
+        bundle exec rake authn_k8s:ca_init['conjur/authn-k8s/$AUTHENTICATOR_ID']
     "
 
     echo "Certificate authority initialized"
@@ -103,7 +106,7 @@ setup_test_app() {
     fi
     set_namespace $TEST_APP_NAMESPACE
 
-    # create rolebinding
+    # create role binding
     kubectl delete --ignore-not-found rolebinding test-app-conjur-authenticator-role-binding-$CONJUR_NAMESPACE
     conjur_authn_cluster_role="$HELM_RELEASE-conjur-authenticator"
 

@@ -69,14 +69,14 @@ class TestRolesApi(api_config.ConfiguredTest):
         """Test case for 200 status response when getting role data
         Gets information on the specified role
         """
-        role_details, status, _ = self.api.show_role_with_http_info(self.account, 'user', 'admin')
+        res = self.api.show_role_with_http_info(self.account, 'user', 'admin')
 
-        self.assertEqual(status, 200)
-        self.assertIsInstance(role_details, dict)
+        self.assertEqual(res.status_code, 200)
+        self.assertIsInstance(res.data, dict)
 
         members = ['created_at', 'id', 'members']
         for i in members:
-            self.assertIn(i, role_details)
+            self.assertIn(i, res.data)
 
     def test_show_role_400(self):
         """Test case for 400 status response when getting role data
@@ -130,8 +130,8 @@ class TestRolesApi(api_config.ConfiguredTest):
         The example shown here is a user Bob being assigned as a member of a group
         204 - successful member assignment, empty response body
         """
-        _, status, _ = self.add_user_to_group('bob')
-        self.assertEqual(status, 204)
+        res = self.add_user_to_group('bob')
+        self.assertEqual(res.status_code, 204)
 
         group_member_data = self.api.show_role(
             self.account,
@@ -220,14 +220,14 @@ class TestRolesApi(api_config.ConfiguredTest):
         self.assertEqual(group_members[1]['member'], self.BOB_ID)
 
         # remove Bob as member of userGroup
-        _, delete_status, _ = self.api.remove_member_from_role_with_http_info(
+        res = self.api.remove_member_from_role_with_http_info(
             self.account,
             'group',
             'userGroup',
             members='',
             member=self.BOB_ID
         )
-        self.assertEqual(delete_status, 204)
+        self.assertEqual(res.status_code, 204)
 
         # confirm Bob's removal as member
         group_members = self.api.show_role(self.account, 'group', 'userGroup', members='')
