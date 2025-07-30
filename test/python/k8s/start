@@ -10,7 +10,7 @@ cleanup() {
 }
 
 print_help(){
-  echo -e "Usage: ./test/python/k8s/start[--no-regen-client]"
+  echo -e "Usage: ./test/python/k8s/start [--no-regen-client]"
   echo
   echo -e "\tThis script tests the functionality of Conjur's API endpoint to inject"
   echo -e "\ta client certificate into a specified Kubernetes pod using Python client"
@@ -46,17 +46,17 @@ export HELM_RELEASE="conjur-oss"
 export CONJUR_NAMESPACE="conjur-oss"
 export CONJUR_ACCOUNT="dev"
 export CONJUR_LOG_LEVEL="info"
-export CONJUR_VERSION="1.11.0"
+export CONJUR_VERSION="1.21.1"
 export VERSION="2.0.7"
 
 export TEST_APP_NAMESPACE="app-test"
 export ANNOTATION_BASE_AUTHN="true"
 export AUTHENTICATOR_ID="my-authenticator-id"
-export SERVICE_ACCOUNT='conjur-oss'
+export SERVICE_ACCOUNT="conjur-oss"
 
 # check for required tools
 if ! command -v kind &> /dev/null; then
-    echo "kind binary not found. See https://kind.sigs.k8s.io/docs/quick-start/"
+    echo "kind binary not found. See https://kind.sigs.k8s.io/"
     echo "for installation instructions."
     exit 1
 fi
@@ -70,6 +70,12 @@ fi
 
 if ! command -v helm &> /dev/null; then
     echo "helm binary not found. See https://helm.sh/docs/intro/install/"
+    echo "for installation instructions."
+    exit 1
+fi
+
+if ! command -v kubectl &> /dev/null; then
+    echo "kubectl binary not found. See https://kubernetes.io/docs/tasks/tools/#kubectl"
     echo "for installation instructions."
     exit 1
 fi

@@ -4,7 +4,7 @@ set -eou pipefail
 
 conjur login -i admin -p $CONJUR_ADMIN_PASSWORD
 
-readonly POLICY_DIR="/policy"
+readonly POLICY_DIR="/tmp/policy"
 
 # NOTE: generated files are prefixed with the test app namespace to allow for parallel CI
 readonly POLICY_FILES=(

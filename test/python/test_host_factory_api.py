@@ -43,8 +43,8 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
 
     def get_host_token(self):
         """Gets a token used for creating new hosts"""
-        token = self.api.create_token(EXPIRE, HOST_FACTORY)
-        return token[0]['token']
+        res = self.api.create_token(EXPIRE.isoformat(), HOST_FACTORY)
+        return res[0].token
 
     # test cases for conjur.HostFactoryApi.create_host
 
@@ -54,18 +54,18 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
 
-        new_host, status, _ = self.api.create_host_with_http_info(TEST_HOST)
-        self.assertEqual(status, 201)
-        self.assertIsInstance(new_host, conjur.models.CreateHost)
+        res = self.api.create_host_with_http_info(TEST_HOST)
+        self.assertEqual(res.status_code, 201)
+        self.assertIsInstance(res.data, conjur.models.CreateHost201Response)
 
         # Make sure the new host can authenticate
         authn = conjur.api.AuthenticationApi(self.client)
         authn.get_access_token(
             self.account,
             f'host/{TEST_HOST}',
-            body=new_host.api_key
+            body=res.data.api_key
         )
 
         self.client.configuration.api_key = old_key
@@ -85,7 +85,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
 
         with self.assertRaises(conjur.ApiException) as context:
             self.api.create_host("")
@@ -99,13 +99,10 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         """Test case for 200 response when creating a host token
         Creates one or more host identity tokens.
         """
-        token_data_list, response, _ = self.api.create_token_with_http_info(
-            EXPIRE,
-            HOST_FACTORY
-        )
-        token_data = token_data_list[0]
+        res = self.api.create_token_with_http_info(EXPIRE.isoformat(), HOST_FACTORY)
+        token_data = res.data[0].to_dict()
 
-        self.assertEqual(response, 200)
+        self.assertEqual(res.status_code, 200)
         self.assertIsInstance(token_data, dict)
         for i in HOST_TOKEN_MEMBERS:
             self.assertIn(i, token_data)
@@ -115,7 +112,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         401 - Unauthorized request
         """
         with self.assertRaises(conjur.ApiException) as context:
-            self.bad_auth_api.create_token(EXPIRE, HOST_FACTORY)
+            self.bad_auth_api.create_token(EXPIRE.isoformat(), HOST_FACTORY)
 
         self.assertEqual(context.exception.status, 401)
 
@@ -128,7 +125,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         no_exec_api = conjur.HostFactoryApi(no_exec_client)
 
         with self.assertRaises(conjur.ApiException) as context:
-            no_exec_api.create_token(EXPIRE, HOST_FACTORY)
+            no_exec_api.create_token(EXPIRE.isoformat(), HOST_FACTORY)
 
         self.assertEqual(context.exception.status, 403)
 
@@ -137,7 +134,7 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         404 - the requested host factory does not exist
         """
         with self.assertRaises(conjur.ApiException) as context:
-            self.api.create_token(EXPIRE, "fake_factory")
+            self.api.create_token(EXPIRE.isoformat(), "fake_factory")
 
         self.assertEqual(context.exception.status, 404)
 
@@ -159,10 +156,10 @@ class TestHostFactoryApi(api_config.ConfiguredTest):
         token = self.get_host_token()
         old_key = dict(self.client.configuration.api_key)
 
-        _, status, _ = self.api.revoke_token_with_http_info(token)
-        self.assertEqual(status, 204)
+        res = self.api.revoke_token_with_http_info(token)
+        self.assertEqual(res.status_code, 204)
 
-        self.client.configuration.api_key = {'Authorization': f'Token token="{token}"'}
+        self.client.configuration.api_key = {'conjurAuth': f'token="{token}"'}
         with self.assertRaises(conjur.exceptions.ApiException):
             self.api.create_host(TEST_HOST)
 

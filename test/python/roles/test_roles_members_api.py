@@ -16,12 +16,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         """Test case for 200 status response for GET requests using 'members' query parameter
         Queries group:userGroup role for its members, which should only be dev:user:admin
         """
-        group_member_data, status, _ = self.api.show_role_with_http_info(
-            self.account,
-            'group',
-            'userGroup',
-            members=''
-        )
+        res = self.api.show_role_with_http_info(self.account, 'group', 'userGroup', members='')
 
         target_response = [
             {
@@ -33,8 +28,8 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
             }
         ]
 
-        self.assertEqual(status, 200)
-        self.assertEqual(group_member_data, target_response)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data, target_response)
 
     def test_get_members_400(self):
         """Test case for 400 status response for GET requests using 'members' query parameter
@@ -119,7 +114,7 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         )
 
         # testLayer will be listed in all memberships of bob
-        bob_membership_data, status, _ = self.api.show_role_with_http_info(
+        res = self.api.show_role_with_http_info(
             self.account,
             'user',
             'bob',
@@ -133,8 +128,8 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
             self.BOB_ID
         ]
 
-        self.assertEqual(status, 200)
-        for i in bob_membership_data:
+        self.assertEqual(res.status_code, 200)
+        for i in res.data:
             self.assertIn(i, target_membership_data)
 
     def test_get_all_memberships_400(self):
@@ -209,18 +204,13 @@ class TestRolesMembersApi(test_roles_api.TestRolesApi):
         )
 
         # testLayer will not be listed in direct memberships of bob
-        bob_membership_data, status, _ = self.api.show_role_with_http_info(
-            self.account,
-            'user',
-            'bob',
-            memberships=''
-        )
+        res = self.api.show_role_with_http_info(self.account, 'user', 'bob', memberships='')
 
         memberships = [f'{self.account}:group:userGroup', f'{self.account}:group:anotherGroup']
 
-        self.assertEqual(status, 200)
+        self.assertEqual(res.status_code, 200)
         for i in range(0, 2):
-            self.assertIn(bob_membership_data[i]['role'], memberships)
+            self.assertIn(res.data[i]['role'], memberships)
 
     def test_get_direct_memberships_400(self):
         """Test case for 400 status response for GET requests using 'memberships' query parameter

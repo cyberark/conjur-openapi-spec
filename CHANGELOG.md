@@ -4,9 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [5.3.3] - 2025-06-06
+## [5.4.0] - 2025-07-24
 
 ### Changed
+- Updated `openapi` from `v3.0.0` to `v3.1.0` in `spec/openapi.yml`.
+- Updated `openapitools/openapi-generator-cli` Docker image in `bin/generate_client` from `v4.3.1` to `v7.14.0`, as 4.3.1 does not support v3.1.0 openapi spec files.
+- Updated python Docker image in `bin/lint_specs` form `v3.8` to `v3.13` as 3.8 reached EOL.
+- Updated the Docker image of `swaggerapi/swagger-editor` to `v5` as previous versions does not support v3.1.0 openapi spec files.
+- Replaced `csharp-netcore` generator with `csharp`, as csharp-netcore was removed in OpenAPI Generator v7.0.0 and merged into the unified csharp generator.
+- Updated target framework of the `csharp` generator to `netstandard2.1` for compatibility with modern .NET platforms.
 - Updated Docker image in `bin/transform` script from `python:3.9` to `python:3.12`, as 3.9 is nearing end-of-life. [cyberark/conjur-openapi-spec#230](https://github.com/cyberark/conjur-openapi-spec/issues/230)
 
 ## [5.3.2] - 2025-03-25

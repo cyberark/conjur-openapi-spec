@@ -101,17 +101,17 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         The default response to a successful request is a JSON response body
         with a `certificate` field including the signed certificate
         """
-        response, status, _ = self.api.sign_with_http_info(
+        res = self.api.sign_with_http_info(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
             'P1D'
         )
 
-        self.assertEqual(status, 201)
-        self.assertIsInstance(response, conjur.models.certificate_json.CertificateJson)
+        self.assertEqual(res.status_code, 201)
+        self.assertIsInstance(res.data, conjur.models.Sign201Response)
 
-        self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
+        self.assertEqual(res.data.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
     @unittest.expectedFailure
     def test_sign_201_pem(self):
@@ -122,7 +122,7 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         This test case fails due to an issue in the OpenAPI Generator
         with passing an `Accept` header. The generator overwrites any assignment to `Accept`.
         """
-        response, status, _ = self.api.sign_with_http_info(
+        res = self.api.sign_with_http_info(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
@@ -130,8 +130,8 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
             accept='application/x-pem-file'
         )
 
-        self.assertEqual(status, 201)
-        self.assertIsInstance(response, str)
+        self.assertEqual(res.status_code, 201)
+        self.assertIsInstance(res.data, str)
 
     def test_sign_with_encrypted_key_201(self):
         """Test case for 201 response when requesting a signed certificate
@@ -143,17 +143,17 @@ class TestCertificateAuthorityApi(api_config.ConfiguredTest):
         self.update_ca_private_key(encrypted_key)
         self.update_ca_key_password(key_password)
 
-        response, status, _ = self.api.sign_with_http_info(
+        res = self.api.sign_with_http_info(
             self.account,
             self.CA_SERVICE_ID,
             self.csr,
             'P1D'
         )
 
-        self.assertEqual(status, 201)
-        self.assertIsInstance(response, conjur.models.certificate_json.CertificateJson)
+        self.assertEqual(res.status_code, 201)
+        self.assertIsInstance(res.data, conjur.models.Sign201Response)
 
-        self.assertEqual(response.certificate[:27], '-----BEGIN CERTIFICATE-----')
+        self.assertEqual(res.data.certificate[:27], '-----BEGIN CERTIFICATE-----')
 
     def test_sign_with_encrypted_key_500(self):
         """Test case for 500 response when requesting a signed certificate

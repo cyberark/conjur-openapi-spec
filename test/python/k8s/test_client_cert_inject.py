@@ -40,7 +40,7 @@ def generateCSR(host_id, key):
 
     req.sign(key, "sha1")
 
-    return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req)
+    return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode('utf-8')
 
 class TestClientCertInject(unittest.TestCase):
 
@@ -59,7 +59,8 @@ class TestClientCertInject(unittest.TestCase):
         config.ssl_ca_cert = CERT_DIR.joinpath(SSL_CERT_FILE)
         # file deepcode ignore NoHardcodedCredentials/test: This is a test file
         config.username = 'admin'
-        config.api_key = {'Authorization': 'Token token="{}"'.format(encoded_token)}
+        config.api_key = {'conjurAuth': f'token="{encoded_token}"'}
+        config.api_key_prefix = {'conjurAuth': "Token"}
 
         self.client = conjur.ApiClient(config)
         self.api = conjur.api.AuthenticationApi(self.client)
@@ -67,22 +68,19 @@ class TestClientCertInject(unittest.TestCase):
         key = generateKey(crypto.TYPE_RSA, 2048)
         self.csr = generateCSR('app-test/*/*', key)
 
-    def tearDown(self):
-        self.client.close()
-
     def test_inject_202(self):
         """Test 202 status response when successfully requesting a client certificate injection
         202 - successful request and injection
         """
         # optional prefix
         # prefix = 'host/conjur/authn-k8s/my-authenticator-id/apps'
-        response, status, _ = self.api.k8s_inject_client_cert_with_http_info(
+        res = self.api.k8s_inject_client_cert_with_http_info(
             'my-authenticator-id',
             body=self.csr
         )
 
-        self.assertEqual(status, 202)
-        self.assertEqual(None, response)
+        self.assertEqual(res.status_code, 202)
+        self.assertEqual(None, res.data)
 
     def test_inject_400(self):
         """Test 400 status response when successfully requesting a cert injection

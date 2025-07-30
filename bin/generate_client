@@ -24,7 +24,7 @@ OPTIONS
 EOF
 }
 
-generator_version="v4.3.1"
+generator_version="v7.14.0"
 GENERATOR_IMAGE="openapitools/openapi-generator-cli:$generator_version"
 
 client_lang=""
@@ -126,6 +126,14 @@ else
   client_config=""
 fi
 
+if [ "$client_lang" == "csharp" ]; then
+  library_config="--library restsharp"
+  additional_properties="--additional-properties=targetFramework=netstandard2.1,testTargetFramework=net8.0"
+else
+  library_config=""
+  additional_properties=""
+fi
+
 bin/transform --$appliance
 
 echo "Pulling latest release $GENERATOR_IMAGE..."
@@ -139,6 +147,8 @@ docker run --rm \
     -i "/local/$input_dir/openapi.yml" \
     -g "$client_lang" \
     -o "/out/" \
+    $library_config \
+    $additional_properties \
     $client_config \
     $template_arg
 

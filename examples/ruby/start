@@ -3,7 +3,7 @@ set -e
 
 source ./bin/util
 
-ensure_client_is_generated ruby conjur
+ensure_client_is_generated ruby oss
 ensure_conjur_up
 
 # Remove the gem if it is already built so we dont create a gemfile

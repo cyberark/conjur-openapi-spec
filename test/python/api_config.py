@@ -2,6 +2,8 @@
 import pathlib
 import os
 import unittest
+from unittest.mock import patch, Mock
+from http import HTTPStatus
 
 import conjur
 
@@ -74,10 +76,14 @@ def get_api_client(username='admin', role='user'):
     api_key = get_api_key(username, role)
     account = os.environ[CONJUR_ACCOUNT]
 
+    if len(api_key) < 51:
+        print(f'api_key: {api_key} => length: {len(api_key)}')
+
     if role == 'host':
         username = f'host/{username}'
 
     config = get_api_config()
+    # config.debug = True
 
     client = conjur.ApiClient(config)
     auth = conjur.api.AuthenticationApi(client)
@@ -87,7 +93,9 @@ def get_api_client(username='admin', role='user'):
             body=api_key,
             accept_encoding='base64'
         )
-    client.configuration.api_key = {'Authorization': f'Token token="{api_token}"'}
+
+    client.configuration.api_key = {'conjurAuth': f'token="{api_token}"'}
+    client.configuration.api_key_prefix = {"conjurAuth": "Token"}
     return client
 
 def setup_oidc_webservice():
@@ -119,6 +127,22 @@ def setup_oidc_webservice():
         body=KEYCLOAK_CERT
     )
 
+def get_mocked_rest_response(status_code: int = 200, data: bytes = None, headers=None):
+    headers = headers or {}
+    data = data or b''
+    status = HTTPStatus(status_code)
+
+    res = Mock(spec=conjur.rest.RESTResponse)
+    res.status = status.value
+    res.reason = status.phrase
+    res.data = data
+    res.read.return_value = data
+    res.getheaders.return_value = headers
+    res.getheader.side_effect = lambda name, default=None: headers.get(name, default)
+
+    return res
+
+
 class ConfiguredTest(unittest.TestCase):
     """Meant for test classes to inherit. Sets up an authenticated api client
     for the test to use"""
@@ -132,10 +156,8 @@ class ConfiguredTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # reload the default policy so tests dont interfere with eachother
+        # reload the default policy so tests don't interfere with each-other
         cls.load_default_policy()
-
-        cls.client.close()
 
     @classmethod
     def load_default_policy(cls):
