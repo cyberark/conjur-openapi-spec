@@ -35,9 +35,8 @@ class TestResourcesApi(api_config.ConfiguredTest):
         res = self.api.show_resources_for_all_accounts_with_http_info()
 
         self.assertEqual(res.status_code, 200)
-        self.assertIsInstance(res.data, list)
-        for resource in res.data:
-            self.assertIsInstance(resource, conjur.models.ShowResourcesForAllAccounts200ResponseInner)
+        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200Response)
+        for resource in res.data.to_dict():
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -77,8 +76,8 @@ class TestResourcesApi(api_config.ConfiguredTest):
         res = self.api.show_resources_for_account_with_http_info(self.account)
 
         self.assertEqual(res.status_code, 200)
-        self.assertIsInstance(res.data, list)
-        for resource in res.data:
+        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200Response)
+        for resource in res.data.to_dict():
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -132,8 +131,8 @@ class TestResourcesApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(res.status_code, 200)
-        self.assertIsInstance(res.data, list)
-        for resource in res.data:
+        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200Response)
+        for resource in res.data.to_dict():
             for member in RESOURCE_MEMBERS:
                 self.assertIsNotNone(getattr(resource, member))
 
@@ -192,7 +191,7 @@ class TestResourcesApi(api_config.ConfiguredTest):
         )
 
         self.assertEqual(res.status_code, 200)
-        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200ResponseInner)
+        self.assertIsInstance(res.data, conjur.models.ShowResourcesForAllAccounts200ResponseOneOfInner)
         for i in RESOURCE_MEMBERS:
             self.assertIsNotNone(getattr(res.data, i))
 

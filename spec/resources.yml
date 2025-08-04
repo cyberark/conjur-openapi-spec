@@ -36,6 +36,7 @@ components:
           type: string
         client_ip:
           type: string
+          nullable: true
         id:
           type: string
         role:
@@ -123,21 +124,25 @@ components:
         } 
 
     Resources:
-      type: array
-      items:
-        $ref: '#/components/schemas/Resource'
-      example:
-        [
-          {
-            "annotations": [],
-            "created_at": "2021-03-23T16:37:14.455+00:00",
-            "id": "dev:policy:conjur/authn-ldap/test",
-            "owner": "dev:user:admin",
-            "permissions": [],
-            "policy": "dev:policy:root",
-            "policy_versions": [],
-          } 
-        ]
+      oneOf:
+        - type: array
+          items:
+            $ref: '#/components/schemas/Resource'
+          example:
+            [
+              {
+                "annotations": [],
+                "created_at": "2021-03-23T16:37:14.455+00:00",
+                "id": "dev:policy:conjur/authn-ldap/test",
+                "owner": "dev:user:admin",
+                "permissions": [],
+                "policy": "dev:policy:root",
+                "policy_versions": [],
+              }
+            ]
+        - type: object
+          example:
+            {"count": 10}
 
   responses:
     Resource:
@@ -189,13 +194,13 @@ components:
         - name: "account"
           in: "query"
           description: "Organization account name"
-          example: myorg
+          example: "myorg"
           schema:
             $ref: 'openapi.yml#/components/schemas/AccountName'
         - name: "kind"
           in: "query"
           description: "Type of resource"
-          example: user
+          example: "user"
           schema:
             $ref: 'openapi.yml#/components/schemas/Kind'
         - name: "search"
@@ -222,13 +227,13 @@ components:
         - name: "role"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
-          example: myorg:host:host1
+          example: "myorg:host:host1"
           schema:
             $ref: 'openapi.yml#/components/schemas/RoleType'
         - name: "acting_as"
           in: "query"
           description: "Retrieves the resources list for a different role if the authenticated role has access"
-          example: myorg:host:host1
+          example: "myorg:host:host1"
           schema:
             $ref: 'openapi.yml#/components/schemas/RoleType'
 
@@ -241,6 +246,10 @@ components:
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -327,8 +336,12 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          "500":
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []
@@ -416,8 +429,12 @@ components:
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
+          "404":
+            $ref: 'openapi.yml#/components/responses/ResourceNotFound'
           "422":
             $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
+          '500':
+            $ref: 'openapi.yml#/components/responses/InternalServerError'
 
         security:
           - conjurAuth: []

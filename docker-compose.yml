@@ -62,9 +62,7 @@ services:
       - ./test/config/ldap/certs:/ldap-certs:ro
 
   test-api:
-    build:
-      context: .
-      dockerfile: test/Dockerfile.api
+    image: schemathesis/schemathesis:stable
     command: ['sleep', '999d']
     environment:
       CONJUR_CA_BUNDLE: /config/ca.crt
@@ -73,6 +71,7 @@ services:
       - conjur-https
     volumes:
       - ./config/https/:/config
+      - ./spec.yml:/config/spec.yml
 
   test-dotnet:
     image: mcr.microsoft.com/dotnet/sdk:2.1

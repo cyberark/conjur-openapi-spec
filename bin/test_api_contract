@@ -20,7 +20,7 @@ while test $# -gt 0; do
       ;;
     -e|--endpoint)
       if [ ! -z $2 ]; then
-        endpoint_flag="-E $2 "
+        endpoint_flag="--include-path $2 "
       else
         echo "No Endpoint Specified"
         exit 1
@@ -42,10 +42,6 @@ fi
 announce "Bundling spec file"
 ./bin/bundle_spec --oss
 
-announce "Building API test container image..."
-docker compose build test-api
-echo
-
 announce "Configuring Conjur Environment..."
 export CONJUR_ADMIN_API_KEY="$(docker compose exec conjur conjurctl role retrieve-key dev:user:admin | tr -d '\r\n')"
 export ENCODED_LOGIN="$(echo "admin:${CONJUR_ADMIN_API_KEY}" | base64 | tr -d '\r\n')"
@@ -55,17 +51,14 @@ echo
 announce "Running example in container..."
 docker compose run --rm --no-deps \
     -e CONJUR_ADMIN_API_KEY=${CONJUR_ADMIN_API_KEY} \
-    test-api \
-    bash -c \
-    "schemathesis run \
-    --show-trace \
-    --request-tls-verify /config/ca.crt \
-    --hypothesis-suppress-health-check=filter_too_much \
-    --hypothesis-deadline None ${endpoint_flag}\
-    --checks status_code_conformance \
-    --checks content_type_conformance \
-    --checks response_headers_conformance \
-    --checks response_schema_conformance \
-    -H \"Authorization: Basic \"$ENCODED_LOGIN\"\" \
-    -H \"Authentication: Token token=\"$CONJUR_ADMIN_TOKEN\"\" \
-    --base-url http://conjur spec.yml"
+    test-api run ${endpoint_flag} \
+    --phases examples,coverage \
+    --output-sanitize false \
+    --continue-on-failure \
+    --tls-verify /config/ca.crt \
+    --workers 'auto' \
+    --suppress-health-check=filter_too_much \
+    --checks status_code_conformance,content_type_conformance,response_headers_conformance,response_schema_conformance \
+    -H "Authentication: Basic $ENCODED_LOGIN" \
+    -H "Authorization: Token token=\"$CONJUR_ADMIN_TOKEN\"" \
+    --url http://conjur /config/spec.yml \

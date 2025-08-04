@@ -177,6 +177,8 @@ components:
         responses:
           "200":
             $ref: '#/components/responses/CreateHostToken'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "403":
@@ -251,6 +253,8 @@ components:
         responses:
           "201":
             $ref: '#/components/responses/CreateHost'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
           "422":

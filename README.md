@@ -1,7 +1,5 @@
 # Conjur OpenAPI Specification
-[![Integration Tests](https://github.com/conjurinc/conjur-openapi-spec/workflows/Integration%20Tests/badge.svg)](https://github.com/conjurinc/conjur-openapi-spec/actions?query=workflow%3A%22Run+Integration+Tests%22)
-[![Maintainability](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/maintainability)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/7bf3957dc33055b0de06/test_coverage)](https://codeclimate.com/github/cyberark/conjur-openapi-spec/test_coverage)
+[![Integration Tests](https://github.com/conjurinc/conjur-openapi-spec/workflows/Integration%20Tests/badge.svg)](https://github.com/conjurinc/conjur-openapi-spec/actions?query=workflow%3A%22Integration+Tests%22)
 
 This project contains the OpenAPI v3.1 specification for [Conjur Open Source](https://www.conjur.org/).  
 
@@ -102,7 +100,6 @@ To generate a client library using the OpenAPI spec, use the provided script:
 $ ./bin/generate_client -l <language> [-o <output-dir>]
 ```
 
-The script will generate a Python client in the absence of a `<language>` argument.  
 A full list of supported languages can be found in 
 [OpenAPI Generator documentation](https://github.com/OpenAPITools/openapi-generator#overview).
 

@@ -138,6 +138,8 @@ components:
         responses:
           "200":
             $ref: '#/components/responses/WhoAmI'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
           "401":
             $ref: 'openapi.yml#/components/responses/UnauthorizedError'
 
@@ -199,7 +201,14 @@ components:
           "404":
             description: "The service was not found"
           "500":
-            $ref: '#/components/responses/AuthenticatorStatus'
+            description: "Malformed request, rejected by the server"
+            content:
+              text/html:
+                schema:
+                  type: string
+              application/json:
+                schema:
+                  $ref: 'openapi.yml#/components/responses/InternalServerError'
           '501':
             $ref: '#/components/responses/AuthenticatorStatus'
 
@@ -241,8 +250,17 @@ components:
             $ref: 'openapi.yml#/components/responses/InadequatePrivileges'
           "404":
             description: "The service was not found"
+          "422":
+            $ref: 'openapi.yml#/components/responses/UnprocessableEntity'
           "500":
-            $ref: '#/components/responses/AuthenticatorStatus'
+            description: "Malformed request, rejected by the server"
+            content:
+              text/html:
+                schema:
+                  type: string
+              application/json:
+                schema:
+                  $ref: 'openapi.yml#/components/responses/InternalServerError'
           '501':
             $ref: '#/components/responses/AuthenticatorStatus'
 
@@ -266,6 +284,8 @@ components:
         responses:
           "200":
             $ref: '#/components/responses/AuthenticatorsIndex'
+          "400":
+            $ref: 'openapi.yml#/components/responses/BadRequest'
 
     Health:
       get:
