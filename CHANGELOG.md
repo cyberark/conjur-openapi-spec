@@ -136,7 +136,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
 
-[5.3.3]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.2...HEAD
+[5.4.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.2.0...v5.3.0
