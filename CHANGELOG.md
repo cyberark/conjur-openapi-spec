@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [5.4.0] - 2025-07-30
+## [5.4.0] - 2025-09-04
 
 ### Changed
+- Updated README.md, CONTRIBUTING.md, and SECURITY.md to align with Conjur Enterprise name change to Secrets Manager, Self-Hosted. CNJR-10967
 - Switched to using the `schemathesis/schemathesis:stable` Docker image for running API contract tests.
 - Updated the OpenAPI spec to indicate that the `client_ip` field in `PolicyVersion` is `nullable`.
 - Clarified in the OpenAPI spec that the `ListResources` endpoint may return an object (e.g., `{"count": 1}`).
@@ -136,6 +137,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
 
+[Unreleased] : https://github.com/cyberark/conjur-openapi-spec/compare/v5.4.0...HEAD
 [5.4.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...v5.3.1
