@@ -16,14 +16,14 @@ including issue reporting, pull request workflow and community guidelines.
     - [Automated tests](#automated-tests)
     - [Linters](#linters)
     - [Utility scripts](#utility-scripts)
-    - [Conjur Enterprise Developers](#conjur-enterprise-developers)
+    - [Secrets Manager, Self-Hosted Developers](#secrets-manager-self-hosted-developers)
 * [Manual Testing](#manual-testing)
 * [Releasing](#releasing)
   + [Verify and update dependencies](#verify-and-update-dependencies)
   + [Update the version and changelog](#update-the-version-and-changelog)
   + [Tag the version](#tag-the-version)
   + [Add a new GitHub release](#add-a-new-github-release)
-  + [Enterprise Releases](#enterprise-releases)
+  + [Secrets Manager, Self-Hosted Releases](#secrets-manager-self-hosted-releases)
 
 <!--
 Table of contents generated with markdown-toc
@@ -44,6 +44,8 @@ Contributing to this repository requires installation of some developer tools.
 [get-docker-compose]: https://docs.docker.com/compose/install
 
 ## Component Compatibility
+
+The spec is compatible with CyberArk Secrets Manager, Self-Hosted and SaaS versions as well as Conjur OSS.
 
 ### Conjur
 
@@ -77,22 +79,22 @@ specify the language of the client to test with a long flag: `--python`, `--csha
 options which can be viewed by running them with the `-h` flag.
 
 There is also an included `api_test` script which will run contract tests against an instance of
-Conjur. It is a great tool for finding return codes which are missing from the spec, and for finding
-changes in Conjur which may not yet have been reflected in the spec.
+Conjur OSS. It is a great tool for finding return codes which are missing from the spec, and for finding
+changes in Conjur OSS which may not yet have been reflected in the spec.
 
 For a full list of all scripts and their purpose see the [utility script reference](#utility-script-reference)
 
 ### Environment Setup
 
 Setup the development environment using the `start_conjur` script. The script starts a Swagger Editor
-container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur to test the
+container, used to the edit the OpenAPI spec, and stands up a new instance of Conjur OSS to test the
 spec against.
 
 ```shell
 $ ./bin/start_conjur
 ```
 
-To use the OpenAPI spec against a pre-existing Conjur server, start the Swagger Editor editor with
+To use the OpenAPI spec against a pre-existing Secrets Manager server, start the Swagger Editor editor with
 the `start_spec_ui` script.
 
 ```shell
@@ -136,7 +138,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Specifying an endpoint with the `-e|--endpoint` flag runs contract tests on that endpoint alone.
 
 `bin/test_integration`
-* Used to run the suite of integration tests against Conjur Open Source or Enterprise.
+* Used to run the suite of integration tests against Conjur Open Source or Secrets Manager, Self-Hosted.
 * Stands up a new Conjur environment, generates a client
   library, and runs the integration test suite.
 * User must specify a client language to test with `-l`:
@@ -148,8 +150,8 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
   ```shell
   $ ./bin/test_integration -l python --test test_authn_api.TestAuthnApi.test_authenticate_200
   ```
-* Tests can be run against Conjur Enterprise.
-* This requires access to the CyberArk Docker registry in order to pull Conjur Enterprise images
+* Tests can be run against Secrets Manager, Self-Hosted.
+* This requires access to the CyberArk Docker registry in order to pull Secrets Manager, Self-Hosted images
   ```shell
   $ ./bin/test_integration --enterprise -l python
   ```
@@ -166,7 +168,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 #### Utility scripts
 
 `bin/transform [--enterprise/--oss]`
-* Generates a usable version of the specification for either Conjur (--oss) or Conjur Enterprise (--enterprise)
+* Generates a usable version of the specification for either Conjur (--oss) or Secrets Manager, Self-Hosted (--enterprise)
 * Generates the Conjur version of the spec by default
 
 `bin/generate_client -l <language> [-o <output-directory>]`
@@ -191,7 +193,7 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Both the http & https ports are exposed so requests can be made to Conjur from outside the docker network.
 
 `bin/start_enterprise`
-* Used to start a new local Conjur Enterprise instance based on [`conjur-intro`](https://github.com/conjurdemos/conjur-intro)
+* Used to start a new local Secrets Manager, Self-Hosted instance based on [`conjur-intro`](https://github.com/conjurdemos/conjur-intro)
 
 `bin/stop`
 * Used to deconstruct the development environment.
@@ -209,9 +211,9 @@ To ensure your changes work as expected, you can run the [automated tests](#auto
 * Gathers artifacts to be attached to releases of the specification.
 * Outputs archives to `release_artifacts` in both zip and tarball format.
 
-#### Conjur Enterprise Developers
+#### Secrets Manager, Self-Hosted Developers
 
-The Enterprise only endpoints included in the specification all use a specific annotation to indicate that they
+The Secrets Manager, Self-Hosted only endpoints included in the specification all use a specific annotation to indicate that they
 are "enterprise only". When the Open Source version of the spec is generated all of these objects will be removed.
 
 ```yaml
@@ -220,7 +222,7 @@ someObject:
     enterprise-only: true
 ```
 
-This marks `someObject` as an enterprise only feature.
+This marks `someObject` as an Secrets Manager, Self-Hosted only feature.
 
 Note that because all `paths` have to be defined in the `openapi.yml#/paths` object it is
 acceptable to just put the annotation on the `openapi.yml#/paths/somePath` object and leave it
@@ -229,12 +231,12 @@ the path definition will have had its reference removed thereby not technically 
 included in the spec.
 
 Many of the scripts included in the `bin` directory have an optional `--enterprise` flag which
-tells the script to use the Enterprise version of the spec. To generate the Enterprise version
+tells the script to use the Secrets Manager, Self-Hosted version of the spec. To generate the Secrets Manager, Self-Hosted version
 of a client you would run `./bin/generate_client -l python --enterprise`.
 
 ## Manual Testing
 
-You can access a compatible version of the the Conjur command line
+You can access a compatible version of the the Secrets Manager command line
 interface by starting the `cli` docker compose container:
 ```shell
 $ ./bin/cli
@@ -278,7 +280,7 @@ version.
 1. Create a new release from the tag in the GitHub UI
 1. Add the [CHANGELOG](./CHANGELOG.txt) for the current version to the GitHub release description
 
-### Enterprise Releases
+### Secrets Manager, Self-Hosted Releases
 
-We currently do not have official spec releases for Conjur Enterprise. Versions of the spec can be
+We currently do not have official spec releases for Secrets Manager, Self-Hosted. Versions of the spec can be
 generated using `./bin/transform --enterprise` which outputs a usable version of the spec to `out/enterprise/spec`.
