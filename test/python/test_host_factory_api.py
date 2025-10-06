@@ -26,7 +26,7 @@ FACTORY_POLICY = '''
 '''
 
 HOST_TOKEN_MEMBERS = ['expiration', 'cidr', 'token']
-EXPIRE = datetime.date.today() + datetime.timedelta(days=1)
+EXPIRE = datetime.datetime.now() + datetime.timedelta(days=1)
 
 class TestHostFactoryApi(api_config.ConfiguredTest):
     """HostFactoryApi unit test stubs"""
