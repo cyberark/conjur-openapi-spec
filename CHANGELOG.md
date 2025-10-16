@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.4.1] - 2025-10-16
+
+### Added
+- Added `close-stale.yml` GitHub workflow
+
 ## [5.4.0] - 2025-09-04
 
 ### Changed
@@ -137,7 +142,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated naming and added support for environment variables in generated Ruby client.
   [cyberark/conjur-openapi-spec#91](https://github.com/cyberark/conjur-openapi-spec/issues/91)
 
-[Unreleased] : https://github.com/cyberark/conjur-openapi-spec/compare/v5.4.0...HEAD
+[Unreleased] : https://github.com/cyberark/conjur-openapi-spec/compare/v5.4.1...HEAD
+[5.4.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.4.0...v5.4.1
 [5.4.0]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.2...v5.4.0
 [5.3.2]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.1...v5.3.2
 [5.3.1]: https://github.com/cyberark/conjur-openapi-spec/compare/v5.3.0...v5.3.1
